@@ -20,7 +20,7 @@
     "tailwindcss": "^4.2.2"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "typescript": "^6.0.2"
   },
   "dependencies": {
     "@astrojs/svelte": "^8.0.4",
