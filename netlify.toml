@@ -1,0 +1,22 @@
+[build]
+  command = "bun run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  BUN_VERSION = "latest"
+  # PUBLIC_* son intencionalmente públicas — evitar que el scanner de secretos
+  # de Netlify las trate como credenciales filtradas.
+  SECRETS_SCAN_OMIT_KEYS = "PUBLIC_SANITY_PROJECT_ID,PUBLIC_SANITY_DATASET"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
