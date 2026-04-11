@@ -7,6 +7,6 @@
  * Para cambiar de CMS: reemplazar los archivos de esta carpeta.
  * Las páginas y componentes no necesitan modificación.
  */
-export { sanityClient } from './client';
+export { sanityClient, isSanityConfigured } from './client';
 export { urlForImage, getImageUrl } from './image';
 export * from './queries';

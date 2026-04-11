@@ -1,5 +1,5 @@
 import { defineCollection, z } from 'astro:content';
-import { sanityClient } from './lib/cms/client';
+import { sanityClient, isSanityConfigured } from './lib/cms/client';
 import {
   ALL_ARTICLES_QUERY,
   ALL_AUTHORS_QUERY,
@@ -34,6 +34,7 @@ const SanitySlugSchema = z.object({
 
 const articles = defineCollection({
   loader: async () => {
+    if (!isSanityConfigured) return [];
     type RawArticle = {
       _id: string;
       slug: { _type: 'slug'; current: string };
@@ -73,6 +74,7 @@ const articles = defineCollection({
 
 const authors = defineCollection({
   loader: async () => {
+    if (!isSanityConfigured) return [];
     type RawAuthor = {
       _id: string;
       slug?: { _type: 'slug'; current: string };
@@ -102,6 +104,7 @@ const authors = defineCollection({
 
 const categories = defineCollection({
   loader: async () => {
+    if (!isSanityConfigured) return [];
     type RawCategory = {
       _id: string;
       slug?: { _type: 'slug'; current: string };

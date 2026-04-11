@@ -14,9 +14,13 @@ import { createClient } from '@sanity/client';
  *
  * Las páginas .astro consumen datos exclusivamente via getCollection() / getEntry().
  */
+// Fallback 'unconfigured' evita que createClient lance en init cuando no hay .env.
+// Los loaders en content.config.ts verifican isSanityConfigured antes de hacer fetch.
+export const isSanityConfigured = Boolean(import.meta.env.PUBLIC_SANITY_PROJECT_ID);
+
 export const sanityClient = createClient({
-  projectId: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
-  dataset: import.meta.env.PUBLIC_SANITY_DATASET,
+  projectId: import.meta.env.PUBLIC_SANITY_PROJECT_ID || 'unconfigured',
+  dataset: import.meta.env.PUBLIC_SANITY_DATASET || 'production',
   // Versión fija — nunca usar 'latest' para evitar breaking changes silenciosos
   apiVersion: '2024-01-01',
   useCdn: false,
