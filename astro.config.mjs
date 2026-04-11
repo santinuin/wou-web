@@ -21,8 +21,8 @@ export default defineConfig({
 
   integrations: [
     sanity({
-      projectId: PUBLIC_SANITY_PROJECT_ID,
-      dataset: PUBLIC_SANITY_DATASET,
+      projectId: PUBLIC_SANITY_PROJECT_ID || 'unconfigured',
+      dataset: PUBLIC_SANITY_DATASET || 'production',
       useCdn: false,
       apiVersion: '2024-01-01',
       perspective: 'published',
