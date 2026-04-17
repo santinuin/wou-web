@@ -1,8 +1,17 @@
 @import "tailwindcss";
 
-/* Design tokens — se completarán cuando lleguen las definiciones de diseño */
 @theme {
-  --color-primary: #0f172a;
-  --color-accent: #3b82f6;
-  --font-sans: 'Inter', system-ui, sans-serif;
+  /* ── Paleta ──────────────────────────────────────────────────────────── */
+  --color-brand-dark:  #0d1b2a;   /* fondo oscuro (header, secciones oscuras) */
+  --color-brand-teal:  #00C9B1;   /* acento principal — iconos, texto highlight */
+  --color-brand-white: #f0f4f8;   /* texto sobre fondos oscuros */
+
+  /* Alias semánticos */
+  --color-primary: var(--color-brand-dark);
+  --color-accent:  var(--color-brand-teal);
+
+  /* ── Tipografía ──────────────────────────────────────────────────────── */
+  --font-sans:    'Inter', system-ui, sans-serif;
+  --font-bowlby:  'Bowlby One', cursive;           /* titulares e indicadores */
+  --font-barlow:  'Barlow Condensed', sans-serif;  /* subtítulos condensados  */
 }

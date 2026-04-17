@@ -40,6 +40,14 @@ const fullTitle = title === SITE_NAME ? title : `${title} | ${SITE_NAME}`;
 
     <title>{fullTitle}</title>
     <meta name="generator" content={Astro.generator} />
+
+    <!-- Fuentes del sistema de diseño -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Barlow+Condensed:wght@700&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body class="min-h-screen bg-white text-gray-900 antialiased">
     <slot name="header" />
