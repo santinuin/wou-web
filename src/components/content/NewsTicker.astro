@@ -13,26 +13,28 @@ const { items } = Astro.props;
 const loopedItems = [...items, ...items, ...items];
 ---
 
-<div class="flex items-stretch overflow-hidden h-12">
+<div class="flex items-stretch overflow-hidden h-9">
 
   <!-- Badge fijo "ESTÁ PASANDO" -->
-  <div class="flex items-center justify-center px-4 bg-brand-orange shrink-0">
-    <span class="font-bowlby text-xs font-black text-brand-black uppercase leading-tight text-center">
+  <div class="flex place-items-center justify-center px-4 bg-brand-orange shrink-0 p-5">
+    <span class="font-bowlby text-xs font-black text-brand-black uppercase leading-none text-start">
       ESTÁ<br />PASANDO
     </span>
   </div>
 
   <!-- Track scrolleable -->
-  <div class="flex-1 overflow-hidden flex items-center bg-brand-black">
-    <div class="ticker-track flex items-center gap-0 whitespace-nowrap">
-      {loopedItems.map((item) => (
-        <span class="font-bowlby text-brand-white text-sm font-bold uppercase px-6">
+<div class="flex-1 overflow-hidden flex items-center bg-brand-green">
+  <div class="ticker-track flex items-center gap-4 whitespace-nowrap">
+    {loopedItems.map((item) => (
+      <>
+        <span class="font-bowlby text-brand-black text-sm font-bold uppercase">
           {item}
-          <span class="text-brand-teal mx-2" aria-hidden="true">·</span>
         </span>
-      ))}
-    </div>
+        <span class="text-brand-black font-bold" aria-hidden="true">·</span>
+      </>
+    ))}
   </div>
+</div>
 </div>
 
 <style>

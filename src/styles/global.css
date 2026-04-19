@@ -2,11 +2,12 @@
 
 @theme {
   /* ── Paleta ──────────────────────────────────────────────────────────── */
-  --color-brand-dark:   #0d1b2a;   /* fondo header y secciones oscuras */
-  --color-brand-black:  #070a0f;   /* fondo LiveCard y news list */
+  --color-brand-dark:   #0D1B2A;   /* fondo header y secciones oscuras */
+  --color-brand-black:  #070A0F;   /* fondo LiveCard y news list */
   --color-brand-teal:   #00C9B1;   /* acento principal */
-  --color-brand-orange: #F97316;   /* badge "ESTÁ PASANDO" */
-  --color-brand-white:  #f0f4f8;   /* texto sobre fondos oscuros */
+  --color-brand-orange: #FB923C;   /* badge "ESTÁ PASANDO" */
+  --color-brand-white:  #F0F4F8;   /* texto sobre fondos oscuros */
+  --color-brand-green:  #B9FFC1;
 
   /* Alias semánticos */
   --color-primary: var(--color-brand-dark);
