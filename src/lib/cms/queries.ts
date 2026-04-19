@@ -136,3 +136,39 @@ export const ALL_CATEGORIES_QUERY = groq`
     color
   }
 `;
+
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+
+// Últimas 4 noticias para el bloque "Ponete al día"
+export const LATEST_NEWS_QUERY = groq`
+  *[_type == "article" && defined(slug.current)] | order(publishedAt desc) [0...4] {
+    _id,
+    title,
+    slug,
+    publishedAt
+  }
+`;
+
+// Editorial más reciente para el bloque derecho del Hero
+export const LATEST_EDITORIAL_QUERY = groq`
+  *[_type == "editorial" && defined(slug.current)] | order(publishedAt desc) [0] {
+    _id,
+    title,
+    question,
+    image,
+    slug,
+    publishedAt
+  }
+`;
+
+// Configuración del stream de radio (singleton)
+export const RADIO_STREAM_QUERY = groq`
+  *[_type == "radioStream"][0] {
+    isLive,
+    station,
+    description,
+    youtubeStreamId,
+    streamUrl,
+    stationLogo
+  }
+`;

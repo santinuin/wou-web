@@ -1,0 +1,99 @@
+---
+/**
+ * Hero — primera sección debajo del header.
+ *
+ * Layout desktop (grid 50/50):
+ *   Columna izquierda │ Columna derecha
+ *   ─────────────────────────────────────
+ *   [LiveCard][YouTube] │
+ *   [── Ticker ──────] │ EditorialCard
+ *   [── NewsList ────] │
+ *
+ * Datos: mock hasta que el CMS esté configurado en Sanity.
+ * TODO: reemplazar MOCK_* por getCollection() / getEntry() de astro:content.
+ */
+import LiveCard from './LiveCard.astro';
+import YoutubeEmbed from './YoutubeEmbed.astro';
+import NewsTicker from './NewsTicker.astro';
+import NewsList from './NewsList.astro';
+import EditorialCard from './EditorialCard.astro';
+
+// ── Mock data ──────────────────────────────────────────────────────────────
+// Reemplazar por queries GROQ via getCollection() cuando el CMS esté listo.
+
+const MOCK_RADIO = {
+  isLive: true,
+  station: 'WOU 95.1',
+  description:
+    'La 100 es la radio más escuchada del país y en Río Gallegos se escucha a través de Wou radio, en la 95.1',
+  streamUrl: null,           // TODO: URL real del stream HLS/Icecast
+  youtubeStreamId: null,     // TODO: ID real del stream de YouTube
+};
+
+const now = new Date();
+const MOCK_NEWS = [
+  { title: 'Sube el gas', publishedAt: new Date(now.getTime() - 12 * 60_000).toISOString(), slug: 'sube-el-gas' },
+  { title: 'Fallo por IPF', publishedAt: new Date(now.getTime() - 12 * 60_000).toISOString(), slug: 'fallo-por-ipf' },
+  { title: 'El discurso no cierra', publishedAt: new Date(now.getTime() - 60 * 60_000).toISOString(), slug: 'el-discurso-no-cierra' },
+  { title: 'City tour de pascuas', publishedAt: new Date(now.getTime() - 3 * 60 * 60_000).toISOString(), slug: 'city-tour-de-pascuas' },
+];
+
+const MOCK_TICKER = [
+  'Sube el gas',
+  'Fallo por YPF',
+  'El discurso no cierra',
+  'Paritaria en modo ahorro',
+  'Mi barrio festeja llega al desfile',
+];
+
+const MOCK_EDITORIAL = {
+  title: 'Sueldos de pobreza',
+  question: '¿Tiene sentido resignar recursos concretos a cambio de desfinanciar salarios, salud y educación?',
+  imageUrl: null,   // TODO: urlForImage(editorial.image) cuando el CMS esté listo
+  imageAlt: 'Foto editorial semanal',
+  slug: 'sueldos-de-pobreza',
+};
+---
+
+<!--
+  h-[calc(100vh-3.5rem)]: ocupa exactamente el viewport restante tras el header (h-14 = 3.5rem).
+  La división al 50% coincide con el centro del logo W•U! en el header.
+-->
+<section aria-label="Hero — noticias y editorial" class="grid grid-cols-2 h-[calc(100vh-3.5rem)]">
+
+  <!-- ── Columna izquierda: Live + Ticker + Noticias ──────────────────── -->
+  <div class="flex flex-col">
+
+    <!-- Top row: LiveCard + YouTube — crece proporcionalmente -->
+    <div class="grid grid-cols-[2fr_3fr] flex-1 min-h-0 bg-brand-black">
+      <LiveCard
+        isLive={MOCK_RADIO.isLive}
+        station={MOCK_RADIO.station}
+        description={MOCK_RADIO.description}
+        streamUrl={MOCK_RADIO.streamUrl}
+      />
+      <YoutubeEmbed
+        videoId={MOCK_RADIO.youtubeStreamId}
+        station={MOCK_RADIO.station}
+      />
+    </div>
+
+    <!-- Middle row: Ticker de última hora -->
+    <NewsTicker items={MOCK_TICKER} />
+
+    <!-- Bottom row: Lista de noticias (crece para llenar el espacio restante) -->
+    <div class="flex-1">
+      <NewsList articles={MOCK_NEWS} buildDate={now} />
+    </div>
+  </div>
+
+  <!-- ── Columna derecha: Editorial Semanal ───────────────────────────── -->
+  <EditorialCard
+    title={MOCK_EDITORIAL.title}
+    question={MOCK_EDITORIAL.question}
+    imageUrl={MOCK_EDITORIAL.imageUrl}
+    imageAlt={MOCK_EDITORIAL.imageAlt}
+    slug={MOCK_EDITORIAL.slug}
+  />
+
+</section>

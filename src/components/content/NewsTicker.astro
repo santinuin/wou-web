@@ -1,0 +1,53 @@
+---
+/**
+ * Cintillo de noticias de última hora.
+ * Animación CSS pura — cero JavaScript.
+ * Los items se duplican para que el loop sea continuo.
+ */
+interface Props {
+  items: string[];
+}
+
+const { items } = Astro.props;
+// Triplicamos para garantizar scroll continuo sin gaps
+const loopedItems = [...items, ...items, ...items];
+---
+
+<div class="flex items-stretch overflow-hidden h-12">
+
+  <!-- Badge fijo "ESTÁ PASANDO" -->
+  <div class="flex items-center justify-center px-4 bg-brand-orange shrink-0">
+    <span class="font-bowlby text-xs font-black text-brand-black uppercase leading-tight text-center">
+      ESTÁ<br />PASANDO
+    </span>
+  </div>
+
+  <!-- Track scrolleable -->
+  <div class="flex-1 overflow-hidden flex items-center bg-brand-black">
+    <div class="ticker-track flex items-center gap-0 whitespace-nowrap">
+      {loopedItems.map((item) => (
+        <span class="font-bowlby text-brand-white text-sm font-bold uppercase px-6">
+          {item}
+          <span class="text-brand-teal mx-2" aria-hidden="true">·</span>
+        </span>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .ticker-track {
+    animation: ticker-scroll 30s linear infinite;
+  }
+
+  @keyframes ticker-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-33.333%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ticker-track {
+      animation: none;
+    }
+  }
+</style>

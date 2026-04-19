@@ -1,0 +1,48 @@
+---
+import { timeAgo, formatDateLong } from '@/lib/utils';
+
+interface NewsItem {
+  title: string;
+  publishedAt: string;
+  slug: string;
+}
+
+interface Props {
+  articles: NewsItem[];
+  buildDate?: Date;
+}
+
+const { articles, buildDate = new Date() } = Astro.props;
+---
+
+<div class="flex flex-col bg-brand-black h-full">
+
+  <!-- Encabezado -->
+  <div class="flex items-center justify-between px-5 py-3 border-b border-brand-teal/30">
+    <span class="font-bowlby text-brand-teal text-xs uppercase tracking-widest">
+      Ponete al día
+    </span>
+    <span class="font-sans text-brand-white/50 text-xs">
+      {formatDateLong(buildDate)}
+    </span>
+  </div>
+
+  <!-- Lista de noticias -->
+  <ul class="flex-1 divide-y divide-brand-white/10">
+    {articles.map((article) => (
+      <li>
+        <a
+          href={`/articulo/${article.slug}`}
+          class="flex items-center justify-between px-5 py-4 hover:bg-brand-white/5 transition-colors group"
+        >
+          <span class="font-barlow font-black text-brand-white text-base uppercase tracking-wide group-hover:text-brand-teal transition-colors">
+            {article.title}
+          </span>
+          <span class="font-sans text-brand-white/40 text-xs shrink-0 ml-4">
+            {timeAgo(article.publishedAt)}
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</div>

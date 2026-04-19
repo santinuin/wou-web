@@ -2,37 +2,11 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
-import { getCollection } from 'astro:content';
-
-const articles = await getCollection('articles');
-const featured = articles.filter((a) => a.data.featured);
-const byFormat = articles.reduce<Record<string, number>>((acc, a) => {
-  const f = a.data.format ?? 'sin formato';
-  acc[f] = (acc[f] ?? 0) + 1;
-  return acc;
-}, {});
+import Hero from '../components/content/Hero.astro';
 ---
 
 <BaseLayout title="Portada">
   <Header slot="header" />
-
-  <section class="container mx-auto px-4 py-12">
-    <h1 class="text-4xl font-bold mb-8">Portal de Noticias</h1>
-
-    <!-- Verificación del pipeline — eliminar antes de producción -->
-    <div class="bg-green-50 border border-green-200 rounded p-4 mb-8 text-sm font-mono">
-      <p class="font-semibold text-green-800 mb-2">Pipeline de datos OK</p>
-      <p class="text-green-700">{articles.length} artículo(s) · {featured.length} destacado(s)</p>
-      <p class="text-green-700 mt-1">
-        Formatos: {Object.entries(byFormat).map(([f, n]) => `${f}(${n})`).join(' · ')}
-      </p>
-    </div>
-
-    <!-- TODO: grilla editorial cuando el diseño esté definido -->
-    <p class="text-gray-400 italic">
-      Infraestructura lista. En espera de definiciones de diseño.
-    </p>
-  </section>
-
+  <Hero />
   <Footer slot="footer" />
 </BaseLayout>

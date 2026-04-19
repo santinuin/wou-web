@@ -1,0 +1,72 @@
+---
+/**
+ * Facade estático para el stream de YouTube.
+ * Muestra thumbnail + play button que abre YouTube en nueva pestaña.
+ * Sin iframe — evita el bloqueo del main thread.
+ * Cuando se quiera el embed real: reemplazar por lite-youtube-embed.
+ */
+interface Props {
+  videoId?: string | null;
+  station?: string;
+  handle?: string;
+}
+
+const { videoId, station = 'WOU! RADIO 95.1', handle = '@wounoticias' } = Astro.props;
+
+const thumbnailUrl = videoId
+  ? `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`
+  : null;
+
+const youtubeUrl = videoId
+  ? `https://www.youtube.com/watch?v=${videoId}`
+  : 'https://www.youtube.com/@-WouRadio-/streams';
+---
+
+<a
+  href={youtubeUrl}
+  target="_blank"
+  rel="noopener noreferrer"
+  class="relative block w-full h-full bg-brand-black overflow-hidden group"
+  aria-label={`Ver ${station} en YouTube`}
+>
+  <!-- Thumbnail -->
+  {thumbnailUrl ? (
+    <img
+      src={thumbnailUrl}
+      alt={`Stream en vivo de ${station}`}
+      class="w-full h-full object-cover"
+      loading="lazy"
+      width="1280"
+      height="720"
+    />
+  ) : (
+    <!-- Placeholder cuando no hay videoId configurado -->
+    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-brand-dark to-brand-black">
+      <span class="font-barlow font-black text-brand-white text-2xl tracking-wider opacity-40">
+        WOU!
+      </span>
+    </div>
+  )}
+
+  <!-- Overlay oscuro al hover -->
+  <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+
+  <!-- Encabezado: station + handle + hora -->
+  <div class="absolute top-0 left-0 right-0 flex items-start justify-between p-3">
+    <span class="font-barlow font-black text-brand-white text-sm tracking-wide drop-shadow">
+      {station}
+    </span>
+    <span class="font-sans text-brand-white text-xs opacity-80 drop-shadow">
+      {handle}
+    </span>
+  </div>
+
+  <!-- Botón play de YouTube (centro) -->
+  <div class="absolute inset-0 flex items-center justify-center">
+    <div class="w-14 h-10 bg-[#FF0000] rounded-lg flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M8 5v14l11-7z"/>
+      </svg>
+    </div>
+  </div>
+</a>
