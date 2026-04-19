@@ -16,4 +16,6 @@
   --font-sans:    'Inter', system-ui, sans-serif;
   --font-bowlby:  'Bowlby One', cursive;           /* titulares e indicadores */
   --font-barlow:  'Barlow Condensed', sans-serif;  /* subtítulos condensados  */
+  --font-alumni:  'Alumni Sans', sans-serif;       /* títulos editoriales     */
+  --font-franklin:'Libre Franklin', sans-serif;    /* bajadas en negrita       */
 }

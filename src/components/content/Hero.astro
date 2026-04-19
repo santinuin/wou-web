@@ -58,36 +58,46 @@ const MOCK_EDITORIAL = {
 <!--
   h-[calc(100vh-3.5rem)]: ocupa exactamente el viewport restante tras el header (h-14 = 3.5rem).
   La división al 50% coincide con el centro del logo W•U! en el header.
+
+  Grilla 2 columnas × 3 filas:
+    Fila 1 (1fr):  LiveCard+YT      │ Editorial: badge+bajada+imagen
+    Fila 2 (auto): Ticker           │ Editorial: (vacía → fondo teal)
+    Fila 3 (1fr):  NewsList         │ Editorial: título gigante
+
+  El EditorialCard usa `grid-rows-subgrid` con row-span-3 para heredar
+  estas filas → su contenido queda perfectamente alineado horizontalmente
+  con la columna izquierda (piso de imagen = piso de LiveCard/YT).
 -->
-<section aria-label="Hero — noticias y editorial" class="grid grid-cols-2 h-[calc(100vh-3.5rem)]">
+<section
+  aria-label="Hero — noticias y editorial"
+  class="grid grid-cols-2 grid-rows-[1fr_auto_1fr] h-[calc(100vh-3.5rem)]"
+>
 
-  <!-- ── Columna izquierda: Live + Ticker + Noticias ──────────────────── -->
-  <div class="flex flex-col">
-
-    <!-- Top row: LiveCard + YouTube — crece proporcionalmente -->
-    <div class="grid grid-cols-[2fr_3fr] flex-1 min-h-0 bg-brand-black">
-      <LiveCard
-        isLive={MOCK_RADIO.isLive}
-        station={MOCK_RADIO.station}
-        description={MOCK_RADIO.description}
-        streamUrl={MOCK_RADIO.streamUrl}
-      />
-      <YoutubeEmbed
-        videoId={MOCK_RADIO.youtubeStreamId}
-        station={MOCK_RADIO.station}
-      />
-    </div>
-
-    <!-- Middle row: Ticker de última hora -->
-    <NewsTicker items={MOCK_TICKER} />
-
-    <!-- Bottom row: Lista de noticias (crece para llenar el espacio restante) -->
-    <div class="flex-1">
-      <NewsList articles={MOCK_NEWS} buildDate={now} />
-    </div>
+  <!-- ── Col izq, fila 1: LiveCard + YouTube ───────────────────────────── -->
+  <div class="col-start-1 row-start-1 grid grid-cols-[2fr_3fr] bg-brand-black min-h-0">
+    <LiveCard
+      isLive={MOCK_RADIO.isLive}
+      station={MOCK_RADIO.station}
+      description={MOCK_RADIO.description}
+      streamUrl={MOCK_RADIO.streamUrl}
+    />
+    <YoutubeEmbed
+      videoId={MOCK_RADIO.youtubeStreamId}
+      station={MOCK_RADIO.station}
+    />
   </div>
 
-  <!-- ── Columna derecha: Editorial Semanal ───────────────────────────── -->
+  <!-- ── Col izq, fila 2: Ticker ───────────────────────────────────────── -->
+  <div class="col-start-1 row-start-2">
+    <NewsTicker items={MOCK_TICKER} />
+  </div>
+
+  <!-- ── Col izq, fila 3: Lista de noticias ─────────────────────────────── -->
+  <div class="col-start-1 row-start-3 min-h-0">
+    <NewsList articles={MOCK_NEWS} buildDate={now} />
+  </div>
+
+  <!-- ── Col der, filas 1-3: Editorial Semanal (subgrid) ────────────────── -->
   <EditorialCard
     title={MOCK_EDITORIAL.title}
     question={MOCK_EDITORIAL.question}
