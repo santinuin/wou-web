@@ -8,6 +8,7 @@
   --color-brand-orange: #FB923C;   /* badge "ESTÁ PASANDO" */
   --color-brand-white:  #F0F4F8;   /* texto sobre fondos oscuros */
   --color-brand-green:  #B9FFC1;
+  --color-brand-gray: #FFFFFF8C;
 
   /* Alias semánticos */
   --color-primary: var(--color-brand-dark);
@@ -19,4 +20,12 @@
   --font-barlow:  'Barlow Condensed', sans-serif;  /* subtítulos condensados  */
   --font-alumni:  'Alumni Sans', sans-serif;       /* títulos editoriales     */
   --font-franklin:'Libre Franklin', sans-serif;    /* bajadas en negrita       */
+}
+
+/* Hide scrollbar globally */
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
 }

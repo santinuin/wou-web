@@ -18,11 +18,11 @@ const { articles, buildDate = new Date() } = Astro.props;
 <div class="flex flex-col bg-brand-black h-full">
 
   <!-- Encabezado -->
-  <div class="flex items-center justify-between px-5 py-3 border-b border-brand-teal/30">
-    <span class="font-bowlby text-brand-teal text-xs uppercase tracking-widest">
+  <div class="flex items-center justify-between px-5 pt-10 pb-1 border-b border-brand-teal/30">
+    <span class="font-bowlby text-brand-teal text-s uppercase tracking-widest">
       Ponete al día
     </span>
-    <span class="font-sans text-brand-white/50 text-xs">
+    <span class="font-franklin italic text-brand-gray/50 text-xs">
       {formatDateLong(buildDate)}
     </span>
   </div>
@@ -33,9 +33,9 @@ const { articles, buildDate = new Date() } = Astro.props;
       <li>
         <a
           href={`/articulo/${article.slug}`}
-          class="flex items-center justify-between px-5 py-4 hover:bg-brand-white/5 transition-colors group"
+          class="flex items-center justify-between px-5 py-9 hover:bg-brand-white/5 transition-colors group"
         >
-          <span class="font-barlow font-black text-brand-white text-base uppercase tracking-wide group-hover:text-brand-teal transition-colors">
+          <span class="font-franklin font-bold text-brand-white text-2xl uppercase tracking-wide group-hover:text-brand-teal transition-colors">
             {article.title}
           </span>
           <span class="font-sans text-brand-white/40 text-xs shrink-0 ml-4">
