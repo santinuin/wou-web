@@ -3,7 +3,7 @@
 Source of truth para Claude Code. Leer antes de cualquier tarea.
 
 ## Stack
-Astro v6 (output: 'static') · Bun · Sanity v3 · Tailwind CSS v4 · TypeScript strict
+Astro v6 (output: 'static') · Bun · Sanity v3 · Tailwind CSS v4 · TypeScript strict · GSAP 3 (animaciones)
 
 ## Invariante central
 **Build-time-only data fetching.**
@@ -157,3 +157,37 @@ Ejemplos de componentes que NO deben ser islands:
 - ArticleCard.astro — tarjeta de artículo (solo presenta datos)
 - Header.astro — header estático (el menú mobile sería una island dentro)
 - CategoryBadge.astro — badge de categoría (HTML puro)
+
+## Animaciones — GSAP 3
+
+**GSAP (`gsap`)** es la herramienta estándar para animaciones complejas del sitio.
+Decisión de arquitectura: GSAP se elige por su performance, control de timelines
+y compatibilidad con ScrollTrigger para efectos sincronizados al scroll.
+
+**Regla de oro — jerarquía de animación:**
+1. **Transiciones CSS / Tailwind** → efectos simples de 1-2 propiedades
+   (hover, focus, reveals lineales). No traer GSAP para esto.
+2. **Keyframes CSS** → animaciones cíclicas sin estado (ticker, pulses).
+3. **GSAP** → secuencias, timelines encadenados, ScrollTrigger, física
+   (stagger, easing avanzado, morph), o cuando CSS se vuelve inmanejable.
+
+**Dónde vive GSAP:**
+- Solo dentro de islas Svelte (`client:*`). Nunca en componentes `.astro`.
+- Importar desde el componente que lo consume, no globalmente:
+  ```svelte
+  <script>
+    import { gsap } from 'gsap';
+    import { onMount } from 'svelte';
+    onMount(() => {
+      gsap.from('.hero-title', { y: 40, opacity: 0, duration: 0.8, ease: 'power3.out' });
+    });
+  </script>
+  ```
+- Los plugins (`ScrollTrigger`, `Flip`, etc.) se importan por separado y se
+  registran una sola vez: `gsap.registerPlugin(ScrollTrigger)`.
+
+**Performance:**
+- Preferir `client:visible` para islas con animaciones below-the-fold — GSAP
+  no se descarga ni ejecuta hasta que el usuario llega al componente.
+- `gsap.context()` / `ctx.revert()` en `onDestroy` para evitar memory leaks
+  en componentes que se montan/desmontan.
