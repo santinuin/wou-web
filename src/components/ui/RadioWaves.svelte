@@ -52,12 +52,10 @@
   ];
 
   const BUMP_W = 100; // radio del bump (px en viewBox)
-  const SPEED = 50; // px/s — misma velocidad para ambos grupos
+  const SPEED = 60; // px/s — misma velocidad para ambos grupos
 
-  const BX_TOP0 = 100; // posición inicial top (coincide con SVG original)
+  const BX_TOP0 = 110; // posición inicial top (coincide con SVG original)
   const BX_BOT0 = 0; // posición inicial bot (coincide con SVG original)
-  const BX_END = -(BUMP_W + 5); // off-screen izquierda  (-145)
-  const BX_LOOP = 330 + BUMP_W; // off-screen derecha    ( 470)
 
   // Generamos puntos cada 15px para tener una curva de alta resolución
   const XS = [];
@@ -67,11 +65,19 @@
 
   // ── Generación de path ──────────────────────────────────────────────────
 
+  // Devuelve 0 en los bordes (x≈−5 y x≈330) y 1 en el centro.
+  // Smoothstep: derivada = 0 en los extremos → la curva llega tangente al borde (redondeada).
+  const EDGE_W = 100;
+  function edgeDamp(x) {
+    const t = Math.max(0, Math.min(1, (x - (-5)) / EDGE_W));
+    const u = Math.max(0, Math.min(1, (330 - x) / EDGE_W));
+    const s = Math.min(t, u);
+    return s * s * (3 - 2 * s); // smoothstep
+  }
+
   function bumpOffset(x, bumpX, amp) {
     const d = x - bumpX;
-    // ELIMINADO: if (Math.abs(d) >= BUMP_W) return 0;
-    // Ahora la onda fluye de forma continua sin cortarse
-    return (amp * (Math.cos((d / BUMP_W) * Math.PI) + 1)) / 2;
+    return ((amp * (Math.cos((d / BUMP_W) * Math.PI) + 1)) / 2) * edgeDamp(x);
   }
 
   // Catmull-Rom → Cubic Bezier (solo comandos C, sin M inicial)
