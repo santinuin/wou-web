@@ -1,10 +1,13 @@
 ---
+import { Image } from 'astro:assets';
 import { timeAgo, formatDateLong } from '@/lib/utils';
 
 interface NewsItem {
   title: string;
   publishedAt: string;
   slug: string;
+  imageUrl?: string | null;
+  excerpt?: string | null;
 }
 
 interface Props {
@@ -27,18 +30,60 @@ const { articles, buildDate = new Date() } = Astro.props;
     </span>
   </div>
 
-  <!-- Lista de noticias -->
-  <ul class="flex-1 divide-y divide-brand-white/10">
+  <!--
+    Lista de noticias.
+    Cada <li> es un `group` para activar el hover compartido de:
+      · Sweep del fondo (scaleY de arriba hacia abajo)
+      · Reveal del preview (imagen + excerpt) con transición de max-width
+      · Desplazamiento del título a la derecha (empujado por el preview)
+  -->
+  <ul class="flex-1">
     {articles.map((article) => (
-      <li>
+      <li class="group relative">
         <a
           href={`/articulo/${article.slug}`}
-          class="flex items-center justify-between px-5 py-9 hover:bg-brand-white/5 transition-colors group"
+          class="relative flex items-center px-5 py-3.5 overflow-hidden"
         >
-          <span class="font-franklin font-bold text-brand-white text-2xl uppercase tracking-wide group-hover:text-brand-teal transition-colors">
+          {/*
+            Sweep background — barrido vertical del color de hover.
+            transform-origin: top + scaleY(0→1) produce el efecto de "barrer"
+            la fila desde arriba hacia abajo en ~700ms.
+          */}
+          <span
+            aria-hidden="true"
+            class="absolute inset-0 bg-blue-800 origin-top scale-y-0 transition-transform duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] group-hover:scale-y-100"
+          ></span>
+
+          {/*
+            Panel de preview (imagen + excerpt).
+            Colapsado en reposo (max-w-0, opacity-0); se expande a la derecha
+            empujando al título al entrar en hover.
+          */}
+          {(article.imageUrl || article.excerpt) && (
+            <span class="relative flex items-center gap-4 max-w-0 opacity-0 overflow-hidden transition-all duration-500 ease-out group-hover:max-w-[280px] group-hover:opacity-100 group-hover:mr-6">
+              {article.imageUrl && (
+                <Image
+                  src={article.imageUrl}
+                  alt={article.title}
+                  width={200}
+                  height={140}
+                  class="w-[100px] h-[70px] object-cover shrink-0"
+                  loading="lazy"
+                />
+              )}
+              {article.excerpt && (
+                <span class="font-franklin text-brand-white text-sm leading-snug shrink-0 w-[160px]">
+                  {article.excerpt}
+                </span>
+              )}
+            </span>
+          )}
+
+          <span class="relative font-franklin font-bold text-brand-white text-2xl uppercase tracking-wide whitespace-nowrap transition-colors">
             {article.title}
           </span>
-          <span class="font-sans text-brand-white/40 text-xs shrink-0 ml-4">
+
+          <span class="relative ml-auto font-sans text-brand-white/40 text-xs shrink-0 pl-4 group-hover:text-brand-white/70 transition-colors">
             {timeAgo(article.publishedAt)}
           </span>
         </a>

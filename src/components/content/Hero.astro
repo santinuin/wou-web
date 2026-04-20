@@ -31,11 +31,13 @@ const MOCK_RADIO = {
 };
 
 const now = new Date();
+// imageUrl vendrá del CMS: urlForImage(article.mainImage).width(200).height(140).url()
+const LOREM = 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.';
 const MOCK_NEWS = [
-  { title: 'Sube el gas', publishedAt: new Date(now.getTime() - 12 * 60_000).toISOString(), slug: 'sube-el-gas' },
-  { title: 'Fallo por IPF', publishedAt: new Date(now.getTime() - 12 * 60_000).toISOString(), slug: 'fallo-por-ipf' },
-  { title: 'El discurso no cierra', publishedAt: new Date(now.getTime() - 60 * 60_000).toISOString(), slug: 'el-discurso-no-cierra' },
-  { title: 'City tour de pascuas', publishedAt: new Date(now.getTime() - 3 * 60 * 60_000).toISOString(), slug: 'city-tour-de-pascuas' },
+  { title: 'Sube el gas', publishedAt: new Date(now.getTime() - 12 * 60_000).toISOString(), slug: 'sube-el-gas', excerpt: LOREM },
+  { title: 'Fallo por YPF', publishedAt: new Date(now.getTime() - 34 * 60_000).toISOString(), slug: 'fallo-por-ypf', excerpt: LOREM },
+  { title: 'El discurso no cierra', publishedAt: new Date(now.getTime() - 60 * 60_000).toISOString(), slug: 'el-discurso-no-cierra', excerpt: LOREM },
+  { title: 'City tour de pascuas', publishedAt: new Date(now.getTime() - 3 * 60 * 60_000).toISOString(), slug: 'city-tour-de-pascuas', excerpt: LOREM },
 ];
 
 const MOCK_TICKER = [
