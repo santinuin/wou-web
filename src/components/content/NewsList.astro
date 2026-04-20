@@ -60,19 +60,19 @@ const { articles, buildDate = new Date() } = Astro.props;
             empujando al título al entrar en hover.
           */}
           {(article.imageUrl || article.excerpt) && (
-            <span class="relative flex items-center gap-4 max-w-0 opacity-0 overflow-hidden transition-all duration-500 ease-out group-hover:max-w-[280px] group-hover:opacity-100 group-hover:mr-6">
+            <span class="relative flex items-center gap-4 max-w-0 opacity-0 overflow-hidden transition-all duration-500 ease-out group-hover:max-w-70 group-hover:opacity-100 group-hover:mr-6">
               {article.imageUrl && (
                 <Image
                   src={article.imageUrl}
                   alt={article.title}
                   width={200}
                   height={140}
-                  class="w-[100px] h-[70px] object-cover shrink-0"
+                  class="w-25 h-75.5 object-cover shrink-0"
                   loading="lazy"
                 />
               )}
               {article.excerpt && (
-                <span class="font-franklin text-brand-white text-sm leading-snug shrink-0 w-[160px]">
+                <span class="font-franklin text-brand-white text-sm leading-snug shrink-0 w-40">
                   {article.excerpt}
                 </span>
               )}

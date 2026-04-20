@@ -52,7 +52,7 @@
   ];
 
   const BUMP_W = 100; // radio del bump (px en viewBox)
-  const SPEED = 60; // px/s — misma velocidad para ambos grupos
+  const SPEED = 40; // px/s — misma velocidad para ambos grupos
 
   const BX_TOP0 = 0; // posición inicial top (coincide con SVG original)
   const BX_BOT0 = 0; // posición inicial bot (coincide con SVG original)
