@@ -36,13 +36,13 @@
     { baseY: 44.2602, bandH: 3.1428, bumpAmp: 18.53 },
     { baseY: 51.0641, bandH: 3.2437, bumpAmp: 14.77 },
     { baseY: 58.0838, bandH: 3.3445, bumpAmp: 10.97 },
-    { baseY: 65.3005, bandH: 3.4455, bumpAmp: 6.15 }, // Igual al primero de abajo
+    { baseY: 65.3005, bandH: 3.4455, bumpAmp: 10.5 },
   ];
 
   // BOT: bump baja (sumamos). Amplitudes crecen de afuera hacia adentro.
   // Derivadas de los control-points máximos de cada return-curve.
   const BOT_BANDS = [
-    { baseY: 70.9575, bandH: 3.4455, bumpAmp: 6.15 },
+    { baseY: 70.9575, bandH: 3.4455, bumpAmp: 10.5 },
     { baseY: 78.2843, bandH: 3.3445, bumpAmp: 10.97 },
     { baseY: 85.3999, bandH: 3.2437, bumpAmp: 14.77 },
     { baseY: 92.3001, bandH: 3.1428, bumpAmp: 18.53 },
@@ -54,7 +54,7 @@
   const BUMP_W = 100; // radio del bump (px en viewBox)
   const SPEED = 60; // px/s — misma velocidad para ambos grupos
 
-  const BX_TOP0 = 110; // posición inicial top (coincide con SVG original)
+  const BX_TOP0 = 0; // posición inicial top (coincide con SVG original)
   const BX_BOT0 = 0; // posición inicial bot (coincide con SVG original)
 
   // Generamos puntos cada 15px para tener una curva de alta resolución
@@ -77,7 +77,7 @@
 
   function bumpOffset(x, bumpX, amp) {
     const d = x - bumpX;
-    return ((amp * (Math.cos((d / BUMP_W) * Math.PI) + 1)) / 2) * edgeDamp(x);
+    return (amp * Math.cos((d / BUMP_W) * Math.PI)) * edgeDamp(x);
   }
 
   // Catmull-Rom → Cubic Bezier (solo comandos C, sin M inicial)
@@ -143,7 +143,7 @@
     const topPaths = Array.from(svgEl.querySelectorAll("[data-top]"));
     const botPaths = Array.from(svgEl.querySelectorAll("[data-bot]"));
     animateGroup(topPaths, TOP_BANDS, -1, BX_TOP0, "top");
-    animateGroup(botPaths, BOT_BANDS, +1, BX_BOT0, "bot");
+    animateGroup(botPaths, BOT_BANDS, -1, BX_BOT0, "bot");
   });
 
   onDestroy(() => {
