@@ -11,31 +11,42 @@
  */
 ---
 
-<header class="bg-brand-dark">
+<!--
+  `sticky top-0 z-50`: el header queda visible en todas las secciones al
+  scrollear. Cuando el usuario baja más de 40px aplicamos la clase
+  `is-scrolled` que reduce altura, logo y texto vía la variable
+  `--header-scale` (leída por los elementos internos). Esto mantiene el
+  grid matemáticamente centrado aunque los elementos encojan.
+-->
+<header
+  id="siteHeader"
+  class="sticky top-0 left-0 right-0 z-50 bg-brand-dark transition-colors duration-300"
+>
   <div
-    class="w-full px-6 h-20 grid grid-cols-[1fr_auto_1fr] items-center"
+    class="w-full px-6 h-[calc(5rem*var(--header-scale,1))] grid grid-cols-[1fr_auto_1fr] items-center transition-[height] duration-300"
   >
     <!-- ── Indicador de viento ─────────────────────────────────────────── -->
     <div class="flex items-center gap-2">
-      <!-- líneas de viento (estilo Lucide "wind") -->                                                                          
-      <svg                                                                                                                      
-        aria-hidden="true"                                                                                                      
-        width="22"                                                                                                              
-        height="22"                                                                                                                   
-        viewBox="0 0 24 24"                                                                                                           
-        fill="none"                                                                                                                   
-        stroke="#f0f4f8"                                                                                                              
-        stroke-width="2"                                                                                                              
-        stroke-linecap="round"                                                                                                        
-        stroke-linejoin="round"                                                                                                       
-        xmlns="http://www.w3.org/2000/svg"                                                                                            
-      >                                                                                                                               
-        <path d="M9.59 4.59A2 2 0 1 1 11 8H2"></path>                                                                                 
-        <path d="M9.59 19.41A2 2 0 1 0 11 16H2"></path>                                                                               
-        <path d="M15.73 7.73A2.5 2.5 0 1 1 17.5 12H2"></path>                                                                         
-      </svg>   
+      <!-- líneas de viento (estilo Lucide "wind") -->
+      <svg
+        aria-hidden="true"
+        class="w-[calc(1.375rem*var(--header-scale,1))] h-[calc(1.375rem*var(--header-scale,1))] transition-[width,height] duration-300"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#f0f4f8"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d="M9.59 4.59A2 2 0 1 1 11 8H2"></path>
+        <path d="M9.59 19.41A2 2 0 1 0 11 16H2"></path>
+        <path d="M15.73 7.73A2.5 2.5 0 1 1 17.5 12H2"></path>
+      </svg>
 
-      <span class="font-bowlby text-brand-teal text-lg uppercase tracking-wide">
+      <span
+        class="font-bowlby text-brand-teal uppercase tracking-wide text-[calc(1.125rem*var(--header-scale,1))] transition-[font-size] duration-300"
+      >
         Viento | RGL: 72 KM
       </span>
     </div>
@@ -43,8 +54,7 @@
     <!-- ── Logotipo W•U! (SVG oficial) ────────────────────────────────── -->
     <a href="/" aria-label="Ir a la portada" class="select-none">
       <svg
-        width="109"
-        height="37"
+        class="w-[calc(109px*var(--header-scale,1))] h-[calc(37px*var(--header-scale,1))] transition-[width,height] duration-300"
         viewBox="0 0 109 37"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -66,17 +76,48 @@
     <!-- TODO: reemplazar por <SectionMenu client:load /> cuando el dropdown esté definido -->
     <button
       type="button"
-      class="flex items-center gap-1.5 font-bowlby text-brand-teal text-lg uppercase tracking-wide cursor-pointer justify-self-end"
+      class="flex items-center gap-1.5 font-bowlby text-brand-teal uppercase tracking-wide cursor-pointer justify-self-end text-[calc(1.125rem*var(--header-scale,1))] transition-[font-size] duration-300"
       aria-haspopup="true"
       aria-expanded="false"
       aria-label="Ver todas las secciones"
     >
       Secciones
       <!-- flecha ↓ con tallo -->
-      <svg aria-hidden="true" width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg
+        aria-hidden="true"
+        class="w-[calc(8px*var(--header-scale,1))] h-[calc(12px*var(--header-scale,1))] transition-[width,height] duration-300"
+        viewBox="0 0 8 12"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
         <line x1="4" y1="0" x2="4" y2="8" stroke="#00C9B1" stroke-width="2" stroke-linecap="round"/>
         <path d="M1 6L4 11L7 6" stroke="#00C9B1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
   </div>
 </header>
+
+<style>
+  /* --header-scale: 1 cuando está en reposo, 0.72 al scrollear. Un solo
+     toggle de la variable encoge altura, logo, íconos y texto en una sola
+     transición coherente. */
+  #siteHeader {
+    --header-scale: 1;
+  }
+  #siteHeader.is-scrolled {
+    --header-scale: 0.72;
+  }
+</style>
+
+<script>
+  // El header queda en tamaño grande únicamente cuando el scroll está
+  // exactamente en 0 (tope de la página). Apenas se mueve, encoge.
+  const header = document.getElementById('siteHeader');
+  if (header) {
+    const sync = () => {
+      header.classList.toggle('is-scrolled', window.scrollY > 0); //TODO definir si no es 40
+    };
+    sync();
+    window.addEventListener('scroll', sync, { passive: true });
+  }
+</script>

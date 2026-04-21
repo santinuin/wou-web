@@ -4,6 +4,7 @@ import {
   ALL_ARTICLES_QUERY,
   ALL_AUTHORS_QUERY,
   ALL_CATEGORIES_QUERY,
+  ALL_RED_CIRCLES_QUERY,
 } from './lib/cms/queries';
 
 /**
@@ -124,4 +125,29 @@ const categories = defineCollection({
   }),
 });
 
-export const collections = { articles, authors, categories };
+// ─── Red Circles ──────────────────────────────────────────────────────────────
+
+const redCircles = defineCollection({
+  loader: async () => {
+    if (!isSanityConfigured) return [];
+    type RawRedCircle = {
+      _id: string;
+      slug: { _type: 'slug'; current: string };
+      [key: string]: unknown;
+    };
+    const data = await sanityClient.fetch<RawRedCircle[]>(ALL_RED_CIRCLES_QUERY);
+    return data.map((c) => ({ id: c.slug.current, ...c }));
+  },
+
+  schema: z.object({
+    _id: z.string(),
+    label: z.string(),
+    slug: SanitySlugSchema,
+    href: z.string().nullish(),
+    image: z.any(),
+    order: z.number().nullish(),
+    publishedAt: z.string().nullish(),
+  }),
+});
+
+export const collections = { articles, authors, categories, redCircles };

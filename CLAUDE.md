@@ -3,7 +3,7 @@
 Source of truth para Claude Code. Leer antes de cualquier tarea.
 
 ## Stack
-Astro v6 (output: 'static') · Bun · Sanity v3 · Tailwind CSS v4 · TypeScript strict · GSAP 3 (animaciones)
+Astro v6 (output: 'static') · Bun · Sanity v3 · Tailwind CSS v4 · TypeScript strict · GSAP 3 (animaciones) · Matter.js 0.19 (físicas DOM)
 
 ## Invariante central
 **Build-time-only data fetching.**
@@ -191,3 +191,34 @@ y compatibilidad con ScrollTrigger para efectos sincronizados al scroll.
   no se descarga ni ejecuta hasta que el usuario llega al componente.
 - `gsap.context()` / `ctx.revert()` en `onDestroy` para evitar memory leaks
   en componentes que se montan/desmontan.
+
+## Físicas interactivas — Matter.js
+
+**`matter-js` 0.19** es la librería estándar para simulación de física 2D
+en interacciones arrastrables (ball-pool, draggables con gravedad, rebotes).
+Decisión: se eligió sobre alternativas (rapier-wasm, p5.physics) por:
+  - cero dependencias (JS puro, ~90kb), sin WASM ni bundling especial
+  - API estable y documentada — engine, runner, bodies, constraints, mouse
+  - `MouseConstraint` resuelve drag & throw sin código custom
+  - compatibilidad con render DOM sincronizado (no requiere canvas)
+
+**Regla: Matter.js NO usa canvas.** Los cuerpos son invisibles para el
+render engine; sincronizamos `body.position` y `body.angle` al DOM cada
+frame vía `transform: translate(x,y) rotate(rad)` sobre elementos HTML.
+Esto permite que cada bola sea un `<a>`/`<li>` con `<Image>` de Astro
+optimizada en build-time.
+
+**Dónde vive Matter.js:**
+- Solo dentro de islas Svelte (`client:*`). Nunca en componentes `.astro`.
+- `client:visible` por defecto — no se descarga hasta que el usuario
+  scrollea hasta la sección. La librería pesa ~90kb gzipped.
+- `Runner.stop()` + `Engine.clear()` + `World.clear()` en `onDestroy`
+  para evitar memory leaks en navegaciones SPA o resize.
+
+**Performance:**
+- Bajar `timing.timeScale` durante el boot (intro) y volver a 1 después
+  del asentamiento para controlar la sensación de caída.
+- `Mouse.create(container)` — el receptor de eventos debe ser el contenedor
+  DOM que abarca el área física, no `document`.
+- En touch, `touch-action: pan-y` deja pasar scroll vertical cuando no hay
+  drag activo; bloquear `preventDefault` solo si `mouseConstraint.body` existe.

@@ -1,0 +1,224 @@
+---
+/**
+ * RedCircle — sección full-viewport con piscina de bolas físicas (Matter.js).
+ *
+ * Se ubica inmediatamente debajo del Hero en la home. Ocupa el 100% del
+ * viewport (100vh / 100dvh).
+ *
+ * Arquitectura:
+ *  1. Astro (build-time) consulta la collection `redCircles`, pre-genera
+ *     las URLs de imágenes Sanity y monta los `<li>` de cada bola.
+ *  2. El `<ul>` contenedor es renderizado por la isla Svelte `BallPool`,
+ *     que se hidrata con `client:visible` (zero JS hasta que es visible).
+ *  3. La isla aplica Matter.js sobre los `<li>` y sincroniza posición /
+ *     rotación al DOM cada frame.
+ *
+ * Las imágenes se revelan en hover con una transición CSS — sin JS.
+ */
+import { getCollection } from 'astro:content';
+import BallPool from '@/components/ui/BallPool.svelte';
+import { urlForImage } from '@/lib/cms/image';
+import { MOCK_RED_CIRCLES } from './redCircleMock';
+
+type BallData = {
+  id: string;
+  label: string;
+  href: string;
+  imageUrl: string | null;
+  imageAlt: string;
+};
+
+const entries = await getCollection('redCircles');
+
+const balls: BallData[] = entries.length
+  ? entries.map((e) => {
+      const data = e.data as {
+        label: string;
+        href?: string | null;
+        slug: { current: string };
+        image: unknown;
+      };
+      return {
+        id: e.id,
+        label: data.label,
+        href: data.href || `/circulo-rojo/${data.slug.current}`,
+        imageUrl: data.image
+          ? urlForImage(data.image as Parameters<typeof urlForImage>[0])
+              .width(600)
+              .height(600)
+              .fit('crop')
+              .auto('format')
+              .url()
+          : null,
+        imageAlt:
+          ((data.image as { alt?: string })?.alt as string | undefined) ?? data.label,
+      };
+    })
+  : MOCK_RED_CIRCLES.map((m) => ({ ...m, imageUrl: m.imageUrl as string | null }));
+---
+
+<section
+  aria-label="Círculo Rojo"
+  class="RedCircleSection relative w-full overflow-hidden bg-brand-black"
+>
+  <!-- Título estático: vive fuera del motor de física. Clases Tailwind
+       para posición, tamaño y tipografía; font-alumni viene del theme. -->
+  <h2
+    class="RedCircleTitle font-alumni pointer-events-none absolute top-[clamp(1.5rem,6vw,5rem)] left-[clamp(2rem,12vw,10rem)] z-10 m-0 font-black uppercase text-white leading-none tracking-tight text-5xl md:text-6xl lg:text-7xl xl:text-8xl select-none"
+  >
+    Círculo Rojo
+  </h2>
+
+  <BallPool client:visible>
+    {
+      balls.map((ball) => (
+        <li class="BallPool--ball" data-id={ball.id}>
+          <a
+            class="BallPool--category"
+            href={ball.href}
+            aria-label={ball.label}
+            draggable="false"
+          >
+            <span class="BallPool--category--body">
+              <span class="BallPool--label">{ball.label}</span>
+              {ball.imageUrl && (
+                <span class="BallPool--image">
+                  <img
+                    src={ball.imageUrl}
+                    alt={ball.imageAlt}
+                    width={600}
+                    height={600}
+                    loading="lazy"
+                    draggable={false}
+                  />
+                </span>
+              )}
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </BallPool>
+</section>
+
+<style>
+  .RedCircleSection {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 520px;
+    --ball-size: 18vw;
+    --ball-color: #e04a3f;
+    --ball-text-color: #ffffff;
+  }
+
+  @media (max-width: 1024px) {
+    .RedCircleSection {
+      --ball-size: 26vw;
+    }
+  }
+  @media (max-width: 600px) {
+    .RedCircleSection {
+      --ball-size: 40vw;
+    }
+  }
+
+  .BallPool--ball {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--ball-individual-size, var(--ball-size));
+    height: var(--ball-individual-size, var(--ball-size));
+    margin-top: calc(var(--ball-individual-size, var(--ball-size)) * -0.5);
+    margin-left: calc(var(--ball-individual-size, var(--ball-size)) * -0.5);
+    user-select: none;
+    will-change: transform;
+  }
+
+  .BallPool--category {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: var(--ball-color);
+    border-radius: 50%;
+    color: var(--ball-text-color);
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.25s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  .BallPool--category::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #ffffff;
+    border-radius: inherit;
+    opacity: 0;
+    transform: scale(0.85);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .BallPool--category:hover,
+    .BallPool--category:focus-visible {
+      transform: rotate(-4deg) scale(1.02);
+    }
+    .BallPool--category:hover::before,
+    .BallPool--category:focus-visible::before {
+      opacity: 1;
+      transform: none;
+    }
+    .BallPool--category:hover .BallPool--image,
+    .BallPool--category:focus-visible .BallPool--image {
+      opacity: 1;
+    }
+    .BallPool--category:hover .BallPool--label,
+    .BallPool--category:focus-visible .BallPool--label {
+      opacity: 0;
+    }
+  }
+
+  .BallPool--category--body {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12%;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .BallPool--label {
+    font-family: var(--font-alumni, 'Alumni Sans', sans-serif);
+    font-weight: 900;
+    text-transform: uppercase;
+    line-height: 0.9;
+    font-size: clamp(0.9rem, 1.3vw, 1.6rem);
+    color: var(--ball-text-color);
+    transform: rotate(-6deg);
+    transition: opacity 0.25s ease;
+    z-index: 1;
+  }
+
+  .BallPool--image {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    z-index: 2;
+    border-radius: inherit;
+    overflow: hidden;
+  }
+
+  .BallPool--image :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+</style>

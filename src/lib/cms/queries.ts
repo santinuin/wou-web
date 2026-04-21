@@ -161,6 +161,22 @@ export const LATEST_EDITORIAL_QUERY = groq`
   }
 `;
 
+// ─── Red Circles ──────────────────────────────────────────────────────────────
+
+// Bolas de la sección "RedCircle" del home — orden manual + más reciente
+export const ALL_RED_CIRCLES_QUERY = groq`
+  *[_type == "redCircle" && defined(slug.current)]
+  | order(order asc, publishedAt desc) {
+    _id,
+    label,
+    slug,
+    href,
+    image,
+    order,
+    publishedAt
+  }
+`;
+
 // Configuración del stream de radio (singleton)
 export const RADIO_STREAM_QUERY = groq`
   *[_type == "radioStream"][0] {
