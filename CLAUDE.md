@@ -106,11 +106,41 @@ Nunca usar `npm`, `npx`, `yarn` ni `pnpm`.
 | `bun run audit`       | Auditoría A11y + console errors con Playwright  |
 | `bun run audit:report`| Ídem con reporte HTML                           |
 
-## Estructura de componentes
-  src/components/
-  ├── layout/    ← .astro — Header, Footer, estructura global
-  ├── ui/        ← .svelte para interactivos / .astro para estáticos
-  └── content/   ← .astro — ArticleCard, AuthorCard, etc.
+## Estructura del código
+
+```
+src/
+├── layouts/          shells de página (BaseLayout, ArticleLayout futuro...)
+├── pages/            rutas Astro (index.astro, [slug].astro...)
+├── sections/         composiciones grandes, específicas de una página
+│   └── home/         Hero, RedCircle, TransitionSection (+ mocks locales)
+├── components/       piezas reutilizables entre páginas
+│   ├── layout/       .astro — Header, Footer, estructura global
+│   ├── content/      .astro — cards y bloques (ArticleCard, LiveCard, NewsList, etc.)
+│   └── ui/           .svelte para interactivos / .astro para estáticos atómicos
+├── lib/              lógica pura, sin markup (cms/, utils.ts, mocks/)
+├── schemas/          schemas Sanity (importados por sanity.config.ts)
+├── styles/           global.css (Tailwind v4 @theme)
+└── content.config.ts loaders de Content Collections
+```
+
+Los tres niveles de composición, diferenciados:
+
+| Carpeta        | Qué vive ahí                                        | Criterio                                |
+|----------------|-----------------------------------------------------|-----------------------------------------|
+| `layouts/`     | Shells de página (header + main + footer, slots)    | Lo usa más de una página                |
+| `sections/`    | Composiciones grandes (full-viewport o bloques)     | Vive en UNA sola página                 |
+| `components/`  | Piezas reutilizables (cards, embeds, badges, UI)    | Se importa desde más de una página/sección |
+
+Regla práctica: si un archivo puede importarse desde otra página o sección,
+va en `components/`. Si es único de una página (como `Hero`), va en
+`sections/<page>/`. Los mocks locales de una sección viven junto a ella.
+
+**Direcciones de import válidas:**
+- `pages/*` → `layouts/`, `sections/*`, `components/*`
+- `sections/<page>/*` → `components/*`, `lib/*`
+- `components/*` → `components/*` (entre sí), `lib/*`
+- Nunca: `components/` importa de `sections/`, ni `lib/` de componentes.
 
 ## Deploy (Netlify)
 - Build: `bun run build` · Publish: `dist`
