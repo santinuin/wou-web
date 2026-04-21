@@ -1,0 +1,158 @@
+---
+/**
+ * TransitionSection — sección puente full-viewport entre RedCircle y el
+ * bloque de noticias/artículos.
+ *
+ * Interacción: el botón "Abrí la ventana" es un `<button>` inerte
+ * (click no hace nada). En hover dispara una animación que da la
+ * sensación de que la pantalla se acerca al botón: la capa azul —que
+ * arranca clipeada con la forma y tamaño exacto del botón— se expande
+ * via `clip-path: inset()` hasta cubrir el viewport, a la vez que
+ * aparece "Esto es WOW". El estado final persiste: una clase
+ * `.is-active` se agrega una sola vez en `pointerenter` y no se
+ * revierte.
+ *
+ * Animación puramente CSS (clip-path + opacity). El JS solo dispara
+ * el toggle de clase. Respeta `prefers-reduced-motion`.
+ */
+---
+
+<section
+  aria-label="Esto es WOW — transición"
+  class="TransitionSection relative w-full overflow-hidden bg-brand-dark"
+>
+  <div class="TransitionSection--pill-bg" aria-hidden="true"></div>
+
+  <button
+    type="button"
+    class="TransitionSection--button font-bowlby"
+    aria-label="Abrí la ventana"
+  >
+    Abrí la ventana
+  </button>
+
+  <h2 class="TransitionSection--headline font-alumni" aria-hidden="true">
+    Esto es WOU
+  </h2>
+</section>
+
+<style>
+  .TransitionSection {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 520px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    isolation: isolate;
+    /* Dimensiones del botón inicial — compartidas entre el clip-path
+       de la capa azul y el propio botón para que arranquen alineados. */
+    --pill-w: 20rem;
+    --pill-h: 3rem;
+  }
+
+  /* Rectángulo azul — tamaño idéntico al del botón, centrado en la
+     sección. Escala uniforme preserva la aspect ratio durante toda la
+     animación: primero los lados alcanzan los bordes del viewport,
+     después arriba/abajo. El overflow de la section recorta el exceso. */
+  .TransitionSection--pill-bg {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: var(--pill-w);
+    height: var(--pill-h);
+    background-color: #002e6e;
+    transform: scale(1);
+    transform-origin: center center;
+    transition: transform 1.8s cubic-bezier(0.65, 0, 0.35, 1);
+    pointer-events: none;
+    z-index: 0;
+    will-change: transform;
+  }
+
+  .TransitionSection.is-active .TransitionSection--pill-bg {
+    transform: scale(40);
+  }
+
+  .TransitionSection--button {
+    position: relative;
+    z-index: 1;
+    width: var(--pill-w);
+    height: var(--pill-h);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: 0;
+    padding: 0;
+    color: var(--color-brand-green);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    font-size: clamp(1.1rem, 1.6vw, 1.6rem);
+    cursor: pointer;
+    transform-origin: center center;
+    transition:
+      opacity 1.2s ease,
+      transform 3s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .TransitionSection--button:focus-visible {
+    outline: 2px solid var(--color-brand-green);
+    outline-offset: 4px;
+  }
+
+  .TransitionSection.is-active .TransitionSection--button {
+    opacity: 0;
+    transform: scale(40);
+    pointer-events: none;
+  }
+
+  .TransitionSection--headline {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0 1rem;
+    color: var(--color-brand-green);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    line-height: 0.95;
+    text-align: center;
+    font-size: clamp(2.5rem, 8vw, 6.5rem);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease 1.3s;
+  }
+
+  .TransitionSection.is-active .TransitionSection--headline {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .TransitionSection--pill-bg,
+    .TransitionSection--button,
+    .TransitionSection--headline {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  /* El botón es visualmente un botón pero click no hace nada.
+     Primer pointerenter agrega `.is-active` y ahí queda. */
+  const section = document.querySelector<HTMLElement>('.TransitionSection');
+  const btn = section?.querySelector<HTMLButtonElement>('.TransitionSection--button');
+
+  btn?.addEventListener('click', (e) => e.preventDefault());
+  btn?.addEventListener(
+    'pointerenter',
+    () => section?.classList.add('is-active'),
+    { once: true }
+  );
+</script>
