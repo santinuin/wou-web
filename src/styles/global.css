@@ -8,7 +8,8 @@
   --color-brand-orange: #FB923C;   /* badge "ESTÁ PASANDO" */
   --color-brand-white:  #F0F4F8;   /* texto sobre fondos oscuros */
   --color-brand-green:  #B9FFC1;
-  --color-brand-gray: #FFFFFF8C;
+  --color-brand-gray:   #FFFFFF8C;
+  --color-brand-blue:   #01236A;
 
   /* Alias semánticos */
   --color-primary: var(--color-brand-dark);
