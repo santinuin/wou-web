@@ -46,11 +46,11 @@ const shows: ShowItem[] = entries.length
           data-card
           data-theme={i % 2 === 0 ? 'green' : 'blue'}
         >
+          <h3 class="LineupSection__card-title">{show.name}</h3>
           <div class="LineupSection__card-meta">
             <span>{show.days ?? ''}</span>
             <span>{show.time ?? ''}</span>
           </div>
-          <h3 class="LineupSection__card-title">{show.name}</h3>
         </div>
       ))}
 
@@ -107,10 +107,10 @@ const shows: ShowItem[] = entries.length
   /* ── Columna de programas ────────────────────────────────────────────────── */
   .LineupSection__column {
     position: absolute;
-    top: 0;
+    top: 3rem;
     left: 50%;
     z-index: 1;
-    width: min(38%, 420px);
+    width: min(40%, 491px);
     padding-top: 0;
     padding-bottom: 0;
     /* El script setea --col-ty a medida que scrollea */
@@ -135,8 +135,10 @@ const shows: ShowItem[] = entries.length
   .LineupSection__card {
     display: flex;
     flex-direction: column;
-    padding: 1rem 1.5rem 1.25rem;
-    min-height: clamp(7rem, 18vh, 11rem);
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    min-height: clamp(11rem, 26vh, 15rem);
   }
 
   .LineupSection__card[data-theme='green'] {
@@ -149,10 +151,27 @@ const shows: ShowItem[] = entries.length
     color: var(--color-brand-green);
   }
 
+  /* ── Título del programa ─────────────────────────────────────────────────── */
+  .LineupSection__card-title {
+    margin: 0;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: var(--font-alumni), sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    line-height: 0.9;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+  }
+
   /* ── Meta (días + hora) ──────────────────────────────────────────────────── */
   .LineupSection__card-meta {
     display: flex;
     justify-content: space-between;
+    width: 100%;
     font-family: var(--font-barlow), sans-serif;
     font-size: clamp(0.6rem, 1.1vw, 0.72rem);
     font-weight: 500;
@@ -160,18 +179,6 @@ const shows: ShowItem[] = entries.length
     text-transform: uppercase;
     opacity: 0.75;
     line-height: 1.2;
-    margin-bottom: 0.35rem;
-  }
-
-  /* ── Título del programa ─────────────────────────────────────────────────── */
-  .LineupSection__card-title {
-    margin: 0;
-    font-family: var(--font-alumni), sans-serif;
-    font-weight: 800;
-    font-size: clamp(2rem, 5vw, 3.25rem);
-    line-height: 0.9;
-    text-transform: uppercase;
-    letter-spacing: -0.01em;
   }
 
   /* ── CTA ─────────────────────────────────────────────────────────────────── */
@@ -217,7 +224,8 @@ const shows: ShowItem[] = entries.length
 
     function init() {
       const vpH = window.innerHeight;
-      colTravel = Math.max(0, col!.offsetHeight - vpH);
+      const gap = col!.offsetTop; // margen CSS 'top', se aplica también abajo
+      colTravel = Math.max(0, col!.offsetHeight - (vpH - 2 * gap));
       section!.style.setProperty('--lineup-h', `${vpH + colTravel}px`);
     }
 
