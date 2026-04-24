@@ -193,6 +193,20 @@ export const ALL_PROGRAMS_QUERY = groq`
   }
 `;
 
+// ─── Radio Shows (Lineup) ─────────────────────────────────────────────────────
+
+// Programas de radio para la sección "Lineup" del home.
+export const ALL_RADIO_SHOWS_QUERY = groq`
+  *[_type == "radioShow"] | order(order asc) {
+    _id,
+    name,
+    slug,
+    days,
+    time,
+    order
+  }
+`;
+
 // Configuración del stream de radio (singleton)
 export const RADIO_STREAM_QUERY = groq`
   *[_type == "radioStream"][0] {

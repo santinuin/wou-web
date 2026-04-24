@@ -1,0 +1,224 @@
+---
+import { getCollection } from 'astro:content';
+import LineupWaves from '@/components/ui/LineupWaves.svelte';
+import { MOCK_SHOWS, type ShowItem } from './mocks/lineupMock';
+
+const entries = await getCollection('radioShows');
+
+const shows: ShowItem[] = entries.length
+  ? entries.map((e) => ({
+      id:   e.id,
+      name: (e.data as { name: string }).name,
+      days: (e.data as { days?: string | null }).days ?? null,
+      time: (e.data as { time?: string | null }).time ?? null,
+    }))
+  : MOCK_SHOWS;
+---
+
+<!--
+  Sticky scroll pattern:
+  – .LineupSection tiene height dinámica (100dvh + colTravel), seteada por el script.
+  – .LineupSection__sticky es el viewport visible (position: sticky, 100dvh).
+  – .LineupSection__column se traslada hacia arriba a medida que el usuario scrollea,
+    usando --col-ty calculado en el script de scroll.
+-->
+<section class="LineupSection" aria-label="Programación de radio WOU">
+
+  <div class="LineupSection__sticky">
+
+    <!-- Fondo animado (isla — client:only evita SSR con window) -->
+    <LineupWaves client:only="svelte" />
+
+    <!-- Labels superiores -->
+    <div class="LineupSection__header" aria-hidden="true">
+      <span class="LineupSection__header-label">Programas</span>
+      <span class="LineupSection__header-label">95.1 FM</span>
+    </div>
+
+    <!-- Grilla de programas — se mueve con scroll via --col-ty -->
+    <div class="LineupSection__column" data-col>
+      {shows.map((show, i) => (
+        <div
+          class="LineupSection__card"
+          data-card
+          data-theme={i % 2 === 0 ? 'green' : 'blue'}
+        >
+          <div class="LineupSection__card-meta">
+            <span>{show.days ?? ''}</span>
+            <span>{show.time ?? ''}</span>
+          </div>
+          <h3 class="LineupSection__card-title">{show.name}</h3>
+        </div>
+      ))}
+
+      <a
+        class="LineupSection__cta"
+        data-cta
+        href="/grilla"
+        aria-label="Ver grilla completa de programación"
+      >
+        Ver grilla completa
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  /* ── Sección (altura dinámica, default 100dvh antes del script) ──────────── */
+  .LineupSection {
+    position: relative;
+    height: var(--lineup-h, 100dvh);
+    background: var(--color-brand-dark);
+  }
+
+  /* ── Sticky viewport ─────────────────────────────────────────────────────── */
+  .LineupSection__sticky {
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    min-height: 560px;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  /* ── Labels ──────────────────────────────────────────────────────────────── */
+  .LineupSection__header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    pointer-events: none;
+  }
+
+  .LineupSection__header-label {
+    font-family: var(--font-barlow), sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--color-brand-teal);
+  }
+
+  /* ── Columna de programas ────────────────────────────────────────────────── */
+  .LineupSection__column {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    z-index: 1;
+    width: min(38%, 420px);
+    /* El script setea --col-ty a medida que scrollea */
+    transform: translateX(-50%) translateY(var(--col-ty, 0px));
+    will-change: transform;
+  }
+
+  @media (max-width: 768px) {
+    .LineupSection__column { width: min(72%, 380px); }
+  }
+  @media (max-width: 480px) {
+    .LineupSection__column { width: 86%; }
+  }
+
+  /* ── Cards ───────────────────────────────────────────────────────────────── */
+  .LineupSection__card {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 1.5rem 1.25rem;
+    min-height: clamp(7rem, 18vh, 11rem);
+  }
+
+  .LineupSection__card[data-theme='green'] {
+    background: var(--color-brand-green);
+    color: var(--color-brand-blue);
+  }
+
+  .LineupSection__card[data-theme='blue'] {
+    background: var(--color-brand-blue);
+    color: var(--color-brand-green);
+  }
+
+  /* ── Meta (días + hora) ──────────────────────────────────────────────────── */
+  .LineupSection__card-meta {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-barlow), sans-serif;
+    font-size: clamp(0.6rem, 1.1vw, 0.72rem);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.75;
+    line-height: 1.2;
+    margin-bottom: 0.35rem;
+  }
+
+  /* ── Título del programa ─────────────────────────────────────────────────── */
+  .LineupSection__card-title {
+    margin: 0;
+    font-family: var(--font-alumni), sans-serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    line-height: 0.9;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+  }
+
+  /* ── CTA ─────────────────────────────────────────────────────────────────── */
+  .LineupSection__cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.85rem 1rem;
+    background: var(--color-brand-blue);
+    color: var(--color-brand-green);
+    font-family: var(--font-barlow), sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .LineupSection__cta:hover,
+  .LineupSection__cta:focus-visible {
+    background: var(--color-brand-green);
+    color: var(--color-brand-blue);
+    outline: none;
+  }
+
+  .LineupSection__cta:focus-visible {
+    outline: 2px solid var(--color-brand-teal);
+    outline-offset: 2px;
+  }
+</style>
+
+<script>
+  (() => {
+    const section = document.querySelector<HTMLElement>('.LineupSection');
+    const col     = section?.querySelector<HTMLElement>('[data-col]');
+    if (!section || !col) return;
+
+    let colTravel = 0;
+
+    function init() {
+      const vpH = window.innerHeight;
+      colTravel = Math.max(0, col!.offsetHeight - vpH);
+      section!.style.setProperty('--lineup-h', `${vpH + colTravel}px`);
+    }
+
+    function onScroll() {
+      if (colTravel <= 0) return;
+      const scrolled = Math.max(0, -section!.getBoundingClientRect().top);
+      section!.style.setProperty('--col-ty', `${-Math.min(scrolled, colTravel)}px`);
+    }
+
+    init();
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', () => { init(); onScroll(); });
+  })();
+</script>

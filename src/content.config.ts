@@ -5,6 +5,7 @@ import {
   ALL_AUTHORS_QUERY,
   ALL_CATEGORIES_QUERY,
   ALL_PROGRAMS_QUERY,
+  ALL_RADIO_SHOWS_QUERY,
   ALL_RED_CIRCLES_QUERY,
 } from './lib/cms/queries';
 
@@ -176,4 +177,28 @@ const programs = defineCollection({
   }),
 });
 
-export const collections = { articles, authors, categories, programs, redCircles };
+// ─── Radio Shows (Lineup) ─────────────────────────────────────────────────────
+
+const radioShows = defineCollection({
+  loader: async () => {
+    if (!isSanityConfigured) return [];
+    type RawRadioShow = {
+      _id: string;
+      slug?: { _type: 'slug'; current: string };
+      [key: string]: unknown;
+    };
+    const data = await sanityClient.fetch<RawRadioShow[]>(ALL_RADIO_SHOWS_QUERY);
+    return data.map((s) => ({ id: s.slug?.current ?? s._id, ...s }));
+  },
+
+  schema: z.object({
+    _id: z.string(),
+    name: z.string(),
+    slug: SanitySlugSchema.nullish(),
+    days: z.string().nullish(),
+    time: z.string().nullish(),
+    order: z.number().nullish(),
+  }),
+});
+
+export const collections = { articles, authors, categories, programs, radioShows, redCircles };

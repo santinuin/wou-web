@@ -5,9 +5,10 @@ import { blockContentType } from './blockContent';
 import { categoryType } from './category';
 import { editorialType } from './editorial';
 import { programType } from './program';
+import { radioShowType } from './radioShow';
 import { radioStreamType } from './radioStream';
 import { redCircleType } from './redCircle';
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [articleType, authorType, blockContentType, categoryType, editorialType, programType, radioStreamType, redCircleType],
+  types: [articleType, authorType, blockContentType, categoryType, editorialType, programType, radioShowType, radioStreamType, redCircleType],
 };
