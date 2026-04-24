@@ -177,6 +177,22 @@ export const ALL_RED_CIRCLES_QUERY = groq`
   }
 `;
 
+// ─── Programs ─────────────────────────────────────────────────────────────────
+
+// Últimos programas del canal para la sección "Programs" del home.
+// Límite fijo en el loader (8), pero la query ya ordena por `order` asc.
+export const ALL_PROGRAMS_QUERY = groq`
+  *[_type == "program" && defined(youtubeUrl)]
+  | order(order asc, publishedAt desc) [0...8] {
+    _id,
+    title,
+    guest,
+    youtubeUrl,
+    order,
+    publishedAt
+  }
+`;
+
 // Configuración del stream de radio (singleton)
 export const RADIO_STREAM_QUERY = groq`
   *[_type == "radioStream"][0] {

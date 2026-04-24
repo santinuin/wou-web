@@ -1,0 +1,475 @@
+---
+/**
+ * Programs — sección scroll-driven que muestra los últimos programas
+ * del canal de YouTube. Inspirada en la sección "work" de wodniack.dev,
+ * adaptada a la marca WOU: fondo azul marino, acento verde menta,
+ * tipografía Alumni Sans y letras flotantes "W O U".
+ *
+ * Arquitectura:
+ *  1. Este .astro consulta la collection `programs` en build-time y
+ *     normaliza cada programa a `ProgramItem` (videoId + thumbnail URL
+ *     + watch URL). Parseo del youtubeUrl vía src/lib/youtube.ts.
+ *  2. Fallback a `MOCK_PROGRAMS` si Sanity está vacío.
+ *  3. El markup estático (título, items, máscara SVG, ruler) se pasa como
+ *     children a la isla Svelte `ProgramsAnimation`, que se hidrata con
+ *     `client:visible` y maneja GSAP + ScrollTrigger.
+ *  4. Límite hard: 8 programas (lo que venga del CMS, capped).
+ *
+ * Invariante: no se importa `@sanity/client` ni se hace fetch runtime.
+ */
+import { getCollection } from 'astro:content';
+import ProgramsAnimation from './ProgramsAnimation.svelte';
+import { parseYouTubeId, getYouTubeThumbUrl, getYouTubeWatchUrl } from '@/lib/youtube';
+import { MOCK_PROGRAMS, type ProgramItem } from '../mocks/programMock';
+
+const MAX_PROGRAMS = 8;
+
+type RawProgram = {
+  _id: string;
+  title: string;
+  youtubeUrl: string;
+  guest?: string | null;
+};
+
+const entries = await getCollection('programs');
+
+const programs: ProgramItem[] = (
+  entries.length
+    ? entries
+        .map((e) => {
+          const d = e.data as RawProgram;
+          const videoId = parseYouTubeId(d.youtubeUrl);
+          if (!videoId) return null;
+          return {
+            id: d._id,
+            title: d.title,
+            guest: d.guest ?? null,
+            videoId,
+            thumbUrl: getYouTubeThumbUrl(videoId, 'max'),
+            watchUrl: getYouTubeWatchUrl(videoId),
+          } satisfies ProgramItem;
+        })
+        .filter((x): x is ProgramItem => x !== null)
+    : MOCK_PROGRAMS
+).slice(0, MAX_PROGRAMS);
+
+// Seeds determinísticos para --y / --size por item (build-time).
+// No usamos Math.random porque rompería la estabilidad build-to-build
+// (mismo data → mismo layout). Hash simple del id.
+function seededY(id: string, i: number): number {
+  let h = 0;
+  for (let k = 0; k < id.length; k++) h = (h * 31 + id.charCodeAt(k)) | 0;
+  const r = ((h >>> 0) % 1000) / 1000; // 0..1
+  // Signo alterna por índice para balancear izquierda/derecha
+  const sign = i % 2 === 0 ? -1 : 1;
+  return +((0.35 + r * 0.55) * sign).toFixed(3);
+}
+
+function seededSize(id: string): number {
+  let h = 0;
+  for (let k = 0; k < id.length; k++) h = (h * 17 + id.charCodeAt(k)) | 0;
+  const r = ((h >>> 0) % 1000) / 1000;
+  return +(0.6 + r * 0.4).toFixed(3); // 0.6..1.0
+}
+
+/**
+ * Posición "rest" (x relativo al centro) del item cuando la píldora está
+ * totalmente expandida y el grid final es visible. Alternamos columnas
+ * izquierda/derecha y con ligera variación horizontal usando el hash del id.
+ * Rango: [-0.42, -0.18] para izquierda, [0.18, 0.42] para derecha.
+ */
+function seededRestX(id: string, i: number): number {
+  let h = 0;
+  for (let k = 0; k < id.length; k++) h = (h * 13 + id.charCodeAt(k)) | 0;
+  const r = ((h >>> 0) % 1000) / 1000;
+  const side = i % 2 === 0 ? -1 : 1;
+  return +((0.18 + r * 0.24) * side).toFixed(3);
+}
+
+/** Posición "rest" Y reutilizando seededY pero más acotado vertical. */
+function seededRestY(id: string, i: number): number {
+  let h = 0;
+  for (let k = 0; k < id.length; k++) h = (h * 7 + id.charCodeAt(k)) | 0;
+  const r = ((h >>> 0) % 1000) / 1000;
+  const side = i % 3 === 0 ? -1 : i % 3 === 1 ? 0.3 : 1;
+  return +((0.15 + r * 0.25) * side).toFixed(3);
+}
+
+const total = programs.length;
+---
+
+<section
+  class="ProgramsSection"
+  aria-label="Programas de WOU"
+  style={`--programs-count: ${total}`}
+>
+  <ProgramsAnimation client:visible count={total}>
+    <div class="ProgramsSection__sticky" data-sticky>
+      <!-- Título invisible: referencia tipográfica para el tamaño del glyph.
+           Los glyphs visibles son los "ghosts" inyectados por el island. -->
+      <h2 class="ProgramsSection__title" aria-hidden="true">
+        <span class="ProgramsSection__title-inner" data-title>
+          <span class="ProgramsSection__letter" data-letter>W</span>
+          <span class="ProgramsSection__letter" data-letter>O</span>
+          <span class="ProgramsSection__letter" data-letter>U</span>
+        </span>
+      </h2>
+
+      <!-- Escena: items + letras ghost. El island inyecta los ghosts al montar. -->
+      <div class="ProgramsSection__scene" data-scene>
+        {
+          programs.map((p, i) => (
+            <article
+              class="ProgramsSection__item"
+              data-program
+              style={`--y: ${seededY(p.id, i)}; --size: ${seededSize(p.id)}; --rx: ${seededRestX(p.id, i)}; --ry: ${seededRestY(p.id, i)}; --progress: -10`}
+            >
+              <a
+                href={p.watchUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Ver "${p.title}" en YouTube${p.guest ? ` — ${p.guest}` : ''}`}
+              >
+                <div class="ProgramsSection__thumb">
+                  <img
+                    src={p.thumbUrl}
+                    alt={p.title}
+                    width={1280}
+                    height={720}
+                    loading="lazy"
+                    decoding="async"
+                    draggable="false"
+                  />
+                </div>
+                <div class="ProgramsSection__caption">
+                  <span class="ProgramsSection__caption-text">
+                    {p.title}
+                    {p.guest && <span class="ProgramsSection__caption-guest">— {p.guest}</span>}
+                  </span>
+                  <span class="ProgramsSection__caption-key">
+                    #{String(i + 1).padStart(2, '0')}/{String(total).padStart(2, '0')}
+                  </span>
+                </div>
+              </a>
+            </article>
+          ))
+        }
+      </div>
+
+      <!-- Máscara píldora. Los paths se generan dinámicamente desde el island
+           (dependen del tamaño del ruler + viewport). -->
+      <div class="ProgramsSection__mask-outer" aria-hidden="true">
+        <div class="ProgramsSection__mask" data-mask>
+          <svg class="ProgramsSection__mask-svg" data-mask-svg>
+            <path class="ProgramsSection__mask-path-outer" data-mask-outer></path>
+            <path class="ProgramsSection__mask-path-inner" data-mask-inner></path>
+            <path class="ProgramsSection__mask-path-lines" data-mask-lines></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Ruler invisible: define la posición y tamaño de la píldora
+           sin depender de JS para el breakpoint responsive. -->
+      <div class="ProgramsSection__ruler" data-ruler aria-hidden="true"></div>
+    </div>
+  </ProgramsAnimation>
+</section>
+
+<style>
+  .ProgramsSection {
+    /* --height la setea el island: count * 40lvh. Fallback 300lvh. */
+    position: relative;
+    width: 100%;
+    height: var(--height, 300lvh);
+    background: var(--color-brand-blue);
+    color: var(--color-brand-green);
+    isolation: isolate;
+    overflow: clip;
+  }
+
+  /* Línea fina verde menta en el borde superior, como en el original. */
+  .ProgramsSection::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--color-brand-green);
+    z-index: 5;
+  }
+
+  .ProgramsSection__sticky {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 100lvh;
+    overflow: hidden;
+  }
+
+  /* ── Ruler ─────────────────────────────────────────────────────────── */
+  .ProgramsSection__ruler {
+    --w: min(16.6667%, 19.625rem);
+    position: absolute;
+    top: 10lvh;
+    left: calc(50% - var(--w) / 2);
+    width: var(--w);
+    height: 80lvh;
+    pointer-events: none;
+    visibility: hidden;
+  }
+  @media (max-width: 987px) {
+    .ProgramsSection__ruler {
+      --w: 33.3333%;
+    }
+  }
+  @media (max-width: 576px) {
+    .ProgramsSection__ruler {
+      --w: 60%;
+    }
+  }
+
+  /* ── Título (invisible, sólo referencia) + ghosts ──────────────────── */
+  .ProgramsSection__title,
+  .ProgramsSection__scene :global([data-ghost]) {
+    font-family: var(--font-alumni), sans-serif;
+    font-weight: 900;
+    font-size: min(18.75rem, 25lvh);
+    line-height: 0.85;
+    letter-spacing: -0.02em;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .ProgramsSection__title {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0.7em;
+    margin: 0;
+    opacity: 0;
+    word-break: break-all;
+    pointer-events: none;
+  }
+  .ProgramsSection__title-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 0.85;
+    margin: 0.075em 0 -0.125em;
+  }
+
+  /* ── Escena (contiene items + ghosts) ──────────────────────────────── */
+  .ProgramsSection__scene {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    perspective: 40rem;
+    --state: 0;
+    transform-origin: center center;
+    will-change: transform;
+  }
+
+  /* Ghost letters — inyectadas por el island. Position absolute inside scene.
+     Opacidad boosteada durante reveal para que las letras sean legibles
+     en el estado final (cuando la píldora ya no está). */
+  .ProgramsSection__scene :global([data-ghost]) {
+    --head: calc((var(--ghost-progress, 0.5) - 0.5) * -2);
+    --ahead: calc(var(--head) * var(--head));
+    position: absolute;
+    top: var(--ghost-y, 50%);
+    left: var(--ghost-x, 50%);
+    display: block;
+    color: var(--color-brand-green);
+    opacity: calc(var(--ghost-opacity, 0.12) + var(--reveal, 0) * 0.18);
+    transform: translate(-50%, -50%)
+      rotateY(calc(var(--head) * -10deg * var(--state)))
+      translate3d(
+        calc(var(--ix, 0) * var(--ghost-step, 6rem) * var(--state)),
+        calc(var(--iy, 0) * 40% * var(--ahead) * var(--state)),
+        0
+      );
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+
+  /* ── Item (thumbnail + caption) ────────────────────────────────────── */
+  /* Dos transforms combinados vía --reveal (0..1):
+       - sweep: el item cruza la píldora (phase 1)
+       - rest:  el item queda anclado en su posición de grid (phase 2)
+     Cuando reveal=0 solo sweep; cuando reveal=1 solo rest.
+     La mezcla es lineal via calc(a*(1-r) + b*r). */
+  .ProgramsSection__item {
+    --r: var(--reveal, 0);
+    --inv-r: calc(1 - var(--r));
+
+    --sweep-x: calc(var(--progress, 0) * (50vw + 50%));
+    --rest-x: calc(var(--rx, 0) * 100vw);
+    --mix-x: calc(var(--sweep-x) * var(--inv-r) + var(--rest-x) * var(--r));
+
+    --sweep-y: calc(var(--y, 0) * 35%);
+    --rest-y: calc(var(--ry, 0) * 80lvh);
+    --mix-y: calc(var(--sweep-y) * var(--inv-r) + var(--rest-y) * var(--r));
+
+    --sweep-z: calc(var(--progress, 0) * var(--progress, 0) * -5rem);
+    --mix-z: calc(var(--sweep-z) * var(--inv-r));
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    margin: 0;
+    padding: 0.5rem 0.5rem 0;
+    background: var(--color-brand-green);
+    content-visibility: hidden;
+    transform-style: preserve-3d;
+    will-change: transform;
+    transform: translate(-50%, -50%)
+      rotateY(calc(var(--progress, 0) * -20deg * var(--inv-r)))
+      translate3d(var(--mix-x), var(--mix-y), var(--mix-z))
+      scale(var(--size, 1));
+  }
+  .ProgramsSection__item[data-inview] {
+    content-visibility: visible;
+  }
+  @media (max-width: 576px) {
+    .ProgramsSection__item {
+      padding: 0.25rem;
+    }
+  }
+
+  .ProgramsSection__item a {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .ProgramsSection__thumb {
+    display: block;
+    width: clamp(18rem, 32vw, 38rem);
+    aspect-ratio: 16 / 9;
+    background: var(--color-brand-blue);
+    overflow: hidden;
+    position: relative;
+  }
+  @media (max-width: 576px) {
+    .ProgramsSection__thumb {
+      width: 70vw;
+    }
+  }
+  .ProgramsSection__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  /* Overlay de play sobre el thumb */
+  .ProgramsSection__thumb::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 3rem;
+    height: 3rem;
+    transform: translate(-50%, -50%);
+    background-color: var(--color-brand-blue);
+    clip-path: polygon(30% 20%, 30% 80%, 80% 50%);
+    opacity: 0.9;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+  }
+
+  .ProgramsSection__caption {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.25rem 0.25rem;
+    color: var(--color-brand-blue);
+    font-family: ui-monospace, 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 0.7rem;
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    gap: 0.75rem;
+  }
+  .ProgramsSection__caption-text {
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ProgramsSection__caption-guest {
+    opacity: 0.7;
+    margin-left: 0.35rem;
+  }
+  .ProgramsSection__caption-key {
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+  @media (max-width: 576px) {
+    .ProgramsSection__caption {
+      display: none;
+    }
+  }
+
+  /* ── Máscara píldora ───────────────────────────────────────────────── */
+  .ProgramsSection__mask-outer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .ProgramsSection__mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* --mask-scale: 1 → píldora normal; crece hasta cubrir el viewport
+       en la phase 2 (reveal). Origin = centro de la píldora (donde está
+       el ruler). */
+    transform: scale(var(--mask-scale, 1));
+    transform-origin: 50% 50%;
+    will-change: transform;
+  }
+  .ProgramsSection__mask-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .ProgramsSection__mask-path-outer {
+    fill: var(--color-brand-blue);
+    fill-rule: evenodd;
+    stroke: var(--color-brand-green);
+    stroke-width: 1px;
+  }
+  .ProgramsSection__mask-path-inner {
+    fill: var(--color-brand-blue);
+    fill-rule: evenodd;
+    stroke: var(--color-brand-green);
+    stroke-width: 1px;
+    transform: translate3d(0, calc(var(--scroll-progress, 0) * 32px), 0);
+    will-change: transform;
+  }
+  .ProgramsSection__mask-path-lines {
+    fill: none;
+    stroke: var(--color-brand-green);
+    stroke-width: 1px;
+    opacity: 0.15;
+  }
+</style>

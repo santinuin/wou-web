@@ -4,6 +4,7 @@ import {
   ALL_ARTICLES_QUERY,
   ALL_AUTHORS_QUERY,
   ALL_CATEGORIES_QUERY,
+  ALL_PROGRAMS_QUERY,
   ALL_RED_CIRCLES_QUERY,
 } from './lib/cms/queries';
 
@@ -150,4 +151,29 @@ const redCircles = defineCollection({
   }),
 });
 
-export const collections = { articles, authors, categories, redCircles };
+// ─── Programs ─────────────────────────────────────────────────────────────────
+
+const programs = defineCollection({
+  loader: async () => {
+    if (!isSanityConfigured) return [];
+    type RawProgram = {
+      _id: string;
+      [key: string]: unknown;
+    };
+    const data = await sanityClient.fetch<RawProgram[]>(ALL_PROGRAMS_QUERY);
+    // No hay slug en program: el id de la collection = _id
+    return data.map((p) => ({ id: p._id, ...p }));
+  },
+
+  schema: z.object({
+    _id: z.string(),
+    title: z.string(),
+    youtubeUrl: z.string(),
+    // [EXP]: todos nullish hasta que se estabilice
+    guest: z.string().nullish(),
+    order: z.number().nullish(),
+    publishedAt: z.string().nullish(),
+  }),
+});
+
+export const collections = { articles, authors, categories, programs, redCircles };
