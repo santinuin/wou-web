@@ -62,10 +62,9 @@
   let section: HTMLElement | null = null;
 
   function setSize() {
-    const rect = container.getBoundingClientRect();
     bounding = {
-      left:   rect.left,
-      top:    rect.top + window.scrollY,
+      left:   0,
+      top:    0,
       width:  container.clientWidth,
       height: container.clientHeight,
     };
@@ -163,8 +162,9 @@
   }
 
   function onMouseMove(e: MouseEvent) {
-    mouse.x = e.clientX - bounding.left;
-    mouse.y = e.clientY - bounding.top + window.scrollY;
+    const rect = container.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
     if (!mouse.set) {
       mouse.sx = mouse.lx = mouse.x;
       mouse.sy = mouse.ly = mouse.y;
