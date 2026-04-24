@@ -1,0 +1,499 @@
+---
+/**
+ * Programs — sección scroll-driven inspirada en wodniack.dev/work
+ * (AWork.astro + SWork.astro). Porteada 1:1 al stack WOU:
+ *
+ *  - Build-time only: data desde Sanity Content Collection `programs`
+ *    o fallback a MOCK_PROGRAMS. Nunca fetch en runtime.
+ *  - Item = `<article data-program>` con thumb YouTube + caption.
+ *    En el original cada item es un custom element `<a-work>`; aquí
+ *    el island Svelte le setea --progress directamente (no usamos
+ *    attributeChangedCallback — CSS var es más barato y declarativo).
+ *  - La isla Svelte `ProgramsAnimation` orquesta el GSAP timeline con
+ *    ScrollTrigger (scrub). Consume el markup como children snippet.
+ *
+ * Paleta:
+ *    primary   → var(--color-brand-blue)   (fondo)
+ *    secondary → var(--color-brand-green)  (texto / bordes / píldora)
+ *
+ * Invariante respetada: 0 fetches runtime; `@sanity/client` no se
+ * importa acá (solo vía el loader de Content Collections).
+ */
+import { getCollection } from 'astro:content';
+import ProgramsAnimation from '@/components/ui/ProgramsAnimation.svelte';
+import { parseYouTubeId, getYouTubeThumbUrl, getYouTubeWatchUrl } from '@/lib/youtube';
+import { MOCK_PROGRAMS, type ProgramItem } from './mocks/programMock';
+
+const MAX_PROGRAMS = 8;
+
+type RawProgram = {
+  _id: string;
+  title: string;
+  youtubeUrl: string;
+  guest?: string | null;
+};
+
+const entries = await getCollection('programs');
+
+const programs: ProgramItem[] = (
+  entries.length
+    ? entries
+        .map((e) => {
+          const d = e.data as RawProgram;
+          const videoId = parseYouTubeId(d.youtubeUrl);
+          if (!videoId) return null;
+          return {
+            id: d._id,
+            title: d.title,
+            guest: d.guest ?? null,
+            videoId,
+            thumbUrl: getYouTubeThumbUrl(videoId, 'max'),
+            watchUrl: getYouTubeWatchUrl(videoId),
+          } satisfies ProgramItem;
+        })
+        .filter((x): x is ProgramItem => x !== null)
+    : MOCK_PROGRAMS
+).slice(0, MAX_PROGRAMS);
+
+/**
+ * Seeds determinísticos (hash del id) para --y y --size. El reference
+ * usa Math.random puro, pero eso rompería la estabilidad build-to-build.
+ * Mismo programa → misma posición decorativa siempre.
+ */
+function hash(id: string, salt: number): number {
+  let h = 0;
+  for (let k = 0; k < id.length; k++) h = (h * salt + id.charCodeAt(k)) | 0;
+  return ((h >>> 0) % 1000) / 1000; // 0..1
+}
+function seededY(id: string, i: number): number {
+  const sign = i % 2 ? -1 : 1;
+  return +((0.5 + hash(id, 31) * 0.5) * sign).toFixed(3);
+}
+function seededSize(id: string): number {
+  return +(0.5 + hash(id, 17) * 0.5).toFixed(3);
+}
+
+const total = programs.length;
+
+/** `key` del caption: [a-z0-9]{4}-idx/total — mirror del AWork.astro. */
+function captionKey(id: string, i: number): string {
+  let h = 0;
+  for (let k = 0; k < id.length; k++) h = (h * 37 + id.charCodeAt(k)) | 0;
+  const r = (h >>> 0).toString(36).padStart(4, '0').slice(0, 4);
+  return `${r}-${String(i).padStart(4, '0')}/${String(total).padStart(2, '0')}`;
+}
+---
+
+<section class="ProgramsSection" aria-label="Programas de WOU">
+  <ProgramsAnimation client:visible count={total}>
+    <div class="ProgramsSection__outer" data-outer>
+      <div class="ProgramsSection__inner" data-inner>
+        <h2 class="ProgramsSection__title" aria-hidden="true">
+          <span class="ProgramsSection__title-inner" data-title>
+            <span class="ProgramsSection__letter" data-letter>W</span>
+            <span class="ProgramsSection__letter" data-letter>O</span>
+            <span class="ProgramsSection__letter" data-letter>U</span>
+          </span>
+        </h2>
+
+        <div class="ProgramsSection__scene" data-scene>
+          {
+            programs.map((p, i) => (
+              <article
+                class="ProgramsSection__work"
+                data-program
+                style={`--size: ${seededSize(p.id)}; --y: ${seededY(p.id, i)}; --progress: 1`}
+              >
+                <div class="ProgramsSection__work-inner">
+                  <a
+                    href={p.watchUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Ver "${p.title}" en YouTube${p.guest ? ` — ${p.guest}` : ''}`}
+                  >
+                    <div class="ProgramsSection__thumb">
+                      <img
+                        src={p.thumbUrl}
+                        alt={p.title}
+                        width={1280}
+                        height={720}
+                        loading="lazy"
+                        decoding="async"
+                        draggable="false"
+                      />
+                    </div>
+                    <div class="ProgramsSection__caption">
+                      <div class="ProgramsSection__caption-text">
+                        {p.title}
+                        {p.guest && <span class="ProgramsSection__caption-guest">— {p.guest}</span>}
+                      </div>
+                      <div class="ProgramsSection__caption-key">#{captionKey(p.id, i)}</div>
+                    </div>
+                  </a>
+                </div>
+              </article>
+            ))
+          }
+        </div>
+
+        <canvas class="ProgramsSection__canvas" data-canvas></canvas>
+      </div>
+
+      <div class="ProgramsSection__mask-outer">
+        <div class="ProgramsSection__mask" data-mask>
+          <svg class="ProgramsSection__mask-svg" data-mask-svg>
+            <path class="ProgramsSection__mask-path-inner" data-mask-inner></path>
+            <path class="ProgramsSection__mask-path-outer" data-mask-outer></path>
+            <path class="ProgramsSection__mask-path-lines" data-mask-lines></path>
+          </svg>
+        </div>
+      </div>
+
+      <div class="ProgramsSection__ruler" data-ruler aria-hidden="true"></div>
+    </div>
+  </ProgramsAnimation>
+</section>
+
+<style>
+  .ProgramsSection {
+    /* --height lo setea la isla: works.length * 50lvh (mirror del reference). */
+    --height: 100lvh;
+    position: relative;
+    z-index: 2;
+    height: var(--height);
+    background: var(--color-brand-blue);
+    color: var(--color-brand-green);
+    isolation: isolate;
+  }
+  .ProgramsSection::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    width: 100%;
+    height: 1px;
+    background: var(--color-brand-green);
+  }
+
+  /* ── Mask píldora (sticky en el viewport) ──────────────────────────── */
+  .ProgramsSection__mask-outer {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    width: 100%;
+    height: 100lvh;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .ProgramsSection__mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    will-change: scale, transform;
+  }
+  .ProgramsSection__mask-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .ProgramsSection__mask-path-outer {
+    fill: var(--color-brand-blue);
+    fill-rule: evenodd;
+    stroke: var(--color-brand-green);
+    stroke-width: 1px;
+  }
+  .ProgramsSection__mask-path-inner {
+    fill: var(--color-brand-blue);
+    fill-rule: evenodd;
+    stroke: var(--color-brand-green);
+    stroke-width: 1px;
+    transform: translate3d(0, calc(var(--scroll-progress, 0) * 48px), 0);
+    will-change: transform;
+  }
+  .ProgramsSection__mask-path-lines {
+    fill: none;
+    stroke: var(--color-brand-green);
+    stroke-width: 1px;
+  }
+
+  /* ── Outer / Inner ─────────────────────────────────────────────────── */
+  .ProgramsSection__outer {
+    position: relative;
+    height: var(--height);
+    clip-path: inset(0 -1rem);
+  }
+  /* Fixed (no sticky): el outer tiene clip-path y height:var(--height),
+     eso clipea el inner a la rect del outer. Cuando el outer sale del
+     viewport, el inner queda clippeado → invisible. Así se evita que
+     inner y mask-outer se stackeen en secuencia como sticky siblings. */
+  .ProgramsSection__inner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100lvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-brand-green);
+    color: var(--color-brand-blue);
+    transform: translate3d(0, calc(var(--scroll-progress, 0) * -15%), 0);
+    will-change: clip-path, transform, scale;
+    /* GSAP lo anima: inset(0 1rem) → inset(0 0) → inset(0 1rem) */
+    clip-path: inset(0 1rem);
+  }
+  @media (max-width: 576px) {
+    .ProgramsSection__inner {
+      transform: none;
+    }
+  }
+
+  /* ── Ruler ─────────────────────────────────────────────────────────── */
+  .ProgramsSection__ruler {
+    --w: min(16.6667%, 19.625rem);
+    position: absolute;
+    top: 10lvh;
+    left: calc(50% - var(--w) / 2);
+    width: var(--w);
+    height: 80lvh;
+    pointer-events: none;
+    visibility: hidden;
+  }
+  @media (max-width: 987px) {
+    .ProgramsSection__ruler {
+      --w: 33.3333%;
+    }
+  }
+  @media (max-width: 576px) {
+    .ProgramsSection__ruler {
+      --w: 50%;
+    }
+  }
+
+  /* ── Título (ref invisible) + ghosts ───────────────────────────────── */
+  .ProgramsSection__title,
+  .ProgramsSection__scene {
+    font-family: var(--font-alumni), sans-serif;
+    font-weight: 900;
+    font-size: min(18.75rem, 25lvh);
+    line-height: 1;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+  }
+  .ProgramsSection__title-inner,
+  .ProgramsSection__scene :global(.ProgramsSection__ghost) {
+    line-height: 0.85;
+  }
+  .ProgramsSection__title {
+    width: 0.7em;
+    opacity: 0;
+    word-break: break-all;
+    margin: 0;
+  }
+  .ProgramsSection__title-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0.075em 0 -0.125em;
+  }
+
+  /* ── Escena ────────────────────────────────────────────────────────── */
+  .ProgramsSection__scene {
+    --state: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    perspective: 40rem;
+    will-change: transform, scale;
+  }
+
+  /* Ghost letter (inyectada por la isla). --progress lo cicla JS. */
+  .ProgramsSection__scene :global(.ProgramsSection__ghost) {
+    --head: calc((var(--progress, 0.5) - 0.5) * -2);
+    --ahead: calc(var(--head) * var(--head));
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    color: var(--color-brand-blue);
+    transform: rotateY(calc(var(--head) * -10deg * var(--state)))
+      translate3d(
+        calc(var(--head) * 50vw * var(--state)),
+        calc(var(--iy, 0) * 50% * var(--ahead) * var(--state)),
+        0
+      );
+    pointer-events: none;
+    will-change: transform;
+  }
+  .ProgramsSection__scene :global(.ProgramsSection__ghost::before) {
+    content: attr(data-letter);
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    color: color-mix(in oklab, var(--color-brand-green) 55%, black);
+    opacity: min(calc(var(--state) * 2), 1);
+    transform: scale(1.05, 1.02)
+      translate3d(calc(var(--head) * 0.1rem * var(--state) * var(--state)), 0, 0);
+    transform-origin: calc(50% - var(--head) * 50%) -50%;
+    will-change: opacity, transform;
+  }
+
+  /* ── Work ──────────────────────────────────────────────────────────── */
+  .ProgramsSection__work {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    margin: 0;
+    padding: 0.5rem 0.5rem 0;
+    background: var(--color-brand-green);
+    content-visibility: hidden;
+    transform-style: preserve-3d;
+    will-change: transform;
+    transform: rotateY(calc(var(--progress, 1) * -20deg))
+      translate3d(
+        calc(var(--progress, 1) * (50vw + 100%) - 50%),
+        calc(var(--y, 0) * 50% - 50%),
+        calc(var(--progress, 1) * var(--progress, 1) * -5rem)
+      )
+      scale(var(--size, 1));
+  }
+  .ProgramsSection__work[data-inview] {
+    content-visibility: visible;
+  }
+  @media (max-width: 987px) {
+    .ProgramsSection__work {
+      transform: rotateY(calc(var(--progress, 1) * -20deg))
+        translate3d(
+          calc(var(--progress, 1) * (50vw + 100%) - 50%),
+          calc(var(--y, 0) * 50% - 50%),
+          calc(var(--progress, 1) * var(--progress, 1) * -5rem)
+        );
+    }
+  }
+  @media (max-width: 576px) {
+    .ProgramsSection__work {
+      padding: 0.25rem;
+      transform: rotateY(calc(var(--progress, 1) * -20deg))
+        translate3d(
+          calc(var(--progress, 1) * (50vw + 100%) - 50%),
+          calc(var(--y, 0) * 100% - 50%),
+          calc(var(--progress, 1) * var(--progress, 1) * -5rem)
+        );
+    }
+  }
+  .ProgramsSection__work a {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+  .ProgramsSection__work-inner {
+    display: block;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ProgramsSection__thumb {
+    display: block;
+    width: auto;
+    max-width: 50vw;
+    aspect-ratio: 16 / 9;
+    background: var(--color-brand-blue);
+    overflow: hidden;
+    position: relative;
+  }
+  .ProgramsSection__thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 50vw;
+    max-height: 50vh;
+    object-fit: cover;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  @media (max-width: 576px) {
+    .ProgramsSection__thumb img {
+      max-width: 80vw;
+      max-height: 80vh;
+    }
+  }
+  .ProgramsSection__thumb::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 3rem;
+    height: 3rem;
+    transform: translate(-50%, -50%);
+    background-color: var(--color-brand-blue);
+    clip-path: polygon(30% 20%, 30% 80%, 80% 50%);
+    opacity: 0.9;
+    pointer-events: none;
+  }
+
+  .ProgramsSection__caption {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.5rem;
+    color: var(--color-brand-blue);
+    font-family: ui-monospace, 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-align: right;
+    gap: 0.75rem;
+  }
+  .ProgramsSection__caption-text {
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ProgramsSection__caption-guest {
+    opacity: 0.7;
+    margin-left: 0.35rem;
+  }
+  .ProgramsSection__caption-key {
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+  @media (max-width: 576px) {
+    .ProgramsSection__caption {
+      display: none;
+    }
+  }
+
+  /* ── Canvas (textura de puntos) ────────────────────────────────────── */
+  .ProgramsSection__canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    transform: translate3d(0, calc(var(--scroll-progress, 0) * -5%), 0);
+  }
+  @media (max-width: 576px) {
+    .ProgramsSection__canvas {
+      transform: none;
+    }
+  }
+</style>
