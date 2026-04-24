@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Programs — diagnóstico visual: verifica que la sección monte, que la
+ * Videos — diagnóstico visual: verifica que la sección monte, que la
  * isla GSAP hidrate (mask paths poblados, ghosts inyectados, height set)
  * y que --scroll-progress se actualice al scrollear.
  */
 
-test.describe('Programs — animación scroll-driven', () => {
+test.describe('Videos — animación scroll-driven', () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
   });
@@ -18,12 +18,12 @@ test.describe('Programs — animación scroll-driven', () => {
     });
 
     await page.goto('/');
-    const section = page.locator('section.ProgramsSection');
+    const section = page.locator('section.VideosSection');
     await expect(section).toBeAttached();
 
     // Snapshot del estado pre-hidratación
     const preHydration = await section.evaluate((el) => {
-      const items = el.querySelectorAll('[data-program]');
+      const items = el.querySelectorAll('[data-video]');
       const ghosts = el.querySelectorAll('[data-ghost]');
       const mask = el.querySelector('[data-mask-outer]') as SVGPathElement | null;
       const inner = el.querySelector('[data-mask-inner]') as SVGPathElement | null;
@@ -47,11 +47,10 @@ test.describe('Programs — animación scroll-driven', () => {
 
     // Forzar entrada al viewport para que client:visible hidrate
     await section.scrollIntoViewIfNeeded();
-    // Dar tiempo a GSAP/ScrollTrigger
     await page.waitForTimeout(1500);
 
     const postHydration = await section.evaluate((el) => {
-      const items = el.querySelectorAll('[data-program]');
+      const items = el.querySelectorAll('[data-video]');
       const ghosts = el.querySelectorAll('[data-ghost]');
       const mask = el.querySelector('[data-mask-outer]') as SVGPathElement | null;
       const inner = el.querySelector('[data-mask-inner]') as SVGPathElement | null;
@@ -84,9 +83,8 @@ test.describe('Programs — animación scroll-driven', () => {
     });
     console.log('POST-HYDRATION:', JSON.stringify(postHydration, null, 2));
 
-    // Screenshot del estado inicial centrado en la sección
     await page.screenshot({
-      path: 'test-results/programs-initial.png',
+      path: 'test-results/videos-initial.png',
       fullPage: false,
     });
 
@@ -107,7 +105,7 @@ test.describe('Programs — animación scroll-driven', () => {
       await page.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' as ScrollBehavior }), targetY);
       await page.waitForTimeout(400);
       const sample = await section.evaluate((el) => {
-        const items = el.querySelectorAll('[data-program]');
+        const items = el.querySelectorAll('[data-video]');
         return {
           scrollY: window.scrollY,
           progress: el.style.getPropertyValue('--scroll-progress'),
@@ -120,17 +118,15 @@ test.describe('Programs — animación scroll-driven', () => {
       });
       samples.push(sample);
 
-      // Screenshot intermedio
       await page.screenshot({
-        path: `test-results/programs-scroll-${i}.png`,
+        path: `test-results/videos-scroll-${i}.png`,
         fullPage: false,
       });
     }
     console.log('SCROLL SAMPLES:', JSON.stringify(samples, null, 2));
-
     console.log('CONSOLE ERRORS:', errors);
 
-    // Aserciones — mínimas, sólo para fallar si nada hidrata
+    // Aserciones mínimas
     expect(postHydration.itemsCount).toBe(6);
     expect(postHydration.heightVar, 'height var debería estar seteado').not.toBe('');
     expect(postHydration.maskOuterD, 'mask outer path debería estar lleno').not.toBe('');

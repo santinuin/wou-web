@@ -1,7 +1,6 @@
 <!--
-  ProgramsAnimation — isla Svelte que orquesta el GSAP timeline
-  scroll-driven de la sección Programs. Port 1:1 del `SWork.astro`
-  del portfolio de wodniack.dev, adaptado a Svelte 5 + client:visible.
+  ScrollCarousel — isla Svelte que orquesta un carrusel scroll-driven con GSAP.
+  Agnóstico al contenido: recibe los items como children snippet de Astro.
 
   Fases del timeline (scrub linkeado a ScrollTrigger):
 
@@ -12,8 +11,8 @@
       · pointsProgress 0 → 1              (ease power4.inOut)
       · state          0 → 1              (ease power4.in)
 
-    [0.75 → end]   Pase de works
-      · works[i] progress 1 → -1          (stagger 0.25, ease slow)
+    [0.75 → end]   Pase de items
+      · items[i] progress 1 → -1          (stagger 0.25, ease slow)
       · animationProgress 0 → 10000       (continua, para letras/canvas)
 
     [end-1.00 → end]   Outro (la ventana se cierra)
@@ -23,15 +22,10 @@
       · inner.clipPath 0 → inset(0 1rem)  (ease power3.inOut)
       · pointsProgress 1 → 0              (ease power4.inOut)
 
-  Además de los tweens, en cada frame (gsap.ticker) calculamos:
+  Además de los tweens, en cada frame (gsap.ticker):
     · --scroll-progress (0..1) — driver de los translates sticky
     · moveLetters() — por ghost, --progress cíclico según animationProgress
     · drawPoints()  — puntitos en canvas, flow según animationProgress
-
-  Por qué Svelte island y no <script> en .astro: CLAUDE.md exige GSAP
-  dentro de islas para lazy-load. Con client:visible los ~70kb de gsap
-  + ScrollTrigger + EasePack se descargan solo cuando el usuario
-  scrollea hasta la sección (below-the-fold).
 -->
 <script lang="ts">
   import { onMount } from 'svelte';
@@ -47,10 +41,8 @@
 
   const { count, children }: Props = $props();
 
-  // ── Letras del título (ghosts a inyectar) ───────────────────────────
   const LETTERS = ['W', 'O', 'U'];
 
-  // ── Refs ────────────────────────────────────────────────────────────
   let host: HTMLDivElement;
   let section: HTMLElement | null = null;
   let outer: HTMLElement | null = null;
@@ -65,9 +57,8 @@
   let maskInner: SVGPathElement | null = null;
   let maskOuter: SVGPathElement | null = null;
   let maskLines: SVGPathElement | null = null;
-  let works: HTMLElement[] = [];
+  let items: HTMLElement[] = [];
 
-  // ── Estado físico ──────────────────────────────────────────────────
   let maskMaxScale = 1;
   let bounding = { width: 0, height: 0 };
 
@@ -82,8 +73,6 @@
   type Point = { x: number; y: number; dx: number; dy: number; flowX: number };
   let points: Point[] = [];
 
-  // Targets animados por el timeline (GSAP los escribe via fromTo).
-  // Los leemos cada frame en tick() para redibujar canvas y mover ghosts.
   const state = { value: 0 };
   const animationProgress = { value: 0 };
   const pointsProgress = { value: 0 };
@@ -98,7 +87,7 @@
 
   // ── queryRefs ───────────────────────────────────────────────────────
   function queryRefs(): boolean {
-    section = host.closest<HTMLElement>('.ProgramsSection');
+    section = host.closest<HTMLElement>('.VideosSection');
     if (!section) return false;
     outer = section.querySelector<HTMLElement>('[data-outer]');
     inner = section.querySelector<HTMLElement>('[data-inner]');
@@ -111,7 +100,7 @@
     maskInner = section.querySelector<SVGPathElement>('[data-mask-inner]');
     maskOuter = section.querySelector<SVGPathElement>('[data-mask-outer]');
     maskLines = section.querySelector<SVGPathElement>('[data-mask-lines]');
-    works = Array.from(section.querySelectorAll<HTMLElement>('[data-program]'));
+    items = Array.from(section.querySelectorAll<HTMLElement>('[data-video]'));
     ctx = canvas?.getContext('2d') ?? null;
     return Boolean(
       outer && inner && scene && ruler && titleInner && canvas && ctx &&
@@ -122,20 +111,14 @@
   // ── setSize ─────────────────────────────────────────────────────────
   function setSize() {
     if (!section || !canvas) return;
-    // N * 50lvh — exactamente como el reference.
     section.style.setProperty('--height', `${count * 50}lvh`);
 
-    const rect = section.getBoundingClientRect();
     bounding = { width: window.innerWidth, height: window.innerHeight };
 
     canvas.width = bounding.width;
     canvas.height = bounding.height;
 
-    // Velocidad "viajera" de los ghosts — depende del tamaño viewport.
     speed = Math.hypot(bounding.width, bounding.height) * 4;
-
-    // Forzar re-lectura del rect (evitar unused warning).
-    void rect;
   }
 
   // ── setCtxStyle ─────────────────────────────────────────────────────
@@ -146,7 +129,6 @@
   }
 
   // ── setMask ────────────────────────────────────────────────────────
-  /** Píldora SVG con evenodd — outer rect + agujero píldora en la posición del ruler. */
   function setMask() {
     if (!maskEl || !ruler || !section || !maskSvg || !maskInner || !maskOuter || !maskLines) return;
 
@@ -165,7 +147,6 @@
 
     const dOuter = `M -1 0 L ${width + 2} 0 L ${width + 2} ${height} L -1 ${height} Z`;
 
-    // Corners píldora exterior
     const corners = {
       tl: { x: offsetX, y: offsetY },
       tr: { x: offsetX + rulerW, y: offsetY },
@@ -175,7 +156,6 @@
 
     let radius = (corners.tr.x - corners.tl.x) / 2;
 
-    // Escala máxima para que la píldora cubra el viewport (diámetro → ancho).
     maskMaxScale = bounding.width / radius;
 
     let dInner =
@@ -187,7 +167,6 @@
 
     maskOuter.setAttribute('d', `${dOuter} ${dInner}`);
 
-    // Píldora interior (grosor del borde)
     const thickness = bounding.width > 767 ? 16 : 8;
     corners.tl.x += thickness;
     corners.tl.y += thickness;
@@ -208,7 +187,6 @@
 
     maskInner.setAttribute('d', `${dOuter} ${dInner}`);
 
-    // Líneas de grilla, clip dentro del agujero
     const vLines = bounding.width > 767 ? 12 : 8;
     const gapX = width / vLines;
     const gapY = height * 0.1;
@@ -253,7 +231,6 @@
   function setLetters() {
     if (!titleInner || !scene) return;
 
-    // Limpiar ghosts previos
     letters.forEach((l) => l.ghosts.forEach((g) => g.el.remove()));
     letters = [];
 
@@ -273,7 +250,7 @@
 
       for (let i = 0; i < total; i++) {
         const el = document.createElement('span');
-        el.className = 'ProgramsSection__ghost';
+        el.className = 'VideosSection__ghost';
         el.textContent = letterEl.textContent ?? '';
         el.dataset.letter = letterEl.textContent ?? '';
         el.dataset.ghost = '';
@@ -286,7 +263,6 @@
 
         el.style.top = `${top}px`;
         el.style.left = `${left}px`;
-        // Algunas letras delante del thumb (z:3) para dar profundidad
         el.style.zIndex = String(j !== 1 && j !== 2 && (j + letterEls.length + i) % 5 === 0 ? 3 : 1);
         el.style.setProperty('--ix', String(ix));
         el.style.setProperty('--iy', String(iy));
@@ -309,7 +285,6 @@
       const tot = letter.total;
       for (let i = 0; i < letter.ghosts.length; i++) {
         const g = letter.ghosts[i];
-        // Mirror exacto de la fórmula del reference
         const progress =
           (((ap % letterSpeed) / letterSpeed + g.i / tot) % 1) / 0.7 - 0.15;
         g.el.style.setProperty('--progress', progress.toFixed(4));
@@ -322,7 +297,6 @@
     const ap = animationProgress.value;
     const pp = pointsProgress.value;
 
-    // Early-out: si ninguno cambió significativamente, skip redibujo
     const rAp = Math.round(ap * 100) / 100;
     const rPp = Math.round(pp * 100) / 100;
     if (rAp === lastRender.anim && rPp === lastRender.pts) return;
@@ -343,13 +317,12 @@
     lastRender.pts = rPp;
   }
 
-  // ── updateWorksInview ──────────────────────────────────────────────
-  /** Toggle content-visibility: un work solo pinta mientras está "en cuadro". */
-  function updateWorksInview() {
-    for (const w of works) {
-      const p = parseFloat(w.style.getPropertyValue('--progress') || '1');
-      if (Math.abs(p) < 1) w.setAttribute('data-inview', '');
-      else w.removeAttribute('data-inview');
+  // ── updateItemsInview ──────────────────────────────────────────────
+  function updateItemsInview() {
+    for (const item of items) {
+      const p = parseFloat(item.style.getPropertyValue('--progress') || '1');
+      if (Math.abs(p) < 1) item.setAttribute('data-inview', '');
+      else item.removeAttribute('data-inview');
     }
   }
 
@@ -359,7 +332,6 @@
 
     if (tl) tl.kill();
 
-    // GSAP setter para CSS vars — `--progress` en works, `--state` en scene.
     tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
@@ -369,7 +341,7 @@
       },
       onUpdate: () => {
         if (scene) scene.style.setProperty('--state', state.value.toFixed(4));
-        updateWorksInview();
+        updateItemsInview();
       },
     });
 
@@ -385,9 +357,9 @@
     tl.fromTo(pointsProgress, { value: 0 }, { value: 1, duration: 1, ease: 'power4.inOut' }, 0);
     tl.fromTo(state, { value: 0 }, { value: 1, duration: 0.75, ease: 'power4.in' }, 0);
 
-    // ── Pase de works (0.75 → end) ─────────────────────────────────
+    // ── Pase de items (0.75 → end) ──────────────────────────────────
     tl.fromTo(
-      works,
+      items,
       { '--progress': 1 },
       {
         '--progress': -1,
@@ -484,7 +456,7 @@
       recompute();
 
       gsap.ticker.add(tick);
-      tick(); // primer frame antes del primer scroll
+      tick();
     });
 
     window.addEventListener('resize', handleResize, { passive: true });
@@ -501,15 +473,14 @@
   });
 </script>
 
-<div bind:this={host} class="ProgramsAnimation__host">
+<div bind:this={host} class="ScrollCarousel__host">
   {@render children?.()}
 </div>
 
 <style>
   /* Host con caja real (no display:contents): el IntersectionObserver
-     del client:visible de Astro necesita medir algo que ocupe espacio,
-     si no, la isla nunca hidrata. */
-  .ProgramsAnimation__host {
+     del client:visible de Astro necesita medir algo que ocupe espacio. */
+  .ScrollCarousel__host {
     position: absolute;
     inset: 0;
     display: block;

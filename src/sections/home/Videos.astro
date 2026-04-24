@@ -1,32 +1,12 @@
 ---
-/**
- * Programs — sección scroll-driven inspirada en wodniack.dev/work
- * (AWork.astro + SWork.astro). Porteada 1:1 al stack WOU:
- *
- *  - Build-time only: data desde Sanity Content Collection `programs`
- *    o fallback a MOCK_PROGRAMS. Nunca fetch en runtime.
- *  - Item = `<article data-program>` con thumb YouTube + caption.
- *    En el original cada item es un custom element `<a-work>`; aquí
- *    el island Svelte le setea --progress directamente (no usamos
- *    attributeChangedCallback — CSS var es más barato y declarativo).
- *  - La isla Svelte `ProgramsAnimation` orquesta el GSAP timeline con
- *    ScrollTrigger (scrub). Consume el markup como children snippet.
- *
- * Paleta:
- *    primary   → var(--color-brand-blue)   (fondo)
- *    secondary → var(--color-brand-green)  (texto / bordes / píldora)
- *
- * Invariante respetada: 0 fetches runtime; `@sanity/client` no se
- * importa acá (solo vía el loader de Content Collections).
- */
 import { getCollection } from 'astro:content';
-import ProgramsAnimation from '@/components/ui/ProgramsAnimation.svelte';
+import ScrollCarousel from '@/components/ui/ScrollCarousel.svelte';
 import { parseYouTubeId, getYouTubeThumbUrl, getYouTubeWatchUrl } from '@/lib/youtube';
-import { MOCK_PROGRAMS, type ProgramItem } from './mocks/programMock';
+import { MOCK_VIDEOS, type VideoItem } from './mocks/videoMock';
 
-const MAX_PROGRAMS = 8;
+const MAX_VIDEOS = 8;
 
-type RawProgram = {
+type RawVideo = {
   _id: string;
   title: string;
   youtubeUrl: string;
@@ -35,11 +15,11 @@ type RawProgram = {
 
 const entries = await getCollection('programs');
 
-const programs: ProgramItem[] = (
+const videos: VideoItem[] = (
   entries.length
     ? entries
         .map((e) => {
-          const d = e.data as RawProgram;
+          const d = e.data as RawVideo;
           const videoId = parseYouTubeId(d.youtubeUrl);
           if (!videoId) return null;
           return {
@@ -49,21 +29,20 @@ const programs: ProgramItem[] = (
             videoId,
             thumbUrl: getYouTubeThumbUrl(videoId, 'max'),
             watchUrl: getYouTubeWatchUrl(videoId),
-          } satisfies ProgramItem;
+          } satisfies VideoItem;
         })
-        .filter((x): x is ProgramItem => x !== null)
-    : MOCK_PROGRAMS
-).slice(0, MAX_PROGRAMS);
+        .filter((x): x is VideoItem => x !== null)
+    : MOCK_VIDEOS
+).slice(0, MAX_VIDEOS);
 
 /**
- * Seeds determinísticos (hash del id) para --y y --size. El reference
- * usa Math.random puro, pero eso rompería la estabilidad build-to-build.
- * Mismo programa → misma posición decorativa siempre.
+ * Seeds determinísticos (hash del id) para --y y --size. Mismo video →
+ * misma posición decorativa en cada build.
  */
 function hash(id: string, salt: number): number {
   let h = 0;
   for (let k = 0; k < id.length; k++) h = (h * salt + id.charCodeAt(k)) | 0;
-  return ((h >>> 0) % 1000) / 1000; // 0..1
+  return ((h >>> 0) % 1000) / 1000;
 }
 function seededY(id: string, i: number): number {
   const sign = i % 2 ? -1 : 1;
@@ -73,9 +52,8 @@ function seededSize(id: string): number {
   return +(0.5 + hash(id, 17) * 0.5).toFixed(3);
 }
 
-const total = programs.length;
+const total = videos.length;
 
-/** `key` del caption: [a-z0-9]{4}-idx/total — mirror del AWork.astro. */
 function captionKey(id: string, i: number): string {
   let h = 0;
   for (let k = 0; k < id.length; k++) h = (h * 37 + id.charCodeAt(k)) | 0;
@@ -84,37 +62,37 @@ function captionKey(id: string, i: number): string {
 }
 ---
 
-<section class="ProgramsSection" aria-label="Programas de WOU">
-  <ProgramsAnimation client:visible count={total}>
-    <div class="ProgramsSection__outer" data-outer>
-      <div class="ProgramsSection__inner" data-inner>
-        <h2 class="ProgramsSection__title" aria-hidden="true">
-          <span class="ProgramsSection__title-inner" data-title>
-            <span class="ProgramsSection__letter" data-letter>W</span>
-            <span class="ProgramsSection__letter" data-letter>O</span>
-            <span class="ProgramsSection__letter" data-letter>U</span>
+<section class="VideosSection" aria-label="Videos de WOU">
+  <ScrollCarousel client:visible count={total}>
+    <div class="VideosSection__outer" data-outer>
+      <div class="VideosSection__inner" data-inner>
+        <h2 class="VideosSection__title" aria-hidden="true">
+          <span class="VideosSection__title-inner" data-title>
+            <span class="VideosSection__letter" data-letter>W</span>
+            <span class="VideosSection__letter" data-letter>O</span>
+            <span class="VideosSection__letter" data-letter>U</span>
           </span>
         </h2>
 
-        <div class="ProgramsSection__scene" data-scene>
+        <div class="VideosSection__scene" data-scene>
           {
-            programs.map((p, i) => (
+            videos.map((v, i) => (
               <article
-                class="ProgramsSection__work"
-                data-program
-                style={`--size: ${seededSize(p.id)}; --y: ${seededY(p.id, i)}; --progress: 1`}
+                class="VideosSection__work"
+                data-video
+                style={`--size: ${seededSize(v.id)}; --y: ${seededY(v.id, i)}; --progress: 1`}
               >
-                <div class="ProgramsSection__work-inner">
+                <div class="VideosSection__work-inner">
                   <a
-                    href={p.watchUrl}
+                    href={v.watchUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label={`Ver "${p.title}" en YouTube${p.guest ? ` — ${p.guest}` : ''}`}
+                    aria-label={`Ver "${v.title}" en YouTube${v.guest ? ` — ${v.guest}` : ''}`}
                   >
-                    <div class="ProgramsSection__thumb">
+                    <div class="VideosSection__thumb">
                       <img
-                        src={p.thumbUrl}
-                        alt={p.title}
+                        src={v.thumbUrl}
+                        alt={v.title}
                         width={1280}
                         height={720}
                         loading="lazy"
@@ -122,12 +100,12 @@ function captionKey(id: string, i: number): string {
                         draggable="false"
                       />
                     </div>
-                    <div class="ProgramsSection__caption">
-                      <div class="ProgramsSection__caption-text">
-                        {p.title}
-                        {p.guest && <span class="ProgramsSection__caption-guest">— {p.guest}</span>}
+                    <div class="VideosSection__caption">
+                      <div class="VideosSection__caption-text">
+                        {v.title}
+                        {v.guest && <span class="VideosSection__caption-guest">— {v.guest}</span>}
                       </div>
-                      <div class="ProgramsSection__caption-key">#{captionKey(p.id, i)}</div>
+                      <div class="VideosSection__caption-key">#{captionKey(v.id, i)}</div>
                     </div>
                   </a>
                 </div>
@@ -136,27 +114,27 @@ function captionKey(id: string, i: number): string {
           }
         </div>
 
-        <canvas class="ProgramsSection__canvas" data-canvas></canvas>
+        <canvas class="VideosSection__canvas" data-canvas></canvas>
       </div>
 
-      <div class="ProgramsSection__mask-outer">
-        <div class="ProgramsSection__mask" data-mask>
-          <svg class="ProgramsSection__mask-svg" data-mask-svg>
-            <path class="ProgramsSection__mask-path-inner" data-mask-inner></path>
-            <path class="ProgramsSection__mask-path-outer" data-mask-outer></path>
-            <path class="ProgramsSection__mask-path-lines" data-mask-lines></path>
+      <div class="VideosSection__mask-outer">
+        <div class="VideosSection__mask" data-mask>
+          <svg class="VideosSection__mask-svg" data-mask-svg>
+            <path class="VideosSection__mask-path-inner" data-mask-inner></path>
+            <path class="VideosSection__mask-path-outer" data-mask-outer></path>
+            <path class="VideosSection__mask-path-lines" data-mask-lines></path>
           </svg>
         </div>
       </div>
 
-      <div class="ProgramsSection__ruler" data-ruler aria-hidden="true"></div>
+      <div class="VideosSection__ruler" data-ruler aria-hidden="true"></div>
     </div>
-  </ProgramsAnimation>
+  </ScrollCarousel>
 </section>
 
 <style>
-  .ProgramsSection {
-    /* --height lo setea la isla: works.length * 50lvh (mirror del reference). */
+  .VideosSection {
+    /* --height lo setea la isla: videos.length * 50lvh */
     --height: 100lvh;
     position: relative;
     z-index: 2;
@@ -165,7 +143,7 @@ function captionKey(id: string, i: number): string {
     color: var(--color-brand-green);
     isolation: isolate;
   }
-  .ProgramsSection::before {
+  .VideosSection::before {
     content: '';
     position: absolute;
     top: 0;
@@ -177,7 +155,7 @@ function captionKey(id: string, i: number): string {
   }
 
   /* ── Mask píldora (sticky en el viewport) ──────────────────────────── */
-  .ProgramsSection__mask-outer {
+  .VideosSection__mask-outer {
     position: sticky;
     top: 0;
     left: 0;
@@ -187,7 +165,7 @@ function captionKey(id: string, i: number): string {
     overflow: hidden;
     pointer-events: none;
   }
-  .ProgramsSection__mask {
+  .VideosSection__mask {
     position: absolute;
     top: 0;
     left: 0;
@@ -195,20 +173,20 @@ function captionKey(id: string, i: number): string {
     height: 100%;
     will-change: scale, transform;
   }
-  .ProgramsSection__mask-svg {
+  .VideosSection__mask-svg {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
   }
-  .ProgramsSection__mask-path-outer {
+  .VideosSection__mask-path-outer {
     fill: var(--color-brand-blue);
     fill-rule: evenodd;
     stroke: var(--color-brand-green);
     stroke-width: 1px;
   }
-  .ProgramsSection__mask-path-inner {
+  .VideosSection__mask-path-inner {
     fill: var(--color-brand-blue);
     fill-rule: evenodd;
     stroke: var(--color-brand-green);
@@ -216,23 +194,22 @@ function captionKey(id: string, i: number): string {
     transform: translate3d(0, calc(var(--scroll-progress, 0) * 48px), 0);
     will-change: transform;
   }
-  .ProgramsSection__mask-path-lines {
+  .VideosSection__mask-path-lines {
     fill: none;
     stroke: var(--color-brand-green);
     stroke-width: 1px;
   }
 
   /* ── Outer / Inner ─────────────────────────────────────────────────── */
-  .ProgramsSection__outer {
+  .VideosSection__outer {
     position: relative;
     height: var(--height);
     clip-path: inset(0 -1rem);
   }
   /* Fixed (no sticky): el outer tiene clip-path y height:var(--height),
      eso clipea el inner a la rect del outer. Cuando el outer sale del
-     viewport, el inner queda clippeado → invisible. Así se evita que
-     inner y mask-outer se stackeen en secuencia como sticky siblings. */
-  .ProgramsSection__inner {
+     viewport, el inner queda clippeado → invisible. */
+  .VideosSection__inner {
     position: fixed;
     top: 0;
     left: 0;
@@ -246,17 +223,16 @@ function captionKey(id: string, i: number): string {
     color: var(--color-brand-blue);
     transform: translate3d(0, calc(var(--scroll-progress, 0) * -15%), 0);
     will-change: clip-path, transform, scale;
-    /* GSAP lo anima: inset(0 1rem) → inset(0 0) → inset(0 1rem) */
     clip-path: inset(0 1rem);
   }
   @media (max-width: 576px) {
-    .ProgramsSection__inner {
+    .VideosSection__inner {
       transform: none;
     }
   }
 
   /* ── Ruler ─────────────────────────────────────────────────────────── */
-  .ProgramsSection__ruler {
+  .VideosSection__ruler {
     --w: min(16.6667%, 19.625rem);
     position: absolute;
     top: 10lvh;
@@ -267,19 +243,19 @@ function captionKey(id: string, i: number): string {
     visibility: hidden;
   }
   @media (max-width: 987px) {
-    .ProgramsSection__ruler {
+    .VideosSection__ruler {
       --w: 33.3333%;
     }
   }
   @media (max-width: 576px) {
-    .ProgramsSection__ruler {
+    .VideosSection__ruler {
       --w: 50%;
     }
   }
 
   /* ── Título (ref invisible) + ghosts ───────────────────────────────── */
-  .ProgramsSection__title,
-  .ProgramsSection__scene {
+  .VideosSection__title,
+  .VideosSection__scene {
     font-family: var(--font-alumni), sans-serif;
     font-weight: 900;
     font-size: min(18.75rem, 25lvh);
@@ -288,17 +264,17 @@ function captionKey(id: string, i: number): string {
     text-transform: uppercase;
     letter-spacing: -0.02em;
   }
-  .ProgramsSection__title-inner,
-  .ProgramsSection__scene :global(.ProgramsSection__ghost) {
+  .VideosSection__title-inner,
+  .VideosSection__scene :global(.VideosSection__ghost) {
     line-height: 0.85;
   }
-  .ProgramsSection__title {
+  .VideosSection__title {
     width: 0.7em;
     opacity: 0;
     word-break: break-all;
     margin: 0;
   }
-  .ProgramsSection__title-inner {
+  .VideosSection__title-inner {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -307,7 +283,7 @@ function captionKey(id: string, i: number): string {
   }
 
   /* ── Escena ────────────────────────────────────────────────────────── */
-  .ProgramsSection__scene {
+  .VideosSection__scene {
     --state: 0;
     position: absolute;
     top: 0;
@@ -320,7 +296,7 @@ function captionKey(id: string, i: number): string {
   }
 
   /* Ghost letter (inyectada por la isla). --progress lo cicla JS. */
-  .ProgramsSection__scene :global(.ProgramsSection__ghost) {
+  .VideosSection__scene :global(.VideosSection__ghost) {
     --head: calc((var(--progress, 0.5) - 0.5) * -2);
     --ahead: calc(var(--head) * var(--head));
     position: absolute;
@@ -337,7 +313,7 @@ function captionKey(id: string, i: number): string {
     pointer-events: none;
     will-change: transform;
   }
-  .ProgramsSection__scene :global(.ProgramsSection__ghost::before) {
+  .VideosSection__scene :global(.VideosSection__ghost::before) {
     content: attr(data-letter);
     position: absolute;
     top: 0;
@@ -352,7 +328,7 @@ function captionKey(id: string, i: number): string {
   }
 
   /* ── Work ──────────────────────────────────────────────────────────── */
-  .ProgramsSection__work {
+  .VideosSection__work {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -371,11 +347,11 @@ function captionKey(id: string, i: number): string {
       )
       scale(var(--size, 1));
   }
-  .ProgramsSection__work[data-inview] {
+  .VideosSection__work[data-inview] {
     content-visibility: visible;
   }
   @media (max-width: 987px) {
-    .ProgramsSection__work {
+    .VideosSection__work {
       transform: rotateY(calc(var(--progress, 1) * -20deg))
         translate3d(
           calc(var(--progress, 1) * (50vw + 100%) - 50%),
@@ -385,7 +361,7 @@ function captionKey(id: string, i: number): string {
     }
   }
   @media (max-width: 576px) {
-    .ProgramsSection__work {
+    .VideosSection__work {
       padding: 0.25rem;
       transform: rotateY(calc(var(--progress, 1) * -20deg))
         translate3d(
@@ -395,18 +371,18 @@ function captionKey(id: string, i: number): string {
         );
     }
   }
-  .ProgramsSection__work a {
+  .VideosSection__work a {
     display: block;
     text-decoration: none;
     color: inherit;
   }
-  .ProgramsSection__work-inner {
+  .VideosSection__work-inner {
     display: block;
     margin: 0;
     padding: 0;
   }
 
-  .ProgramsSection__thumb {
+  .VideosSection__thumb {
     display: block;
     width: auto;
     max-width: 50vw;
@@ -415,7 +391,7 @@ function captionKey(id: string, i: number): string {
     overflow: hidden;
     position: relative;
   }
-  .ProgramsSection__thumb img {
+  .VideosSection__thumb img {
     display: block;
     width: 100%;
     height: 100%;
@@ -426,12 +402,12 @@ function captionKey(id: string, i: number): string {
     -webkit-user-drag: none;
   }
   @media (max-width: 576px) {
-    .ProgramsSection__thumb img {
+    .VideosSection__thumb img {
       max-width: 80vw;
       max-height: 80vh;
     }
   }
-  .ProgramsSection__thumb::after {
+  .VideosSection__thumb::after {
     content: '';
     position: absolute;
     top: 50%;
@@ -445,7 +421,7 @@ function captionKey(id: string, i: number): string {
     pointer-events: none;
   }
 
-  .ProgramsSection__caption {
+  .VideosSection__caption {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -461,28 +437,28 @@ function captionKey(id: string, i: number): string {
     text-align: right;
     gap: 0.75rem;
   }
-  .ProgramsSection__caption-text {
+  .VideosSection__caption-text {
     text-align: left;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .ProgramsSection__caption-guest {
+  .VideosSection__caption-guest {
     opacity: 0.7;
     margin-left: 0.35rem;
   }
-  .ProgramsSection__caption-key {
+  .VideosSection__caption-key {
     flex-shrink: 0;
     opacity: 0.7;
   }
   @media (max-width: 576px) {
-    .ProgramsSection__caption {
+    .VideosSection__caption {
       display: none;
     }
   }
 
   /* ── Canvas (textura de puntos) ────────────────────────────────────── */
-  .ProgramsSection__canvas {
+  .VideosSection__canvas {
     position: absolute;
     top: 0;
     left: 0;
@@ -492,7 +468,7 @@ function captionKey(id: string, i: number): string {
     transform: translate3d(0, calc(var(--scroll-progress, 0) * -5%), 0);
   }
   @media (max-width: 576px) {
-    .ProgramsSection__canvas {
+    .VideosSection__canvas {
       transform: none;
     }
   }

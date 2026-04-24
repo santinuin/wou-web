@@ -1,12 +1,12 @@
 /**
- * Mock para la sección Programs mientras la collection `programs` no
+ * Mock para la sección Videos mientras la collection `programs` no
  * está poblada en Sanity. Placeholder SVG inline (data URI) para que el
  * build funcione sin red.
  *
- * TODO: eliminar cuando existan programas reales en Sanity.
+ * TODO: eliminar cuando existan videos reales en Sanity.
  */
 
-export type ProgramItem = {
+export type VideoItem = {
   id: string;
   title: string;
   guest: string | null;
@@ -36,7 +36,7 @@ function mockThumb(label: string, hue: number): string {
   return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
 }
 
-export const MOCK_PROGRAMS: ProgramItem[] = [
+export const MOCK_VIDEOS: VideoItem[] = [
   {
     id: 'mock-1',
     title: 'WOUW Noticias',
