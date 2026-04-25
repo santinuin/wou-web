@@ -67,6 +67,23 @@ const reelsSorted = allReels.sort((a, b) => (a.data.order ?? 99) - (b.data.order
   )}
 </div>
 
+<script>
+  // Fade-in al entrar al viewport por primera vez
+  const grid = document.querySelector('.NewsGrid');
+  if (grid) {
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          grid.classList.add('NewsGrid--visible');
+          io.disconnect();
+        }
+      },
+      { threshold: 0.04 }
+    );
+    io.observe(grid);
+  }
+</script>
+
 <style>
   .NewsGrid {
     display: flex;
@@ -74,6 +91,14 @@ const reelsSorted = allReels.sort((a, b) => (a.data.order ?? 99) - (b.data.order
     gap: 1rem;
     padding: 1.5rem 10rem;
     background: var(--color-brand-dark);
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .NewsGrid--visible {
+    opacity: 1;
+    transform: translateY(0);
   }
 
   @media (max-width: 1024px) {

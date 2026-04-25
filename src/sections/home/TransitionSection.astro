@@ -1,80 +1,128 @@
 ---
 /**
- * TransitionSection — sección puente full-viewport entre RedCircle y el
- * bloque de noticias/artículos.
+ * TransitionSection — scroll-driven, sin hover.
  *
- * Interacción: el botón "Abrí la ventana" es un `<button>` inerte
- * (click no hace nada). En hover dispara una animación que da la
- * sensación de que la pantalla se acerca al botón: la capa azul —que
- * arranca clipeada con la forma y tamaño exacto del botón— se expande
- * via `clip-path: inset()` hasta cubrir el viewport, a la vez que
- * aparece "Esto es WOW". El estado final persiste: una clase
- * `.is-active` se agrega una sola vez en `pointerenter` y no se
- * revierte.
+ * p = progreso de scroll normalizado [0, 1] sobre 350vh de wrapper.
  *
- * Animación puramente CSS (clip-path + opacity). El JS solo dispara
- * el toggle de clase. Respeta `prefers-reduced-motion`.
+ * Fase 1  [0.00 → 0.42]  Pastilla azul se expande. "Abrí la ventana" desaparece.
+ * Fase 2  [0.38 → 0.62]  "Esto es WOU" aparece.
+ * Fase 3  [0.56 → 0.90]  "Esto es WOU" hace zoom ×10 y se esfuma.
+ * Fase 4  [0.85 → 1.00]  Fondo azul desaparece. Sticky se disuelve → NewsGrid.
  */
 ---
 
-<section
-  aria-label="Esto es WOW — transición"
-  class="TransitionSection relative w-full overflow-hidden bg-brand-black"
->
-  <div class="TransitionSection--pill-bg" aria-hidden="true"></div>
-
-  <button
-    type="button"
-    class="TransitionSection--button font-bowlby"
-    aria-label="Abrí la ventana"
-  >
-    Abrí la ventana
-  </button>
-
-  <h2 class="TransitionSection--headline font-bowlby" aria-hidden="true">
-    Esto es WOU
-  </h2>
+<section class="TSec" aria-label="Transición — Esto es WOU">
+  <div class="TSec__sticky">
+    <div class="TSec__pill"  aria-hidden="true"></div>
+    <span class="TSec__label font-bowlby" aria-hidden="true">Abrí la ventana</span>
+    <h2  class="TSec__headline font-bowlby" aria-hidden="true">Esto es WOU</h2>
+  </div>
 </section>
 
+<p class="TSec__sr">Esto es WOU</p>
+
+<script>
+  const section  = document.querySelector<HTMLElement>('.TSec')!;
+  const sticky   = section.querySelector<HTMLElement>('.TSec__sticky')!;
+  const pill     = section.querySelector<HTMLElement>('.TSec__pill')!;
+  const label    = section.querySelector<HTMLElement>('.TSec__label')!;
+  const headline = section.querySelector<HTMLElement>('.TSec__headline')!;
+
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const LERP    = REDUCED ? 1 : 0.1;
+
+  let pillScale = 1,  tPillScale = 1;
+  let pillOp    = 1,  tPillOp    = 1;
+  let labelOp   = 1,  tLabelOp   = 1;
+  let hlOp      = 0,  tHlOp      = 0;
+  let hlScale   = 1,  tHlScale   = 1;
+  let stickyOp  = 1,  tStickyOp  = 1;
+
+  function c(x: number) { return Math.max(0, Math.min(x, 1)); }
+  function eio(t: number) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+  function ein(t: number) { return t * t * t; }
+
+  function onScroll() {
+    const scrollable = section.offsetHeight - window.innerHeight;
+    if (scrollable <= 0) return;
+    const p = c((window.scrollY - section.offsetTop) / scrollable);
+
+    // Fase 1: pastilla crece, label desaparece
+    const p1      = eio(c(p / 0.42));
+    tPillScale    = 1 + p1 * 39;
+    tLabelOp      = c(1 - p1 * 3);
+
+    // Fase 2 + 3: headline aparece y luego se esfuma mientras escala
+    const hlIn    = eio(c((p - 0.38) / 0.24));       // 0 → 1
+    const hlOut   = eio(c((p - 0.60) / 0.30));       // 0 → 1 (esfumado)
+    tHlOp         = c(hlIn * (1 - hlOut * 1.4));
+    tHlScale      = 1 + ein(c((p - 0.56) / 0.34)) * 9; // 1 → 10
+
+    // Fase 4: azul desaparece, sticky se disuelve
+    const p4      = eio(c((p - 0.85) / 0.15));
+    tPillOp       = 1 - p4;
+    tStickyOp     = c(1 - p4 * 1.4);
+  }
+
+  function render() {
+    pillScale = pillScale + (tPillScale - pillScale) * LERP;
+    pillOp    = pillOp    + (tPillOp    - pillOp)    * LERP;
+    labelOp   = labelOp   + (tLabelOp   - labelOp)   * LERP;
+    hlOp      = hlOp      + (tHlOp      - hlOp)      * LERP;
+    hlScale   = hlScale   + (tHlScale   - hlScale)    * LERP;
+    stickyOp  = stickyOp  + (tStickyOp  - stickyOp)  * LERP;
+
+    pill.style.transform     = `scale(${pillScale.toFixed(3)})`;
+    pill.style.opacity       = pillOp.toFixed(3);
+    label.style.opacity      = labelOp.toFixed(3);
+    headline.style.opacity   = hlOp.toFixed(3);
+    headline.style.transform = `scale(${hlScale.toFixed(3)})`;
+    sticky.style.opacity     = stickyOp.toFixed(3);
+
+    requestAnimationFrame(render);
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+  requestAnimationFrame(render);
+</script>
+
 <style>
-  .TransitionSection {
-    height: 110vh;
-    height: 110dvh;
-    min-height: 520px;
+  .TSec {
+    position: relative;
+    height: 350vh;
+    background: var(--color-brand-dark);
+  }
+
+  .TSec__sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: var(--color-brand-black);
     isolation: isolate;
-    /* Dimensiones del botón inicial — compartidas entre el clip-path
-       de la capa azul y el propio botón para que arranquen alineados. */
     --pill-w: 20rem;
     --pill-h: 3rem;
+    will-change: opacity;
   }
 
-  /* Rectángulo azul — tamaño idéntico al del botón, centrado en la
-     sección. Escala uniforme preserva la aspect ratio durante toda la
-     animación: primero los lados alcanzan los bordes del viewport,
-     después arriba/abajo. El overflow de la section recorta el exceso. */
-  .TransitionSection--pill-bg {
+  .TSec__pill {
     position: absolute;
     inset: 0;
     margin: auto;
     width: var(--pill-w);
     height: var(--pill-h);
-    background-color: var(--color-brand-blue);
-    transform: scale(1);
+    background: var(--color-brand-blue);
     transform-origin: center center;
-    transition: transform 1.8s cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform, opacity;
     pointer-events: none;
     z-index: 0;
-    will-change: transform;
   }
 
-  .TransitionSection.is-active .TransitionSection--pill-bg {
-    transform: scale(40);
-  }
-
-  .TransitionSection--button {
+  .TSec__label {
     position: relative;
     z-index: 1;
     width: var(--pill-w);
@@ -82,34 +130,16 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background-color: transparent;
-    border: 0;
-    padding: 0;
     color: var(--color-brand-green);
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.02em;
-    line-height: 1;
     font-size: clamp(1.1rem, 1.6vw, 1.6rem);
-    cursor: pointer;
-    transform-origin: center center;
-    transition:
-      opacity 1.2s ease,
-      transform 3s cubic-bezier(0.65, 0, 0.35, 1);
-  }
-
-  .TransitionSection--button:focus-visible {
-    outline: 2px solid var(--color-brand-green);
-    outline-offset: 4px;
-  }
-
-  .TransitionSection.is-active .TransitionSection--button {
-    opacity: 0;
-    transform: scale(40);
     pointer-events: none;
+    will-change: opacity;
   }
 
-  .TransitionSection--headline {
+  .TSec__headline {
     position: absolute;
     inset: 0;
     z-index: 2;
@@ -127,32 +157,22 @@
     font-size: clamp(2.5rem, 8vw, 6.5rem);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.6s ease 1.3s;
+    transform-origin: center center;
+    will-change: opacity, transform;
   }
 
-  .TransitionSection.is-active .TransitionSection--headline {
-    opacity: 1;
+  .TSec__sr {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .TransitionSection--pill-bg,
-    .TransitionSection--button,
-    .TransitionSection--headline {
-      transition: none;
-    }
+    .TSec { height: 110vh; }
+    .TSec__sticky { position: relative; }
   }
 </style>
-
-<script>
-  /* El botón es visualmente un botón pero click no hace nada.
-     Primer pointerenter agrega `.is-active` y ahí queda. */
-  const section = document.querySelector<HTMLElement>('.TransitionSection');
-  const btn = section?.querySelector<HTMLButtonElement>('.TransitionSection--button');
-
-  btn?.addEventListener('click', (e) => e.preventDefault());
-  btn?.addEventListener(
-    'pointerenter',
-    () => section?.classList.add('is-active'),
-    { once: true }
-  );
-</script>
