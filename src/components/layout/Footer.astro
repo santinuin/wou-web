@@ -60,10 +60,10 @@ const EMAIL = 'mail@radiowou.com.ar';
   </ul>
 
   <!-- ── CTA central ──────────────────────────────────────────────────── -->
-  <a
+  <button
+    type="button"
     class="FooterWOU__cta"
-    href={`mailto:${EMAIL}`}
-    aria-label="Enviar correo a WOU"
+    aria-label="Copiar email de contacto"
   >
     <!-- Aros concéntricos (decorativos) -->
     <span class="FooterWOU__rings" aria-hidden="true">
@@ -107,7 +107,7 @@ const EMAIL = 'mail@radiowou.com.ar';
     <!-- Email en reposo: debajo del círculo, muted <span class="FooterWOU__email FooterWOU__email--below">{EMAIL}</span> //TODO ver si lo dejo o lo saco-->
     <!-- Email en hover: dentro del círculo oscuro, crema -->
     <span class="FooterWOU__email FooterWOU__email--inside">{EMAIL}</span>
-  </a>
+  </button>
 
   <!-- ── Esquina inferior izquierda ───────────────────────────────────── -->
   <p class="FooterWOU__bottom-left">
@@ -130,7 +130,7 @@ const EMAIL = 'mail@radiowou.com.ar';
     --color-black:  #080F1A;               /* logo en reposo    */
 
     --circle-size:  clamp(220px, 32vw, 420px);
-    --scale-hover:  2.14;                  /* 900/420 aprox     */
+    --scale-hover:  1.7;
     --logo-size:    calc(var(--circle-size) * 0.38);
     --logo-scale-hover: 2.6;
 
@@ -236,7 +236,10 @@ const EMAIL = 'mail@radiowou.com.ar';
     height: calc(var(--circle-size) + 4rem); /* circle + email-below */
     display: block;
     outline: none;
-    text-decoration: none;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
     z-index: 1;
   }
 
@@ -444,7 +447,7 @@ const EMAIL = 'mail@radiowou.com.ar';
   .FooterWOU__cta:focus-visible .FooterWOU__email--inside {
     opacity: 1;
     transform: translate(-50%, 0);
-    transition-delay: 0.3s;
+    transition-delay: 0.9s;
   }
 
   /* ───────────────────────────────────────────────────────────────────
@@ -453,7 +456,7 @@ const EMAIL = 'mail@radiowou.com.ar';
   @media (max-width: 640px) {
     .FooterWOU {
       --circle-size: 220px;
-      --scale-hover: 1.9;
+      --scale-hover: 1.55;
       --logo-size: 86px;
       --logo-scale-hover: 2.3;
       min-height: 560px;
@@ -535,9 +538,7 @@ const EMAIL = 'mail@radiowou.com.ar';
 </style>
 
 <script>
-  /* Entry pop-in: añade .is-visible la primera vez que el footer entra al
-     viewport. CSS se encarga del resto de la animación (transform con
-     cubic-bezier back.out). */
+  /* Entry pop-in */
   const footer = document.getElementById('siteFooter');
   if (footer && 'IntersectionObserver' in window) {
     const io = new IntersectionObserver(
@@ -556,4 +557,23 @@ const EMAIL = 'mail@radiowou.com.ar';
   } else if (footer) {
     footer.classList.add('is-visible');
   }
+
+  /* Copiar mail al portapapeles */
+  const cta = footer?.querySelector('.FooterWOU__cta');
+  const emailEl = footer?.querySelector('.FooterWOU__email--inside');
+  const EMAIL = 'mail@radiowou.com.ar';
+
+  cta?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(EMAIL);
+      if (emailEl) {
+        const original = emailEl.textContent;
+        emailEl.textContent = '¡Copiado!';
+        setTimeout(() => { emailEl.textContent = original; }, 1800);
+      }
+    } catch {
+      /* fallback: abrir mailto si clipboard falla */
+      window.location.href = `mailto:${EMAIL}`;
+    }
+  });
 </script>
