@@ -1,0 +1,133 @@
+---
+const TEXT  = "CADA LOCO CON SU TEMA";
+const chars = TEXT.split("");
+---
+
+<section id="tsep-wrapper" class="relative" style="height: 280vh;">
+  <div
+    id="tsep-sticky"
+    class="sticky top-0 w-full overflow-hidden bg-brand-dark"
+    style="height: 100vh;"
+  >
+    <div id="tsep-container" class="relative w-full h-full">
+      <span class="tsep-sr">Cada loco con su tema</span>
+      {chars.map((char) => (
+        <span class="tsep-char" aria-hidden="true">{char}</span>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  const wrapper = document.getElementById("tsep-wrapper")!;
+  const charEls = wrapper.querySelectorAll<HTMLElement>(".tsep-char");
+
+  const AMPLITUDE  = 130;
+  const WAVELENGTH = 2200;
+  const LERP       = 0.08;
+  // padding entre letras (px). Más grande = más holgura entre caracteres.
+  const PAD        = 18;
+  // padding extra para los espacios entre palabras
+  const WORD_GAP   = 40;
+
+  let measuredTotal   = 0;
+  let measuredOffsetX = 0;
+  const charWidths: number[] = [];
+  const xPos:       number[] = [];
+
+  let offset       = 0;
+  let targetOffset = 0;
+  let rafId        = 0;
+
+  function measure() {
+    const cs   = getComputedStyle(charEls[0]);
+    const font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    const mc   = document.createElement("canvas").getContext("2d")!;
+    mc.font    = font;
+
+    charWidths.length = 0;
+    xPos.length       = 0;
+
+    Array.from(charEls).forEach((s) => {
+      charWidths.push(mc.measureText(s.textContent ?? " ").width);
+    });
+
+    let cursor = 0;
+    charWidths.forEach((w, i) => {
+      xPos.push(cursor);
+      const isSpace = charEls[i].textContent === " ";
+      cursor += w + (isSpace ? WORD_GAP : PAD);
+    });
+
+    measuredTotal   = cursor - PAD;
+    measuredOffsetX = -measuredTotal / 2;
+  }
+
+  /* ── Progreso de scroll relativo a este wrapper ── */
+  function onScroll() {
+    const scrollableH = wrapper.offsetHeight - window.innerHeight;
+    const relScroll   = window.scrollY - wrapper.offsetTop;
+    const progress    = Math.max(0, Math.min(relScroll / scrollableH, 1));
+    const maxOffset   = window.innerWidth / 2 + measuredTotal / 2;
+    targetOffset = -maxOffset + progress * 2 * maxOffset;
+  }
+
+  /* ── Posicionamiento de cada carácter ── */
+  function render() {
+    offset += (targetOffset - offset) * LERP;
+    const oy = window.innerHeight / 2;
+
+    charEls.forEach((span, i) => {
+      const x       = measuredOffsetX + xPos[i] - offset;
+      const xCenter = x + charWidths[i] / 2;
+      const angle   = (xCenter / WAVELENGTH) * 2 * Math.PI;
+      const y       = oy - AMPLITUDE * Math.sin(angle);
+      const dyDx    = AMPLITUDE * (2 * Math.PI / WAVELENGTH) * Math.cos(angle);
+      const rot     = -(Math.atan(dyDx) * (180 / Math.PI));
+      span.style.transform =
+        `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) rotate(${rot.toFixed(3)}deg)`;
+    });
+
+    rafId = requestAnimationFrame(render);
+  }
+
+  /* ── Arranque: esperar webfonts para medir correctamente ── */
+  document.fonts.ready.then(() => {
+    measure();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    offset = targetOffset; // snap inicial sin viaje desde 0
+
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(render);
+  });
+</script>
+
+<style>
+  .tsep-char {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    display: inline-block;
+    font-size: clamp(4rem, 9vw, 9.5rem);
+    font-weight: 900;
+    font-family: var(--font-bowlby);
+    color: var(--color-brand-green);
+    line-height: 1;
+    will-change: transform;
+    white-space: pre;
+    user-select: none;
+  }
+
+  .tsep-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>
