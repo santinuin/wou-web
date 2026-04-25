@@ -9,6 +9,23 @@
  *   · Col 2 (auto, center)     : logotipo W•U!
  *   · Col 3 (1fr, right-align) : botón "Secciones"
  */
+import SectionsMenu from '@/components/ui/SectionsMenu.svelte';
+
+// TODO: reemplazar por getCollection('categories') cuando el CMS esté listo.
+const MOCK_SECTIONS = [
+  { title: 'Círculo Rojo', slug: '/circulo-rojo', color: null },
+  { title: 'Política',     slug: '/politica',     color: null },
+  { title: 'Locales',      slug: '/locales',      color: null },
+  { title: 'Policiales',   slug: '/policiales',   color: null },
+  { title: 'Opinión',      slug: '/opinion',      color: null },
+  { title: 'Deportes',     slug: '/deportes',     color: null },
+  { title: 'Sociedad',     slug: '/sociedad',     color: null },
+  { title: 'Cultura',      slug: '/cultura',      color: null },
+  { title: 'Economía',     slug: '/economia',     color: null },
+  { title: 'Turismo',      slug: '/turismo',      color: null },
+  { title: 'Ambiente',     slug: '/ambiente',     color: null },
+  { title: 'Nacionales',   slug: '/nacionales',   color: null },
+];
 ---
 
 <!--
@@ -96,6 +113,13 @@
     </button>
   </div>
 </header>
+
+<!--
+  SectionsMenu: fixed al viewport, mitad derecha, debajo del header (z-[49] < header z-50).
+  Visible desde cualquier sección de la página al hacer scroll.
+  TODO: pasar getCollection('categories') en vez de MOCK_SECTIONS cuando el CMS esté listo.
+-->
+<SectionsMenu sections={MOCK_SECTIONS} client:only="svelte" />
 
 <style>
   /* --header-scale: 1 cuando está en reposo, 0.72 al scrollear. Un solo

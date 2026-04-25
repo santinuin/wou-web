@@ -17,7 +17,6 @@ import YoutubeEmbed from '@/components/content/YoutubeEmbed.astro';
 import NewsTicker from '@/components/content/NewsTicker.astro';
 import NewsList from '@/components/content/NewsList.astro';
 import EditorialCard from '@/components/content/EditorialCard.astro';
-import SectionsMenu from '@/components/ui/SectionsMenu.svelte';
 
 // ── Mock data ──────────────────────────────────────────────────────────────
 // Reemplazar por queries GROQ via getCollection() cuando el CMS esté listo.
@@ -57,23 +56,6 @@ const MOCK_EDITORIAL = {
   slug: 'sueldos-de-pobreza',
 };
 
-// ── Secciones (categorías del CMS) ────────────────────────────────────────────
-// TODO: reemplazar por getCollection('categories') cuando el CMS esté listo.
-// El campo `color` en Sanity determina el color del texto (hex); sin color → brand-gray.
-const MOCK_SECTIONS = [
-  { title: 'Círculo Rojo', slug: '/circulo-rojo', color: '#00C9B1' },
-  { title: 'Política',     slug: '/politica',     color: null },
-  { title: 'Locales',      slug: '/locales',      color: null },
-  { title: 'Policiales',   slug: '/policiales',   color: null },
-  { title: 'Opinión',      slug: '/opinion',      color: null },
-  { title: 'Deportes',     slug: '/deportes',     color: null },
-  { title: 'Sociedad',     slug: '/sociedad',     color: null },
-  { title: 'Cultura',      slug: '/cultura',      color: null },
-  { title: 'Economía',     slug: '/economia',     color: null },
-  { title: 'Turismo',      slug: '/turismo',      color: null },
-  { title: 'Ambiente',     slug: '/ambiente',     color: null },
-  { title: 'Nacionales',   slug: '/nacionales',   color: null },
-];
 ---
 
 <!--
@@ -118,23 +100,13 @@ const MOCK_SECTIONS = [
     <NewsList articles={MOCK_NEWS} buildDate={now} />
   </div>
 
-  <!-- ── Col der, filas 1-3: Editorial Semanal + overlay Secciones ─────── -->
-  <!--
-    El wrapper hereda las 3 filas del grid padre y sirve como contexto de
-    posicionamiento (position: relative) para el panel de secciones, que
-    se posiciona `absolute inset-0` encima del EditorialCard cuando está abierto.
-    pointer-events-none evita que el wrapper bloquee clics sobre el editorial
-    mientras el menú está cerrado.
-  -->
-  <div class="col-start-2 row-start-1 row-span-3 grid grid-rows-subgrid relative pointer-events-none">
-    <EditorialCard
-      title={MOCK_EDITORIAL.title}
-      question={MOCK_EDITORIAL.question}
-      imageUrl={MOCK_EDITORIAL.imageUrl}
-      imageAlt={MOCK_EDITORIAL.imageAlt}
-      slug={MOCK_EDITORIAL.slug}
-    />
-    <SectionsMenu sections={MOCK_SECTIONS} client:only="svelte" />
-  </div>
+  <!-- ── Col der, filas 1-3: Editorial Semanal ─────────────────────────── -->
+  <EditorialCard
+    title={MOCK_EDITORIAL.title}
+    question={MOCK_EDITORIAL.question}
+    imageUrl={MOCK_EDITORIAL.imageUrl}
+    imageAlt={MOCK_EDITORIAL.imageAlt}
+    slug={MOCK_EDITORIAL.slug}
+  />
 
 </section>
