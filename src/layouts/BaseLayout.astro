@@ -50,6 +50,10 @@ const fullTitle = title === SITE_NAME ? title : `${title} | ${SITE_NAME}`;
     />
   </head>
   <body class="min-h-screen bg-white text-gray-900 antialiased">
+    <script>
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+      window.scrollTo(0, 0);
+    </script>
     <slot name="header" />
     <main id="main-content">
       <slot />
