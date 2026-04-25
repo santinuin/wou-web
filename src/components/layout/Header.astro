@@ -120,4 +120,19 @@
     sync();
     window.addEventListener('scroll', sync, { passive: true });
   }
+
+  // Botón Secciones — abre/cierra el panel lateral del Hero
+  const sectionsBtn = document.querySelector<HTMLButtonElement>('[aria-label="Ver todas las secciones"]');
+  if (sectionsBtn) {
+    sectionsBtn.addEventListener('click', () => {
+      const opening = sectionsBtn.getAttribute('aria-expanded') !== 'true';
+      sectionsBtn.setAttribute('aria-expanded', String(opening));
+      window.dispatchEvent(new CustomEvent('sections-menu-toggle'));
+    });
+
+    // Sincronizar cuando el menú se cierra con Escape desde SectionsMenu
+    window.addEventListener('sections-menu-closed', () => {
+      sectionsBtn.setAttribute('aria-expanded', 'false');
+    });
+  }
 </script>

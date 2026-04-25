@@ -128,12 +128,13 @@ export const ALL_AUTHORS_QUERY = groq`
 // ─── Categories ───────────────────────────────────────────────────────────────
 
 export const ALL_CATEGORIES_QUERY = groq`
-  *[_type == "category"] | order(title asc) {
+  *[_type == "category"] | order(order asc, title asc) {
     _id,
     title,
     slug,
     description,
-    color
+    color,
+    order
   }
 `;
 

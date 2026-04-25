@@ -124,6 +124,7 @@ const categories = defineCollection({
     slug: SanitySlugSchema.nullish(),
     description: z.string().nullish(),
     color: z.string().nullish(),
+    order: z.number().nullish(),
   }),
 });
 

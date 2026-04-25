@@ -36,6 +36,13 @@ export const categoryType = defineType({
       type: 'string',
       description: 'Hex color para badges (ej: #3b82f6)',
     }),
+    // [EXP] Orden de aparición en el menú de secciones
+    defineField({
+      name: 'order',
+      title: 'Orden en el menú [EXP]',
+      type: 'number',
+      description: 'Número menor = aparece primero en el menú de secciones',
+    }),
   ],
 
   preview: {
