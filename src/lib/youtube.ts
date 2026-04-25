@@ -27,3 +27,7 @@ export function getYouTubeThumbUrl(videoId: string, quality: 'max' | 'hq' = 'max
 export function getYouTubeWatchUrl(videoId: string): string {
   return `https://www.youtube.com/watch?v=${videoId}`;
 }
+
+export function getYouTubeShortsUrl(videoId: string): string {
+  return `https://www.youtube.com/shorts/${videoId}`;
+}

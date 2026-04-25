@@ -1,0 +1,59 @@
+---
+import { getImageUrl } from '@/lib/cms';
+import AdCard from './AdCard.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  ads: CollectionEntry<'advertisements'>[];
+}
+
+const { ads } = Astro.props;
+
+function imgUrl(ad: CollectionEntry<'advertisements'>, width: number): string | null {
+  if (!ad.data.image) return null;
+  try {
+    return getImageUrl(ad.data.image as Parameters<typeof getImageUrl>[0], { width });
+  } catch {
+    return null;
+  }
+}
+---
+
+{ads.length > 0 && (
+  <section class="AdsBand2" aria-label="Publicidades" style={`--count: ${Math.min(ads.length, 4)}`}>
+    {ads.slice(0, 4).map((ad) => (
+      <AdCard
+        title={ad.data.title}
+        brand={ad.data.brand ?? null}
+        imageUrl={imgUrl(ad, 280)}
+        imageAlt={ad.data.image?.alt ?? ad.data.brand ?? ad.data.title}
+        url={ad.data.url ?? null}
+        size="equal"
+      />
+    ))}
+  </section>
+)}
+
+<style>
+  .AdsBand2 {
+    display: grid;
+    grid-template-columns: repeat(var(--count, 4), 1fr);
+    gap: 8px;
+    background: var(--color-brand-dark);
+    border-radius: 10px;
+    overflow: hidden;
+    min-height: 280px;
+  }
+
+  .AdsBand2 > * {
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  @media (max-width: 640px) {
+    .AdsBand2 {
+      grid-template-columns: 1fr 1fr;
+      min-height: unset;
+    }
+  }
+</style>

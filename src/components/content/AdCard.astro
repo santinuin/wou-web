@@ -1,0 +1,113 @@
+---
+interface Props {
+  title: string;
+  brand?: string | null;
+  imageUrl?: string | null;
+  imageAlt?: string;
+  url?: string | null;
+  size?: 'large' | 'small' | 'equal';
+}
+
+const { title, brand, imageUrl, imageAlt = brand ?? title, url, size = 'equal' } = Astro.props;
+---
+
+<a
+  href={url ?? '#'}
+  class:list={['AdCard', `AdCard--${size}`]}
+  target={url ? '_blank' : undefined}
+  rel={url ? 'noopener noreferrer sponsored' : undefined}
+  aria-label={`Anuncio: ${brand ?? title}`}
+>
+  {imageUrl && (
+    <div class="AdCard__image-wrap">
+      <img
+        src={imageUrl}
+        alt={imageAlt}
+        width={size === 'large' ? 600 : 300}
+        height={size === 'large' ? 340 : 180}
+        loading="lazy"
+        decoding="async"
+        class="AdCard__image"
+      />
+    </div>
+  )}
+
+  <div class="AdCard__body">
+    <span class="AdCard__label">Anuncio</span>
+    <p class="AdCard__title">{brand ?? title}</p>
+    {brand && <p class="AdCard__subtitle">{title}</p>}
+  </div>
+</a>
+
+<style>
+  .AdCard {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--color-brand-white);
+    text-decoration: none;
+    color: var(--color-brand-dark);
+    overflow: hidden;
+    transition: brightness 0.2s ease;
+  }
+
+  .AdCard:hover {
+    filter: brightness(0.95);
+  }
+
+  .AdCard__image-wrap {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .AdCard__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  .AdCard:hover .AdCard__image {
+    transform: scale(1.02);
+  }
+
+  .AdCard__body {
+    padding: 0.6rem 0.75rem 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .AdCard__label {
+    display: block;
+    font-family: var(--font-barlow);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: color-mix(in oklab, var(--color-brand-dark) 45%, transparent);
+    margin-bottom: 0.25rem;
+  }
+
+  .AdCard__title {
+    font-family: var(--font-alumni);
+    font-weight: 900;
+    font-size: clamp(1.4rem, 2.5vw, 2.25rem);
+    line-height: 0.95;
+    margin: 0 0 0.2rem;
+  }
+
+  .AdCard--small .AdCard__title,
+  .AdCard--equal .AdCard__title {
+    font-size: clamp(1.1rem, 1.8vw, 1.6rem);
+  }
+
+  .AdCard__subtitle {
+    font-family: var(--font-franklin);
+    font-size: 0.8rem;
+    font-weight: 500;
+    line-height: 1.4;
+    margin: 0;
+    color: color-mix(in oklab, var(--color-brand-dark) 70%, transparent);
+  }
+</style>

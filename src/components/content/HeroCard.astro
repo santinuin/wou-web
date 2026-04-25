@@ -1,0 +1,126 @@
+---
+interface Props {
+  title: string;
+  slug: string;
+  categoryTitle?: string | null;
+  imageUrl?: string | null;
+  imageAlt?: string;
+  tickerText?: string | null;
+}
+
+const { title, slug, categoryTitle, imageUrl, imageAlt = title, tickerText } = Astro.props;
+---
+
+<div class="HeroCard">
+  {tickerText && (
+    <div class="HeroCard__ticker" aria-label="Sumario">
+      <span>{tickerText}</span>
+    </div>
+  )}
+
+  <a href={`/${slug}`} class="HeroCard__link group">
+    {categoryTitle && (
+      <span class="HeroCard__category">{categoryTitle}</span>
+    )}
+
+    {imageUrl && (
+      <div class="HeroCard__image-wrap">
+        <img
+          src={imageUrl}
+          alt={imageAlt}
+          width="640"
+          height="420"
+          loading="lazy"
+          decoding="async"
+          class="HeroCard__image"
+        />
+      </div>
+    )}
+
+    <div class="HeroCard__body">
+      <h2 class="HeroCard__title">{title}</h2>
+    </div>
+  </a>
+</div>
+
+<style>
+  .HeroCard {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--color-brand-teal);
+  }
+
+  .HeroCard__ticker {
+    background: var(--color-brand-dark);
+    color: var(--color-brand-white);
+    font-family: var(--font-barlow);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.35rem 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0;
+  }
+
+  .HeroCard__link {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    text-decoration: none;
+    color: inherit;
+    min-height: 0;
+  }
+
+  .HeroCard__category {
+    display: block;
+    font-family: var(--font-barlow);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-brand-dark);
+    padding: 0.75rem 0.75rem 0;
+    flex-shrink: 0;
+  }
+
+  .HeroCard__image-wrap {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .HeroCard__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  .HeroCard__link:hover .HeroCard__image {
+    transform: scale(1.03);
+  }
+
+  .HeroCard__body {
+    padding: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .HeroCard__title {
+    font-family: var(--font-alumni);
+    font-weight: 900;
+    font-size: clamp(2.25rem, 5vw, 4rem);
+    line-height: 0.92;
+    color: var(--color-brand-dark);
+    margin: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .HeroCard__link:hover .HeroCard__title {
+    opacity: 0.8;
+  }
+</style>

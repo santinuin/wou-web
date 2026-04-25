@@ -1,0 +1,132 @@
+---
+interface Props {
+  title: string;
+  slug: string;
+  categoryTitle?: string | null;
+  imageUrl?: string | null;
+  imageAlt?: string;
+  wide?: boolean;
+}
+
+const { title, slug, categoryTitle, imageUrl, imageAlt = title, wide = false } = Astro.props;
+---
+
+<a
+  href={`/${slug}`}
+  class:list={['SupportCard', wide && 'SupportCard--wide']}
+  aria-label={title}
+>
+  {imageUrl && (
+    <div class="SupportCard__image-wrap">
+      <img
+        src={imageUrl}
+        alt={imageAlt}
+        width={wide ? 480 : 320}
+        height={wide ? 280 : 220}
+        loading="lazy"
+        decoding="async"
+        class="SupportCard__image"
+      />
+    </div>
+  )}
+
+  <div class="SupportCard__body">
+    {categoryTitle && (
+      <span class="SupportCard__category">{categoryTitle}</span>
+    )}
+    <h3 class="SupportCard__title">{title}</h3>
+  </div>
+</a>
+
+<style>
+  .SupportCard {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 160px;
+    background: var(--color-brand-white);
+    text-decoration: none;
+    color: var(--color-brand-dark);
+    overflow: hidden;
+    transition: brightness 0.2s ease;
+  }
+
+  .SupportCard:hover {
+    filter: brightness(0.96);
+  }
+
+  /* Wide variant: imagen izquierda, texto derecha */
+  .SupportCard--wide {
+    flex-direction: row;
+  }
+
+  .SupportCard__image-wrap {
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  /* Vertical: imagen ocupa ~55% del alto */
+  .SupportCard:not(.SupportCard--wide) .SupportCard__image-wrap {
+    height: 55%;
+  }
+
+  /* Horizontal: imagen ocupa ~45% del ancho */
+  .SupportCard--wide .SupportCard__image-wrap {
+    width: 45%;
+    height: 100%;
+  }
+
+  .SupportCard__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  .SupportCard:hover .SupportCard__image {
+    transform: scale(1.03);
+  }
+
+  .SupportCard__body {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    flex: 1;
+    padding: 0.6rem 0.75rem 0.75rem;
+    min-height: 0;
+    gap: 0.25rem;
+  }
+
+  /* Sin imagen: título ocupa todo el espacio, más grande */
+  .SupportCard:not(:has(.SupportCard__image-wrap)) .SupportCard__body {
+    justify-content: flex-start;
+    padding: 0.75rem;
+  }
+
+  .SupportCard__category {
+    font-family: var(--font-barlow);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: color-mix(in oklab, var(--color-brand-dark) 50%, transparent);
+  }
+
+  .SupportCard__title {
+    font-family: var(--font-franklin);
+    font-weight: 700;
+    font-size: clamp(0.95rem, 1.4vw, 1.25rem);
+    line-height: 1.2;
+    margin: 0;
+    color: var(--color-brand-dark);
+  }
+
+  /* Sin imagen: título más prominente */
+  .SupportCard:not(:has(.SupportCard__image-wrap)) .SupportCard__title {
+    font-family: var(--font-alumni);
+    font-size: clamp(1.4rem, 2.5vw, 2rem);
+    font-weight: 900;
+    line-height: 0.95;
+  }
+</style>

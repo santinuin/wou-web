@@ -1,12 +1,14 @@
 import { defineCollection, z } from 'astro:content';
 import { sanityClient, isSanityConfigured } from './lib/cms/client';
 import {
+  ALL_ADVERTISEMENTS_QUERY,
   ALL_ARTICLES_QUERY,
   ALL_AUTHORS_QUERY,
   ALL_CATEGORIES_QUERY,
   ALL_PROGRAMS_QUERY,
   ALL_RADIO_SHOWS_QUERY,
   ALL_RED_CIRCLES_QUERY,
+  ALL_REELS_QUERY,
 } from './lib/cms/queries';
 
 /**
@@ -202,4 +204,42 @@ const radioShows = defineCollection({
   }),
 });
 
-export const collections = { articles, authors, categories, programs, radioShows, redCircles };
+// ─── Reels ────────────────────────────────────────────────────────────────────
+
+const reels = defineCollection({
+  loader: async () => {
+    if (!isSanityConfigured) return [];
+    type RawReel = { _id: string; [key: string]: unknown };
+    const data = await sanityClient.fetch<RawReel[]>(ALL_REELS_QUERY);
+    return data.map((r) => ({ id: r._id, ...r }));
+  },
+  schema: z.object({
+    _id: z.string(),
+    title: z.string(),
+    youtubeUrl: z.string(),
+    publishedAt: z.string().nullish(),
+    order: z.number().nullish(),
+  }),
+});
+
+// ─── Advertisements ───────────────────────────────────────────────────────────
+
+const advertisements = defineCollection({
+  loader: async () => {
+    if (!isSanityConfigured) return [];
+    type RawAd = { _id: string; [key: string]: unknown };
+    const data = await sanityClient.fetch<RawAd[]>(ALL_ADVERTISEMENTS_QUERY);
+    return data.map((a) => ({ id: a._id, ...a }));
+  },
+  schema: z.object({
+    _id: z.string(),
+    title: z.string(),
+    brand: z.string().nullish(),
+    image: z.any(),
+    url: z.string().nullish(),
+    placement: z.string(),
+    order: z.number().nullish(),
+  }),
+});
+
+export const collections = { articles, authors, categories, programs, radioShows, redCircles, reels, advertisements };

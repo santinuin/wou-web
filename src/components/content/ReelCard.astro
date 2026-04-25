@@ -1,0 +1,99 @@
+---
+import { getYouTubeShortsUrl } from '@/lib/youtube';
+
+interface Props {
+  videoId: string;
+  title: string;
+  thumbUrl: string;
+}
+
+const { videoId, title, thumbUrl } = Astro.props;
+const watchUrl = getYouTubeShortsUrl(videoId);
+---
+
+<a
+  href={watchUrl}
+  target="_blank"
+  rel="noopener noreferrer"
+  class="ReelCard"
+  aria-label={`Ver reel: ${title}`}
+>
+  <div class="ReelCard__thumb-wrap">
+    <img
+      src={thumbUrl}
+      alt={title}
+      width="360"
+      height="640"
+      loading="lazy"
+      decoding="async"
+      class="ReelCard__thumb"
+    />
+    <div class="ReelCard__play" aria-hidden="true"></div>
+  </div>
+  <p class="ReelCard__title">{title}</p>
+</a>
+
+<style>
+  .ReelCard {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: var(--color-brand-white);
+  }
+
+  .ReelCard__thumb-wrap {
+    position: relative;
+    aspect-ratio: 9 / 16;
+    overflow: hidden;
+    background: color-mix(in oklab, var(--color-brand-dark) 60%, white);
+  }
+
+  .ReelCard__thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  .ReelCard:hover .ReelCard__thumb {
+    transform: scale(1.04);
+  }
+
+  /* Play icon overlay */
+  .ReelCard__play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.25);
+    transition: background 0.2s ease;
+  }
+
+  .ReelCard__play::after {
+    content: '';
+    width: 2.5rem;
+    height: 2.5rem;
+    background: var(--color-brand-teal);
+    clip-path: polygon(28% 18%, 28% 82%, 82% 50%);
+  }
+
+  .ReelCard:hover .ReelCard__play {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  .ReelCard__title {
+    font-family: var(--font-franklin);
+    font-weight: 600;
+    font-size: 0.8rem;
+    line-height: 1.3;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    color: var(--color-brand-white);
+  }
+</style>

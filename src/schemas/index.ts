@@ -8,7 +8,9 @@ import { programType } from './program';
 import { radioShowType } from './radioShow';
 import { radioStreamType } from './radioStream';
 import { redCircleType } from './redCircle';
+import { reelType } from './reel';
+import { advertisementType } from './advertisement';
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [articleType, authorType, blockContentType, categoryType, editorialType, programType, radioShowType, radioStreamType, redCircleType],
+  types: [articleType, authorType, blockContentType, categoryType, editorialType, programType, radioShowType, radioStreamType, redCircleType, reelType, advertisementType],
 };

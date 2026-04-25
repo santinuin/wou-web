@@ -1,0 +1,104 @@
+---
+import { getImageUrl } from '@/lib/cms';
+import AdCard from './AdCard.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  ads: CollectionEntry<'advertisements'>[];
+}
+
+const { ads } = Astro.props;
+
+// Orden ya viene resuelto desde NewsGrid (order asc)
+const large  = ads[0];
+const small1 = ads[1];
+const small2 = ads[2];
+
+function imgUrl(ad: CollectionEntry<'advertisements'> | undefined, width: number): string | null {
+  if (!ad?.data.image) return null;
+  try {
+    return getImageUrl(ad.data.image as Parameters<typeof getImageUrl>[0], { width });
+  } catch {
+    return null;
+  }
+}
+---
+
+{(large || small1 || small2) && (
+  <section class="AdsBand1" aria-label="Publicidades">
+    {large && (
+      <div class="AdsBand1__large">
+        <AdCard
+          title={large.data.title}
+          brand={large.data.brand ?? null}
+          imageUrl={imgUrl(large, 560)}
+          imageAlt={large.data.image?.alt ?? large.data.brand ?? large.data.title}
+          url={large.data.url ?? null}
+          size="large"
+        />
+      </div>
+    )}
+    <div class="AdsBand1__smalls">
+      {small1 && (
+        <AdCard
+          title={small1.data.title}
+          brand={small1.data.brand ?? null}
+          imageUrl={imgUrl(small1, 280)}
+          imageAlt={small1.data.image?.alt ?? small1.data.brand ?? small1.data.title}
+          url={small1.data.url ?? null}
+          size="small"
+        />
+      )}
+      {small2 && (
+        <AdCard
+          title={small2.data.title}
+          brand={small2.data.brand ?? null}
+          imageUrl={imgUrl(small2, 280)}
+          imageAlt={small2.data.image?.alt ?? small2.data.brand ?? small2.data.title}
+          url={small2.data.url ?? null}
+          size="small"
+        />
+      )}
+    </div>
+  </section>
+)}
+
+<style>
+  .AdsBand1 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    background: var(--color-brand-dark);
+    border-radius: 10px;
+    overflow: hidden;
+    min-height: 300px;
+  }
+
+  .AdsBand1__large {
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .AdsBand1__smalls {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .AdsBand1__smalls > * {
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  @media (max-width: 640px) {
+    .AdsBand1 {
+      grid-template-columns: 1fr;
+      min-height: unset;
+    }
+
+    .AdsBand1__smalls {
+      grid-template-rows: auto;
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

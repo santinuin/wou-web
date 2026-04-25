@@ -1,0 +1,85 @@
+---
+import ReelCard from './ReelCard.astro';
+import { parseYouTubeId, getYouTubeThumbUrl } from '@/lib/youtube';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  reels: CollectionEntry<'reels'>[];
+}
+
+const { reels } = Astro.props;
+
+const items = reels
+  .map((r) => {
+    const videoId = parseYouTubeId(r.data.youtubeUrl);
+    if (!videoId) return null;
+    return {
+      id: r.data._id,
+      videoId,
+      title: r.data.title,
+      thumbUrl: getYouTubeThumbUrl(videoId, 'hq'),
+    };
+  })
+  .filter((x): x is NonNullable<typeof x> => x !== null)
+  .slice(0, 5);
+---
+
+{items.length > 0 && (
+  <section class="ReelsBand" aria-label="Últimos reels">
+    <p class="ReelsBand__label">Últimos videos</p>
+    <div class="ReelsBand__grid">
+      {items.map((item) => (
+        <ReelCard
+          videoId={item.videoId}
+          title={item.title}
+          thumbUrl={item.thumbUrl}
+        />
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  .ReelsBand {
+    background: color-mix(in oklab, var(--color-brand-dark) 85%, black);
+    border-radius: 10px;
+    padding: 1.25rem 1rem 1.5rem;
+  }
+
+  .ReelsBand__label {
+    font-family: var(--font-barlow);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-brand-teal);
+    margin: 0 0 0.875rem;
+  }
+
+  .ReelsBand__grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+  }
+
+  @media (max-width: 900px) {
+    .ReelsBand__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* Ocultar el 4to y 5to reel en tablet para evitar overflow */
+    .ReelsBand__grid > :nth-child(n+4) {
+      display: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .ReelsBand__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ReelsBand__grid > :nth-child(n+3) {
+      display: none;
+    }
+  }
+</style>

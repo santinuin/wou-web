@@ -1,0 +1,86 @@
+---
+import { getCollection } from 'astro:content';
+import NewsBand from '@/components/content/NewsBand.astro';
+import AdsBand1 from '@/components/content/AdsBand1.astro';
+import AdsBand2 from '@/components/content/AdsBand2.astro';
+import ReelsBand from '@/components/content/ReelsBand.astro';
+import { MOCK_ARTICLES, type ArticleLike } from './mocks/newsGridMock';
+import type { CollectionEntry } from 'astro:content';
+
+const rawArticles     = await getCollection('articles');
+const allAds          = await getCollection('advertisements');
+const allReels        = await getCollection('reels');
+
+// Fallback a mocks cuando Sanity no está configurado o no hay artículos aún
+const allArticles: ArticleLike[] = rawArticles.length > 0
+  ? (rawArticles as unknown as ArticleLike[])
+  : MOCK_ARTICLES;
+
+function getBand(categoryTitle: string): { hero: ArticleLike | null; support: ArticleLike[] } {
+  const sorted = allArticles
+    .filter((a) => a.data.categories?.some((c) => c.title === categoryTitle))
+    .sort((a, b) => {
+      const af = a.data.featured ? 1 : 0;
+      const bf = b.data.featured ? 1 : 0;
+      if (bf !== af) return bf - af;
+      return (b.data.publishedAt ?? '').localeCompare(a.data.publishedAt ?? '');
+    });
+
+  return { hero: sorted[0] ?? null, support: sorted.slice(1, 4) };
+}
+
+const politica   = getBand('Política');
+const locales    = getBand('Locales');
+const policiales = getBand('Policiales');
+const opinion    = getBand('Opinión');
+
+const sortByOrder = (a: CollectionEntry<'advertisements'>, b: CollectionEntry<'advertisements'>) =>
+  (a.data.order ?? 99) - (b.data.order ?? 99);
+
+const ads1 = allAds.filter((a) => a.data.placement === 'ads1').sort(sortByOrder);
+const ads2 = allAds.filter((a) => a.data.placement === 'ads2').sort(sortByOrder);
+
+const reelsSorted = allReels.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
+---
+
+<div class="NewsGrid">
+  {politica.hero && (
+    <NewsBand variant="hero-left" hero={politica.hero} support={politica.support} />
+  )}
+
+  <AdsBand1 ads={ads1} />
+
+  {locales.hero && (
+    <NewsBand variant="hero-right" hero={locales.hero} support={locales.support} />
+  )}
+
+  <ReelsBand reels={reelsSorted} />
+
+  {policiales.hero && (
+    <NewsBand variant="hero-left" hero={policiales.hero} support={policiales.support} />
+  )}
+
+  <AdsBand2 ads={ads2} />
+
+  {opinion.hero && (
+    <NewsBand variant="hero-left" hero={opinion.hero} support={opinion.support} />
+  )}
+</div>
+
+<style>
+  .NewsGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.5rem 10rem;
+    background: var(--color-brand-dark);
+  }
+
+  @media (max-width: 1024px) {
+    .NewsGrid { padding: 1.25rem 2rem; }
+  }
+
+  @media (max-width: 640px) {
+    .NewsGrid { padding: 0.75rem; }
+  }
+</style>

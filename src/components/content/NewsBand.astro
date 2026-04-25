@@ -1,0 +1,146 @@
+---
+import { getImageUrl } from '@/lib/cms';
+import HeroCard from './HeroCard.astro';
+import SupportCard from './SupportCard.astro';
+import type { ArticleLike } from '@/sections/home/mocks/newsGridMock';
+
+interface Props {
+  variant: 'hero-left' | 'hero-right';
+  hero: ArticleLike;
+  support: ArticleLike[];
+}
+
+const { variant, hero, support } = Astro.props;
+
+function imgUrl(image: unknown, width: number): string | null {
+  if (!image) return null;
+  try {
+    return getImageUrl(image as Parameters<typeof getImageUrl>[0], { width });
+  } catch {
+    return null;
+  }
+}
+
+const heroImgUrl  = imgUrl(hero.data.mainImage, 640);
+const s1ImgUrl    = imgUrl(support[0]?.data.mainImage, 360);
+const s2ImgUrl    = imgUrl(support[1]?.data.mainImage, 360);
+const s3ImgUrl    = imgUrl(support[2]?.data.mainImage, 560);
+
+const heroCategory = hero.data.categories?.[0]?.title ?? null;
+---
+
+<section class:list={['NewsBand', `NewsBand--${variant}`]}>
+  <!-- Hero: DOM-first para accesibilidad; CSS lo posiciona visualmente -->
+  <div class="NewsBand__hero">
+    <HeroCard
+      title={hero.data.title}
+      slug={hero.data.slug.current}
+      categoryTitle={heroCategory}
+      imageUrl={heroImgUrl}
+      imageAlt={hero.data.mainImage?.alt ?? hero.data.title}
+      tickerText={hero.data.excerpt ?? null}
+    />
+  </div>
+
+  {support[0] && (
+    <div class="NewsBand__s1">
+      <SupportCard
+        title={support[0].data.title}
+        slug={support[0].data.slug.current}
+        categoryTitle={support[0].data.categories?.[0]?.title ?? null}
+        imageUrl={s1ImgUrl}
+        imageAlt={support[0].data.mainImage?.alt ?? support[0].data.title}
+      />
+    </div>
+  )}
+
+  {support[1] && (
+    <div class="NewsBand__s2">
+      <SupportCard
+        title={support[1].data.title}
+        slug={support[1].data.slug.current}
+        categoryTitle={support[1].data.categories?.[0]?.title ?? null}
+        imageUrl={s2ImgUrl}
+        imageAlt={support[1].data.mainImage?.alt ?? support[1].data.title}
+      />
+    </div>
+  )}
+
+  {support[2] && (
+    <div class="NewsBand__s3">
+      <SupportCard
+        title={support[2].data.title}
+        slug={support[2].data.slug.current}
+        categoryTitle={support[2].data.categories?.[0]?.title ?? null}
+        imageUrl={s3ImgUrl}
+        imageAlt={support[2].data.mainImage?.alt ?? support[2].data.title}
+        wide={true}
+      />
+    </div>
+  )}
+</section>
+
+<style>
+  .NewsBand {
+    display: grid;
+    grid-template-rows: minmax(220px, 1fr) minmax(220px, 1fr);
+    gap: 8px;
+    background: var(--color-brand-dark);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  /* Cada celda tiene sus propias esquinas redondeadas */
+  .NewsBand__hero,
+  .NewsBand__s1,
+  .NewsBand__s2,
+  .NewsBand__s3 {
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  /* ── Hero-left: [2fr 1fr 1fr] ──────────────────────────────────── */
+  .NewsBand--hero-left {
+    grid-template-columns: 2fr 1fr 1fr;
+  }
+
+  .NewsBand--hero-left .NewsBand__hero { grid-column: 1; grid-row: 1 / span 2; }
+  .NewsBand--hero-left .NewsBand__s1   { grid-column: 2; grid-row: 1; }
+  .NewsBand--hero-left .NewsBand__s2   { grid-column: 3; grid-row: 1; }
+  .NewsBand--hero-left .NewsBand__s3   { grid-column: 2 / span 2; grid-row: 2; }
+
+  /* ── Hero-right: [1fr 1fr 2fr] ─────────────────────────────────── */
+  .NewsBand--hero-right {
+    grid-template-columns: 1fr 1fr 2fr;
+  }
+
+  .NewsBand--hero-right .NewsBand__hero { grid-column: 3; grid-row: 1 / span 2; }
+  .NewsBand--hero-right .NewsBand__s1   { grid-column: 1; grid-row: 1; }
+  .NewsBand--hero-right .NewsBand__s2   { grid-column: 2; grid-row: 1; }
+  .NewsBand--hero-right .NewsBand__s3   { grid-column: 1 / span 2; grid-row: 2; }
+
+  /* ── Mobile: stack vertical ─────────────────────────────────────── */
+  @media (max-width: 640px) {
+    .NewsBand,
+    .NewsBand--hero-left,
+    .NewsBand--hero-right {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+      min-height: unset;
+    }
+
+    .NewsBand--hero-left .NewsBand__hero,
+    .NewsBand--hero-right .NewsBand__hero,
+    .NewsBand--hero-left .NewsBand__s1,
+    .NewsBand--hero-right .NewsBand__s1,
+    .NewsBand--hero-left .NewsBand__s2,
+    .NewsBand--hero-right .NewsBand__s2,
+    .NewsBand--hero-left .NewsBand__s3,
+    .NewsBand--hero-right .NewsBand__s3 {
+      grid-column: 1;
+      grid-row: auto;
+    }
+
+    .NewsBand__hero { min-height: 280px; }
+  }
+</style>
