@@ -5,8 +5,8 @@
  * p = progreso de scroll normalizado [0, 1] sobre 350vh de wrapper.
  *
  * Fase 1  [0.00 → 0.42]  Pastilla azul se expande. "Abrí la ventana" desaparece.
- * Fase 2  [0.38 → 0.62]  "Esto es WOU" aparece.
- * Fase 3  [0.56 → 0.90]  "Esto es WOU" hace zoom ×10 y se esfuma.
+ * Fase 2  [0.38 → 0.48]  "Esto es WOU" aparece rápido.
+ * Fase 3  [0.38 → 0.92]  "Esto es WOU" hace zoom ×15 continuo; se esfuma recién en [0.78→0.92].
  * Fase 4  [0.85 → 1.00]  Fondo azul desaparece. Sticky se disuelve → NewsGrid.
  */
 ---
@@ -52,11 +52,12 @@
     tPillScale    = 1 + p1 * 39;
     tLabelOp      = c(1 - p1 * 3);
 
-    // Fase 2 + 3: headline aparece y luego se esfuma mientras escala
-    const hlIn    = eio(c((p - 0.38) / 0.24));       // 0 → 1
-    const hlOut   = eio(c((p - 0.60) / 0.30));       // 0 → 1 (esfumado)
+    // Fase 2: headline aparece rápido, crece continuamente hasta p=0.90
+    const hlIn    = eio(c((p - 0.38) / 0.10));       // aparece rápido 0.38→0.48
+    // Fase 3: desaparece recién cuando está muy grande (p=0.78→0.92)
+    const hlOut   = eio(c((p - 0.78) / 0.14));       // esfumado tardío
     tHlOp         = c(hlIn * (1 - hlOut * 1.4));
-    tHlScale      = 1 + ein(c((p - 0.56) / 0.34)) * 9; // 1 → 10
+    tHlScale      = 1 + ein(c((p - 0.38) / 0.52)) * 14; // zoom 1 → 15, desde que aparece
 
     // Fase 4: azul desaparece, sticky se disuelve
     const p4      = eio(c((p - 0.85) / 0.15));
@@ -92,6 +93,7 @@
     position: relative;
     height: 350vh;
     background: var(--color-brand-dark);
+    z-index: 2;
   }
 
   .TSec__sticky {

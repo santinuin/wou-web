@@ -23,6 +23,11 @@
   --font-franklin:'Libre Franklin', sans-serif;    /* bajadas en negrita       */
 }
 
+html,
+body {
+  background: var(--color-brand-dark);
+}
+
 /* Hide scrollbar globally */
 * {
   scrollbar-width: none;
