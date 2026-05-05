@@ -93,3 +93,111 @@ export function getYouTubeWatchUrl(videoId: string): string {
 export function getYouTubeShortsUrl(videoId: string): string {
   return `https://www.youtube.com/shorts/${videoId}`;
 }
+
+// ── Últimos Shorts del canal ─────────────────────────────────────────────────
+
+export interface YoutubeVideoInfo {
+  videoId: string;
+  title: string;
+  thumbUrl: string;
+}
+
+// Playlist no oficial de Shorts: reemplazar "UC" → "UUSH" en el channel ID.
+// YouTube la expone en el RSS igual que cualquier playlist pública.
+const SHORTS_PLAYLIST_ID = 'UUSH' + CHANNEL_ID.slice(2);
+
+const YT_VIDEOS_API = 'https://www.googleapis.com/youtube/v3/videos';
+
+/**
+ * Devuelve los últimos `count` Shorts del canal.
+ *
+ * Estrategia (en orden):
+ * 1. RSS de la playlist de Shorts (no oficial, sin API key, sin quota).
+ * 2. Si falla: YouTube Data API con videoDuration=short + filtro de duración ≤ 180 s
+ *    (requiere YOUTUBE_API_KEY; puede incluir clips cortos que no son Shorts).
+ *
+ * Llamar solo en build-time (frontmatter de .astro o content loader).
+ */
+export async function getLatestYoutubeShorts(count = 5): Promise<YoutubeVideoInfo[]> {
+  const fromPlaylist = await getShortsFromPlaylist(count);
+  if (fromPlaylist.length > 0) return fromPlaylist;
+
+  console.warn('[youtube] Playlist de Shorts vacía o inaccesible — intentando API fallback');
+  return getShortsFromApi(count);
+}
+
+// ── Estrategia 1: RSS de la playlist UUSH (no oficial) ──────────────────────
+
+async function getShortsFromPlaylist(count: number): Promise<YoutubeVideoInfo[]> {
+  try {
+    const res = await fetch(
+      `https://www.youtube.com/feeds/videos.xml?playlist_id=${SHORTS_PLAYLIST_ID}`
+    );
+    if (!res.ok) return [];
+    const xml = await res.text();
+    return xml
+      .split('<entry>')
+      .slice(1, count + 1)
+      .flatMap((entry) => {
+        const videoId = entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1];
+        const title = entry.match(/<title>([^<]+)<\/title>/)?.[1] ?? '';
+        if (!videoId) return [];
+        return [{ videoId, title, thumbUrl: getYouTubeThumbUrl(videoId, 'hq') }];
+      });
+  } catch {
+    return [];
+  }
+}
+
+// ── Estrategia 2: API oficial con filtro de duración (fallback) ──────────────
+
+// ISO 8601 duration → segundos (ej: "PT1M30S" → 90)
+function parseDurationSeconds(iso: string): number {
+  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!m) return 0;
+  return (+(m[1] ?? 0)) * 3600 + (+(m[2] ?? 0)) * 60 + +(m[3] ?? 0);
+}
+
+async function getShortsFromApi(count: number): Promise<YoutubeVideoInfo[]> {
+  const apiKey = import.meta.env.YOUTUBE_API_KEY;
+  if (!apiKey) {
+    console.warn('[youtube] YOUTUBE_API_KEY no configurada — sin fallback disponible');
+    return [];
+  }
+
+  try {
+    const searchUrl =
+      `${YT_API}?part=id&channelId=${CHANNEL_ID}&type=video` +
+      `&order=date&videoDuration=short&maxResults=${count * 2}&key=${apiKey}`;
+    const searchRes = await fetch(searchUrl);
+    const searchData = await searchRes.json();
+    if (!searchData.items?.length) return [];
+
+    const ids = (searchData.items as { id: { videoId: string } }[])
+      .map((i) => i.id.videoId)
+      .join(',');
+
+    const detailsRes = await fetch(
+      `${YT_VIDEOS_API}?part=contentDetails,snippet&id=${ids}&key=${apiKey}`
+    );
+    const detailsData = await detailsRes.json();
+
+    type RawVideo = {
+      id: string;
+      contentDetails: { duration: string };
+      snippet: { title: string };
+    };
+
+    return (detailsData.items as RawVideo[])
+      .filter((v) => parseDurationSeconds(v.contentDetails.duration) <= 180)
+      .slice(0, count)
+      .map((v) => ({
+        videoId: v.id,
+        title: v.snippet.title,
+        thumbUrl: getYouTubeThumbUrl(v.id, 'hq'),
+      }));
+  } catch (err) {
+    console.error('[youtube] Error API getShortsFromApi:', err);
+    return [];
+  }
+}

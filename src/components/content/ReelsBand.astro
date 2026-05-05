@@ -1,27 +1,8 @@
 ---
 import ReelCard from './ReelCard.astro';
-import { parseYouTubeId, getYouTubeThumbUrl } from '@/lib/youtube';
-import type { CollectionEntry } from 'astro:content';
+import { getLatestYoutubeShorts } from '@/lib/youtube';
 
-interface Props {
-  reels: CollectionEntry<'reels'>[];
-}
-
-const { reels } = Astro.props;
-
-const items = reels
-  .map((r) => {
-    const videoId = parseYouTubeId(r.data.youtubeUrl);
-    if (!videoId) return null;
-    return {
-      id: r.data._id,
-      videoId,
-      title: r.data.title,
-      thumbUrl: getYouTubeThumbUrl(videoId, 'hq'),
-    };
-  })
-  .filter((x): x is NonNullable<typeof x> => x !== null)
-  .slice(0, 5);
+const items = await getLatestYoutubeShorts(5);
 ---
 
 {items.length > 0 && (

@@ -7,9 +7,8 @@ import ReelsBand from '@/components/content/ReelsBand.astro';
 import { MOCK_ARTICLES, type ArticleLike } from './mocks/newsGridMock';
 import type { CollectionEntry } from 'astro:content';
 
-const rawArticles     = await getCollection('articles');
-const allAds          = await getCollection('advertisements');
-const allReels        = await getCollection('reels');
+const rawArticles = await getCollection('articles');
+const allAds      = await getCollection('advertisements');
 
 // Fallback a mocks cuando Sanity no está configurado o no hay artículos aún
 const allArticles: ArticleLike[] = rawArticles.length > 0
@@ -40,7 +39,6 @@ const sortByOrder = (a: CollectionEntry<'advertisements'>, b: CollectionEntry<'a
 const ads1 = allAds.filter((a) => a.data.placement === 'ads1').sort(sortByOrder);
 const ads2 = allAds.filter((a) => a.data.placement === 'ads2').sort(sortByOrder);
 
-const reelsSorted = allReels.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
 ---
 
 <div class="NGReveal">
@@ -55,7 +53,7 @@ const reelsSorted = allReels.sort((a, b) => (a.data.order ?? 99) - (b.data.order
       <NewsBand variant="hero-right" hero={locales.hero} support={locales.support} />
     )}
 
-    <ReelsBand reels={reelsSorted} />
+    <ReelsBand />
 
     {policiales.hero && (
       <NewsBand variant="hero-left" hero={policiales.hero} support={policiales.support} />

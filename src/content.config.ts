@@ -8,7 +8,6 @@ import {
   ALL_PROGRAMS_QUERY,
   ALL_RADIO_SHOWS_QUERY,
   ALL_RED_CIRCLES_QUERY,
-  ALL_REELS_QUERY,
 } from './lib/cms/queries';
 
 /**
@@ -204,24 +203,6 @@ const radioShows = defineCollection({
   }),
 });
 
-// ─── Reels ────────────────────────────────────────────────────────────────────
-
-const reels = defineCollection({
-  loader: async () => {
-    if (!isSanityConfigured) return [];
-    type RawReel = { _id: string; [key: string]: unknown };
-    const data = await sanityClient.fetch<RawReel[]>(ALL_REELS_QUERY);
-    return data.map((r) => ({ id: r._id, ...r }));
-  },
-  schema: z.object({
-    _id: z.string(),
-    title: z.string(),
-    youtubeUrl: z.string(),
-    publishedAt: z.string().nullish(),
-    order: z.number().nullish(),
-  }),
-});
-
 // ─── Advertisements ───────────────────────────────────────────────────────────
 
 const advertisements = defineCollection({
@@ -242,4 +223,4 @@ const advertisements = defineCollection({
   }),
 });
 
-export const collections = { articles, authors, categories, programs, radioShows, redCircles, reels, advertisements };
+export const collections = { articles, authors, categories, programs, radioShows, redCircles, advertisements };

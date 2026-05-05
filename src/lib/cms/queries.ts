@@ -111,18 +111,6 @@ export const ARTICLE_BY_SLUG_QUERY = groq`
   }
 `;
 
-// ─── Reels ────────────────────────────────────────────────────────────────────
-
-export const ALL_REELS_QUERY = groq`
-  *[_type == "reel"] | order(order asc, publishedAt desc) [0...8] {
-    _id,
-    title,
-    youtubeUrl,
-    publishedAt,
-    order
-  }
-`;
-
 // ─── Advertisements ───────────────────────────────────────────────────────────
 
 export const ALL_ADVERTISEMENTS_QUERY = groq`
