@@ -85,6 +85,25 @@ Para explorar datos en vivo: `bun run studio` → pestaña "Vision" (GROQ playgr
 - `studioBasePath` omitido intencionalmente — su presencia rompe `output: 'static'`.
 - Studio local: `bun run studio` → http://localhost:3333
 
+## Sanity Studio — arquitectura separada
+El Studio vive en `studio/` (subcarpeta del repo) con su propio `package.json`.
+**Separación necesaria**: Bun no instala peer dependencies de Sanity correctamente
+cuando se mezcla con el proyecto Astro (falla con `styled-components`).
+
+```
+studio/
+├── package.json      ← deps propias: sanity, react, styled-components
+├── sanity.config.ts  ← importa schemas desde ../src/schemas (fuente única)
+├── sanity.cli.ts     ← lee SANITY_STUDIO_* de studio/.env
+└── .env              ← SANITY_STUDIO_PROJECT_ID, SANITY_STUDIO_DATASET
+```
+
+Reglas:
+- Los schemas viven SOLO en `src/schemas/` — el Studio los importa desde ahí.
+- El root `package.json` mantiene `sanity` solo para `typegen` y `schema deploy`.
+- `bun run studio` (root) hace `cd studio && bun run dev`.
+- Si falla por ENOSPC: `echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p`
+
 ## Tailwind CSS v4
 - Configuración CSS-first en `src/styles/global.css`
 - Design tokens en bloque `@theme {}`
