@@ -1,46 +1,46 @@
 ---
 /**
- * Facade estático para el stream de YouTube.
- * Muestra thumbnail + play button que abre YouTube en nueva pestaña.
- * Sin iframe — evita el bloqueo del main thread.
- * Cuando se quiera el embed real: reemplazar por lite-youtube-embed.
+ * Facade para el stream de YouTube.
+ * Build-time: detecta vivo con YouTube Data API; si no hay vivo, último stream.
+ * Click: carga el iframe con autoplay (solo cuando el usuario interactúa).
  */
+import { getYoutubeStream, getYouTubeThumbUrl } from '@/lib/youtube';
+
 interface Props {
-  videoId?: string | null;
   station?: string;
   handle?: string;
+  /** Filtra por nombre de programa, ej: "Cambalache". Sin filtro → cualquier stream del canal. */
+  filter?: string;
 }
 
-const { videoId, station = 'WOU! RADIO 95.1', handle = '@wounoticias' } = Astro.props;
+const { station = 'WOU! RADIO 95.1', handle = '@wounoticias', filter } = Astro.props;
 
-const thumbnailUrl = videoId
-  ? `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`
+const { videoId, isLive } = await getYoutubeStream(filter);
+
+const thumbnailUrl = videoId ? getYouTubeThumbUrl(videoId) : null;
+const embedUrl = videoId
+  ? `https://www.youtube.com/embed/${videoId}?autoplay=1`
   : null;
-
-const youtubeUrl = videoId
-  ? `https://www.youtube.com/watch?v=${videoId}`
-  : 'https://www.youtube.com/@-WouRadio-/streams';
 ---
 
-<a
-  href={youtubeUrl}
-  target="_blank"
-  rel="noopener noreferrer"
-  class="relative block w-full h-full bg-brand-black overflow-hidden group"
-  aria-label={`Ver ${station} en YouTube`}
+<div
+  class="yt-facade relative w-full h-full bg-brand-black overflow-hidden group cursor-pointer"
+  data-embed={embedUrl}
+  role="button"
+  tabindex="0"
+  aria-label={`Reproducir ${station} en YouTube`}
 >
   <!-- Thumbnail -->
   {thumbnailUrl ? (
     <img
       src={thumbnailUrl}
-      alt={`Stream en vivo de ${station}`}
+      alt={`Stream de ${station}`}
       class="w-full h-full object-cover"
       loading="lazy"
       width="1280"
       height="720"
     />
   ) : (
-    <!-- Placeholder cuando no hay videoId configurado -->
     <div class="w-full h-full flex items-center justify-center bg-linear-to-br from-brand-dark to-brand-black">
       <span class="font-barlow font-black text-brand-white text-2xl tracking-wider opacity-40">
         WOU!
@@ -48,20 +48,28 @@ const youtubeUrl = videoId
     </div>
   )}
 
-  <!-- Overlay oscuro al hover -->
+  <!-- Overlay -->
   <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
 
-  <!-- Encabezado: station + handle + hora -->
+  <!-- Encabezado -->
   <div class="absolute top-0 left-0 right-0 flex items-start justify-between p-3">
     <span class="font-barlow font-black text-brand-white text-sm tracking-wide drop-shadow">
       {station}
     </span>
-    <span class="font-sans text-brand-white text-xs opacity-80 drop-shadow">
-      {handle}
-    </span>
+    <div class="flex items-center gap-2">
+      {isLive && (
+        <span class="flex items-center gap-1 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+          <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+          EN VIVO
+        </span>
+      )}
+      <span class="font-sans text-brand-white text-xs opacity-80 drop-shadow">
+        {handle}
+      </span>
+    </div>
   </div>
 
-  <!-- Botón play de YouTube (centro) -->
+  <!-- Play button -->
   <div class="absolute inset-0 flex items-center justify-center">
     <div class="w-14 h-10 bg-[#FF0000] rounded-lg flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -69,4 +77,26 @@ const youtubeUrl = videoId
       </svg>
     </div>
   </div>
-</a>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.yt-facade').forEach((facade) => {
+    const activate = () => {
+      const src = facade.dataset.embed;
+      if (!src) return;
+      const iframe = document.createElement('iframe');
+      iframe.src = src;
+      iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
+      iframe.allowFullscreen = true;
+      iframe.className = 'absolute inset-0 w-full h-full border-0';
+      iframe.title = facade.getAttribute('aria-label') ?? 'YouTube';
+      facade.innerHTML = '';
+      facade.appendChild(iframe);
+    };
+
+    facade.addEventListener('click', activate);
+    facade.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') activate();
+    });
+  });
+</script>
