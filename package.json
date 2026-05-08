@@ -7,6 +7,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "studio": "cd studio && bun run dev",
+    "studio:deploy": "cd studio && bun run deploy",
     "typegen": "sanity typegen generate",
     "check": "astro check && svelte-check --tsconfig ./tsconfig.json",
     "audit": "playwright test tests/audit.spec.ts",

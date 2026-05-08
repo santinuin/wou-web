@@ -2,7 +2,8 @@
   "name": "wou-studio",
   "private": true,
   "scripts": {
-    "dev": "sanity dev"
+    "dev": "sanity dev",
+    "deploy": "sanity deploy"
   },
   "dependencies": {
     "@sanity/vision": "^5.20.0",
