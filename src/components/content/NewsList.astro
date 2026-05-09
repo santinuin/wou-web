@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import { timeAgo, formatDateLong } from '@/lib/utils';
+import { timeAgo, formatDateDots } from '@/lib/utils';
 
 interface NewsItem {
   title: string;
@@ -21,13 +21,15 @@ const { articles, buildDate = new Date() } = Astro.props;
 <div class="flex flex-col bg-brand-black h-full">
 
   <!-- Encabezado -->
-  <div class="flex items-center justify-between px-5 pt-10 pb-1 border-b border-brand-teal/30">
-    <span class="font-bowlby text-brand-teal text-s uppercase tracking-widest">
-      Ponete al día
-    </span>
-    <span class="font-franklin italic text-brand-gray/50 text-xs">
-      {formatDateLong(buildDate)}
-    </span>
+  <div class="NL__header px-5 pt-10 border-b-10 border-brand-teal">
+    <div class="flex items-baseline gap-3 leading-none">
+      <span class="NL__title font-boldonse text-brand-teal leading-none whitespace-nowrap" style="font-size: 3rem;">
+        PONETE AL DÍA
+      </span>
+      <span class="NL__date font-boldonse text-brand-teal leading-none whitespace-nowrap shrink-0" style="font-size: 1.1rem;">
+        {formatDateDots(buildDate)}
+      </span>
+    </div>
   </div>
 
   <!--
@@ -37,17 +39,15 @@ const { articles, buildDate = new Date() } = Astro.props;
       · Reveal del preview (imagen + excerpt) con transición de max-width
       · Desplazamiento del título a la derecha (empujado por el preview)
   -->
-  <ul class="flex-1">
+  <ul class="flex-1 flex flex-col">
     {articles.map((article) => (
-      <li class="group relative">
+      <li class="group relative flex-1">
         <a
           href={`/articulo/${article.slug}`}
-          class="relative flex items-center px-5 py-3.5 overflow-hidden"
+          class="relative flex items-center px-5 h-full overflow-hidden"
         >
           {/*
             Sweep background — barrido vertical del color de hover.
-            transform-origin: top + scaleY(0→1) produce el efecto de "barrer"
-            la fila desde arriba hacia abajo en ~700ms.
           */}
           <span
             aria-hidden="true"
@@ -91,3 +91,32 @@ const { articles, buildDate = new Date() } = Astro.props;
     ))}
   </ul>
 </div>
+
+<script>
+  const header = document.querySelector<HTMLElement>('.NL__header');
+  const title  = document.querySelector<HTMLElement>('.NL__title');
+  const date   = document.querySelector<HTMLElement>('.NL__date');
+
+  function fitTitle() {
+    if (!header || !title || !date) return;
+    const available = header.clientWidth
+      - parseInt(getComputedStyle(header).paddingLeft)
+      - parseInt(getComputedStyle(header).paddingRight)
+      - date.offsetWidth
+      - 12; // gap
+
+    let lo = 16, hi = 75;
+    while (hi - lo > 0.5) {
+      const mid = (lo + hi) / 2;
+      title.style.fontSize = `${mid}px`;
+      title.scrollWidth <= available ? (lo = mid) : (hi = mid);
+    }
+    title.style.fontSize = `${Math.floor(lo)}px`;
+
+    // fecha proporcional: ~32% del título
+    date.style.fontSize = `${Math.floor(lo * 0.32)}px`;
+  }
+
+  document.fonts.ready.then(fitTitle);
+  if (header) new ResizeObserver(fitTitle).observe(header);
+</script>
