@@ -22,11 +22,11 @@ const { articles, buildDate = new Date() } = Astro.props;
 
   <!-- Encabezado -->
   <div class="NL__header px-5 pt-10 border-b-10 border-brand-teal">
-    <div class="flex items-baseline gap-3 leading-none">
-      <span class="NL__title font-boldonse text-brand-teal leading-none whitespace-nowrap" style="font-size: 3rem;">
+    <div class="flex items-end gap-3 leading-none pb-0">
+      <span class="NL__title font-boldonse text-brand-teal leading-none whitespace-nowrap pl-4" style="font-size: 3rem;">
         PONETE AL DÍA
       </span>
-      <span class="NL__date font-boldonse text-brand-teal leading-none whitespace-nowrap shrink-0" style="font-size: 1.1rem;">
+      <span class="NL__date font-franklin font-bold text-brand-teal leading-none whitespace-nowrap shrink-0 -mb-1.75" style="font-size: 1.1rem;">
         {formatDateDots(buildDate)}
       </span>
     </div>
@@ -113,8 +113,8 @@ const { articles, buildDate = new Date() } = Astro.props;
     }
     title.style.fontSize = `${Math.floor(lo)}px`;
 
-    // fecha proporcional: ~32% del título
-    date.style.fontSize = `${Math.floor(lo * 0.32)}px`;
+    // fecha proporcional: ~50% del título
+    date.style.fontSize = `${Math.floor(lo * 0.50)}px`;
   }
 
   document.fonts.ready.then(fitTitle);
