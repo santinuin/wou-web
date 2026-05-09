@@ -65,32 +65,32 @@ const MOCK_EDITORIAL = {
 -->
 <section
   aria-label="Hero — noticias y editorial"
-  class="grid grid-cols-2 h-[calc(100vh-5.5rem)]"
+  class="flex flex-col lg:grid lg:grid-cols-2 lg:h-[calc(100vh-5.5rem)]"
 >
 
   <!-- ── Columna izquierda ──────────────────────────────────────────────── -->
-  <div class="flex flex-col bg-brand-black min-h-0">
+  <div class="flex flex-col bg-brand-black lg:min-h-0">
 
-    <!-- LiveCard + YouTube: altura fija proporcional (~42% del total) -->
-    <div class="grid grid-cols-[2fr_4fr] shrink-0" style="height: 42%;">
+    <!-- LiveCard + YouTube -->
+    <div class="grid grid-cols-[2fr_4fr] shrink-0 h-52 lg:h-[42%]">
       <LiveCard isLive={true} streamUrl={null} />
       <YoutubeEmbed station="Cambalache" filter="Cambalache" />
     </div>
 
-    <!-- Lista de noticias: ocupa el resto -->
-    <div class="flex-1 min-h-0">
+    <!-- Lista de noticias -->
+    <div class="min-h-64 lg:flex-1 lg:min-h-0">
       <NewsList articles={MOCK_NEWS} buildDate={now} />
     </div>
 
   </div>
 
   <!-- ── Columna derecha: ticker + editorial ───────────────────────────── -->
-  <div class="flex flex-col min-h-0">
+  <div class="flex flex-col lg:min-h-0 min-h-[60svh]">
 
     <!-- Ticker al tope de la columna -->
     <NewsTicker items={MOCK_TICKER} />
 
-    <!-- Editorial: ocupa el resto de la columna -->
+    <!-- Editorial -->
     <EditorialCard
       title={MOCK_EDITORIAL.title}
       highlightWord={MOCK_EDITORIAL.highlightWord}

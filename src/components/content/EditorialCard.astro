@@ -100,13 +100,16 @@ const titleParts = highlightWord
   /* ── Imagen ───────────────────────────────────────────────────────── */
   .EC__image {
     width: 100%;
-    /*
-      Misma altura que LiveCard+YT (42% del hero) menos el ticker (h-9 = 2.25rem).
-      El hero mide calc(100vh - 5.5rem) → 42% = 0.42 × (100vh - 5.5rem).
-    */
-    height: calc(0.42 * (100vh - 5.5rem) - 2.25rem);
+    height: 260px; /* mobile/tablet: altura fija */
     flex-shrink: 0;
     overflow: hidden;
+  }
+
+  @media (min-width: 1024px) {
+    .EC__image {
+      /* Alinea con LiveCard+YT (42% del hero) menos el ticker (h-9 = 2.25rem) */
+      height: calc(0.42 * (100vh - 5.5rem) - 2.25rem);
+    }
   }
 
   /* ── Título ───────────────────────────────────────────────────────── */
@@ -114,19 +117,20 @@ const titleParts = highlightWord
     container-type: inline-size;
     flex: 1;
     display: flex;
-    align-items: flex-start;
-    padding: 0.6rem 0.75rem 0.75rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.25rem 0.25rem;
     overflow: hidden;
     position: relative;
   }
 
   .EC__title {
-    /* 19cqw ≈ llena el ancho del contenedor para textos como "Sueldos de" */
-    font-size: clamp(2rem, 19cqw, 220px);
-    line-height: 0.88;
+    font-size: 2rem; /* JS lo reemplaza; fallback para SSR */
+    line-height: 0.70;
     color: var(--color-brand-dark);
     margin: 0;
-    letter-spacing: -0.02em;
+    text-align: center;
+    width: 100%;
   }
 
   .EC__title:hover {
@@ -135,11 +139,12 @@ const titleParts = highlightWord
 
   .EC__highlight {
     font-style: normal;
-    font-size: 1.07em;
+    font-size: 1.4em;
   }
 </style>
 
 <script>
+  // ── Cursor personalizado ───────────────────────────────────────────────────
   const card   = document.querySelector<HTMLElement>('.EditorialCard');
   const cursor = document.querySelector<HTMLElement>('.EC__cursor');
   const badge  = document.querySelector<HTMLElement>('.EC__badge');
@@ -150,4 +155,23 @@ const titleParts = highlightWord
       badge.style.transform  = `translate(${e.clientX + 20}px, ${e.clientY + 8}px)`;
     });
   }
+
+  // ── Fit text: binary search del font-size máximo que cabe en el área teal ─
+  const wrap  = document.querySelector<HTMLElement>('.EC__title-wrap');
+  const title = document.querySelector<HTMLElement>('.EC__title');
+
+  function fitTitle() {
+    if (!wrap || !title) return;
+    let lo = 16, hi = 500;
+    // Busca el mayor tamaño donde scrollHeight ≤ clientHeight del wrapper
+    while (hi - lo > 0.5) {
+      const mid = (lo + hi) / 2;
+      title.style.fontSize = `${mid}px`;
+      title.scrollHeight <= wrap.clientHeight ? (lo = mid) : (hi = mid);
+    }
+    title.style.fontSize = `${Math.floor(lo)}px`;
+  }
+
+  document.fonts.ready.then(fitTitle);
+  if (wrap) new ResizeObserver(fitTitle).observe(wrap);
 </script>
