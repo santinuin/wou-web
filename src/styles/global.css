@@ -20,7 +20,7 @@
   --font-sans:    'Inter', system-ui, sans-serif;
   --font-boldonse:'Boldonse', sans-serif;  /* badge "ESTÁ PASANDO"    */
   --font-bowlby:  'Bowlby One';           /* titulares e indicadores */
-  --font-barlow:  'Barlow Condensed', sans-serif;  /* subtítulos condensados  */
+  --font-barlow:  'Barlow', sans-serif;   /* titulares y ticker      */
   --font-alumni:  'Alumni Sans', sans-serif;       /* títulos editoriales     */
   --font-franklin:'Libre Franklin', sans-serif;    /* bajadas en negrita       */
 }

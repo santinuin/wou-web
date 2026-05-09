@@ -18,15 +18,15 @@ interface Props {
 const { articles, buildDate = new Date() } = Astro.props;
 ---
 
-<div class="flex flex-col bg-brand-black h-full">
+<div class="flex flex-col bg-brand-dark h-full">
 
   <!-- Encabezado -->
-  <div class="NL__header px-5 pt-10 border-b-10 border-brand-teal">
+  <div class="NL__header px-5 pt-10 border-b-10 border-brand-teal" style="container-type: inline-size;">
     <div class="flex items-end gap-3 leading-none pb-0">
-      <span class="NL__title font-boldonse text-brand-teal leading-none whitespace-nowrap pl-4" style="font-size: 3rem;">
+      <span class="NL__title font-boldonse text-brand-teal leading-none whitespace-nowrap pl-4" style="font-size: 8.5cqw;">
         PONETE AL DÍA
       </span>
-      <span class="NL__date font-franklin font-bold text-brand-teal leading-none whitespace-nowrap shrink-0 -mb-1.75" style="font-size: 1.1rem;">
+      <span class="NL__date font-franklin font-bold text-brand-teal leading-none whitespace-nowrap shrink-0 -mb-1.75" style="font-size: 4cqw;">
         {formatDateDots(buildDate)}
       </span>
     </div>
@@ -92,31 +92,3 @@ const { articles, buildDate = new Date() } = Astro.props;
   </ul>
 </div>
 
-<script>
-  const header = document.querySelector<HTMLElement>('.NL__header');
-  const title  = document.querySelector<HTMLElement>('.NL__title');
-  const date   = document.querySelector<HTMLElement>('.NL__date');
-
-  function fitTitle() {
-    if (!header || !title || !date) return;
-    const available = header.clientWidth
-      - parseInt(getComputedStyle(header).paddingLeft)
-      - parseInt(getComputedStyle(header).paddingRight)
-      - date.offsetWidth
-      - 12; // gap
-
-    let lo = 16, hi = 75;
-    while (hi - lo > 0.5) {
-      const mid = (lo + hi) / 2;
-      title.style.fontSize = `${mid}px`;
-      title.scrollWidth <= available ? (lo = mid) : (hi = mid);
-    }
-    title.style.fontSize = `${Math.floor(lo)}px`;
-
-    // fecha proporcional: ~50% del título
-    date.style.fontSize = `${Math.floor(lo * 0.50)}px`;
-  }
-
-  document.fonts.ready.then(fitTitle);
-  if (header) new ResizeObserver(fitTitle).observe(header);
-</script>

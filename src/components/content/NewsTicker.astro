@@ -24,10 +24,10 @@ const loopedItems = [...items, ...items, ...items];
 
   <!-- Track scrolleable -->
 <div class="flex-1 overflow-hidden flex items-center bg-brand-green">
-  <div class="ticker-track flex items-center gap-4 whitespace-nowrap">
+  <div class="ticker-track flex items-center gap-1.5 whitespace-nowrap">
     {loopedItems.map((item) => (
       <>
-        <span class="font-bowlby text-brand-black text-sm font-bold uppercase">
+        <span class="font-barlow font-black uppercase text-brand-dark text-[15px] leading-4.5 tracking-[-0.02em]">
           {item}
         </span>
         <span class="text-brand-black font-bold" aria-hidden="true">·</span>
