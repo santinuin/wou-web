@@ -35,7 +35,7 @@ const titleParts = highlightWord
     <Image
       src={editorialBadge}
       alt=""
-      width={110}
+      width={160}
       loading="eager"
     />
   </div>
@@ -82,19 +82,27 @@ const titleParts = highlightWord
   /* ── Cursor personalizado ─────────────────────────────────────────── */
   .EC__cursor,
   .EC__badge {
-    position: fixed;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-    opacity: 0;
-    z-index: 9999;
-    transition: opacity 0.12s ease;
-    will-change: transform;
+    display: none; /* oculto en mobile */
   }
 
-  .EditorialCard:hover .EC__cursor,
-  .EditorialCard:hover .EC__badge {
-    opacity: 1;
+  @media (min-width: 1024px) {
+    .EC__cursor,
+    .EC__badge {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 9999;
+      transition: opacity 0.12s ease;
+      will-change: transform;
+    }
+
+    .EditorialCard:hover .EC__cursor,
+    .EditorialCard:hover .EC__badge {
+      opacity: 1;
+    }
   }
 
   /* ── Imagen ───────────────────────────────────────────────────────── */
@@ -144,16 +152,28 @@ const titleParts = highlightWord
 </style>
 
 <script>
-  // ── Cursor personalizado ───────────────────────────────────────────────────
+  // ── Cursor personalizado con lerp ─────────────────────────────────────────
   const card   = document.querySelector<HTMLElement>('.EditorialCard');
   const cursor = document.querySelector<HTMLElement>('.EC__cursor');
   const badge  = document.querySelector<HTMLElement>('.EC__badge');
 
   if (card && cursor && badge) {
+    let mouseX = 0, mouseY = 0;
+    let badgeX = 0, badgeY = 0;
+    const LERP = 0.08; // 0→1: más bajo = más lento/suave
+
     card.addEventListener('mousemove', (e) => {
-      cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-      badge.style.transform  = `translate(${e.clientX + 20}px, ${e.clientY + 8}px)`;
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      cursor.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
     });
+
+    (function loop() {
+      badgeX += (mouseX + 12 - badgeX) * LERP;
+      badgeY += (mouseY + 6 - badgeY) * LERP;
+      badge.style.transform = `translate(${badgeX}px, ${badgeY}px)`;
+      requestAnimationFrame(loop);
+    })();
   }
 
   // ── Fit text: binary search del font-size máximo que cabe en el área teal ─
