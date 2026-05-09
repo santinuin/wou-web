@@ -18,6 +18,7 @@
 
   /* ── Tipografía ──────────────────────────────────────────────────────── */
   --font-sans:    'Inter', system-ui, sans-serif;
+  --font-boldonse:'Boldonse', sans-serif;  /* badge "ESTÁ PASANDO"    */
   --font-bowlby:  'Bowlby One';           /* titulares e indicadores */
   --font-barlow:  'Barlow Condensed', sans-serif;  /* subtítulos condensados  */
   --font-alumni:  'Alumni Sans', sans-serif;       /* títulos editoriales     */
