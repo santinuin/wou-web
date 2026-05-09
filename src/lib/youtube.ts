@@ -1,12 +1,7 @@
-/**
- * Utilidades para parsear URLs de YouTube en build-time.
- * Sin side effects, sin fetch: el build no debe golpear la red.
- */
-
 // ── Stream del canal ────────────────────────────────────────────────────────
 
 const CHANNEL_ID = 'UC3C3wmr69AvQKvs7f3pJD9w';
-const YT_API = 'https://www.googleapis.com/youtube/v3/search';
+const CHANNEL_HANDLE = '@wounoticias';
 
 export interface YoutubeStreamInfo {
   videoId: string | null;
@@ -14,52 +9,69 @@ export interface YoutubeStreamInfo {
 }
 
 /**
- * Obtiene el stream actual (si hay vivo) o el último stream grabado.
- * Usa YouTube Data API si YOUTUBE_API_KEY está definida; si no, RSS feed.
+ * Obtiene el stream actual (si hay vivo) o el último video del canal.
+ * Sin API key: usa la URL /live del canal + RSS feed.
  * Llamar solo en build-time (frontmatter de .astro o content loader).
  *
- * @param filter - Palabra clave para filtrar por título (ej: "Cambalache").
- *                 Si no se pasa, trae cualquier stream del canal.
+ * @param filter - Palabra clave para filtrar por título en el RSS (ej: "Cambalache").
+ *                 Sin filtro, prioriza el stream en vivo del momento.
  */
 export async function getYoutubeStream(filter?: string): Promise<YoutubeStreamInfo> {
-  const apiKey = import.meta.env.YOUTUBE_API_KEY;
-
-  if (!apiKey) {
-    console.warn('[youtube] YOUTUBE_API_KEY no configurada — RSS fallback');
-    return getRssFallback();
+  // Sin filtro: intentar detectar stream en vivo primero
+  if (!filter) {
+    const liveId = await detectLiveStream();
+    if (liveId) return { videoId: liveId, isLive: true };
   }
 
-  const q = filter ? `&q=${encodeURIComponent(filter)}` : '';
-  const base = `${YT_API}?part=id&channelId=${CHANNEL_ID}&type=video&maxResults=1&key=${apiKey}${q}`;
+  // Fallback: RSS del canal (último video, con filtro opcional por título)
+  return getRssFallback(filter);
+}
 
+/**
+ * Detecta si hay un stream en vivo ahora mismo sin API key.
+ * Fetch de /<handle>/live — si hay vivo, YouTube sirve esa página con el videoId embebido.
+ */
+async function detectLiveStream(): Promise<string | null> {
   try {
-    // Si hay filtro de programa, no tiene sentido buscar "vivo de Cambalache"
-    // porque el vivo del canal es siempre uno solo. Sí buscamos vivo sin filtro.
-    if (!filter) {
-      const liveRes = await fetch(`${base}&eventType=live`);
-      const liveData = await liveRes.json();
-      const liveId: string | null = liveData.items?.[0]?.id?.videoId ?? null;
-      if (liveId) return { videoId: liveId, isLive: true };
-    }
-
-    const completedRes = await fetch(`${base}&eventType=completed&order=date`);
-    const completedData = await completedRes.json();
-    const completedId: string | null = completedData.items?.[0]?.id?.videoId ?? null;
-    return { videoId: completedId, isLive: false };
-  } catch (err) {
-    console.error('[youtube] Error API:', err);
-    return getRssFallback();
+    const res = await fetch(`https://www.youtube.com/${CHANNEL_HANDLE}/live`, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; bot/1.0)' },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+    // La página del vivo incluye este marcador en los metadatos JSON-LD
+    if (!html.includes('"isLiveBroadcast"') && !html.includes('"isLive":true')) return null;
+    const match = html.match(/"videoId":"([A-Za-z0-9_-]{11})"/);
+    return match?.[1] ?? null;
+  } catch {
+    return null;
   }
 }
 
-async function getRssFallback(): Promise<YoutubeStreamInfo> {
+/**
+ * RSS feed público del canal — no requiere API key.
+ * Devuelve el primer video que coincida con el filtro de título, o el más reciente.
+ */
+async function getRssFallback(filter?: string): Promise<YoutubeStreamInfo> {
   try {
     const res = await fetch(
       `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`
     );
     const xml = await res.text();
-    const match = xml.match(/<yt:videoId>([^<]+)<\/yt:videoId>/);
-    return { videoId: match?.[1] ?? null, isLive: false };
+    const entries = xml.split('<entry>').slice(1);
+
+    for (const entry of entries) {
+      const idMatch    = entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/);
+      const titleMatch = entry.match(/<title>([^<]+)<\/title>/);
+      if (!idMatch) continue;
+      if (!filter || titleMatch?.[1]?.toLowerCase().includes(filter.toLowerCase())) {
+        return { videoId: idMatch[1], isLive: false };
+      }
+    }
+
+    // Sin coincidencia con el filtro → último video del canal
+    const firstId = entries[0]?.match(/<yt:videoId>([^<]+)<\/yt:videoId>/)?.[1] ?? null;
+    return { videoId: firstId, isLive: false };
   } catch {
     return { videoId: null, isLive: false };
   }

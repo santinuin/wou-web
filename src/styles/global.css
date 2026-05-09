@@ -10,6 +10,7 @@
   --color-brand-green:  #B9FFC1;
   --color-brand-gray:   #FFFFFF8C;
   --color-brand-blue:   #01236A;
+  --color-brand-red:    #E24B4A;
 
   /* Alias semánticos */
   --color-primary: var(--color-brand-dark);
@@ -17,7 +18,7 @@
 
   /* ── Tipografía ──────────────────────────────────────────────────────── */
   --font-sans:    'Inter', system-ui, sans-serif;
-  --font-bowlby:  'Bowlby One', cursive;           /* titulares e indicadores */
+  --font-bowlby:  'Bowlby One';           /* titulares e indicadores */
   --font-barlow:  'Barlow Condensed', sans-serif;  /* subtítulos condensados  */
   --font-alumni:  'Alumni Sans', sans-serif;       /* títulos editoriales     */
   --font-franklin:'Libre Franklin', sans-serif;    /* bajadas en negrita       */

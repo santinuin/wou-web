@@ -21,15 +21,6 @@ import EditorialCard from '@/components/content/EditorialCard.astro';
 // ── Mock data ──────────────────────────────────────────────────────────────
 // Reemplazar por queries GROQ via getCollection() cuando el CMS esté listo.
 
-const MOCK_RADIO = {
-  isLive: true,
-  station: 'WOU 95.1',
-  description:
-    'La 100 es la radio más escuchada del país y en Río Gallegos se escucha a través de Wou radio, en la 95.1',
-  streamUrl: null,           // TODO: URL real del stream HLS/Icecast
-  youtubeStreamId: null,     // TODO: ID real del stream de YouTube
-};
-
 const now = new Date();
 // imageUrl vendrá del CMS: urlForImage(article.mainImage).width(200).height(140).url()
 const LOREM = 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.';
@@ -78,12 +69,7 @@ const MOCK_EDITORIAL = {
 
   <!-- ── Col izq, fila 1: LiveCard + YouTube ───────────────────────────── -->
   <div class="col-start-1 row-start-1 grid grid-cols-[2fr_3fr] bg-brand-black min-h-0 h-80 pb-5">
-    <LiveCard
-      isLive={MOCK_RADIO.isLive}
-      station={MOCK_RADIO.station}
-      description={MOCK_RADIO.description}
-      streamUrl={MOCK_RADIO.streamUrl}
-    />
+    <LiveCard isLive={true} streamUrl={null} />
     <YoutubeEmbed
        station="Cambalache" filter="Cambalache"
     />

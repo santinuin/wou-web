@@ -4,54 +4,38 @@ import RadioWaves from '@/components/ui/RadioWaves.svelte';
 
 interface Props {
   isLive: boolean;
-  station: string;
-  description: string;
   streamUrl?: string | null;
 }
 
-const { isLive, station, description, streamUrl } = Astro.props;
+const { isLive, streamUrl } = Astro.props;
 ---
 
-<div class="relative flex flex-col h-full bg-brand-black overflow-hidden p-5 pr-0 pb-0">
+<div class="relative flex flex-col h-full bg-brand-black overflow-hidden">
 
-  <!-- Estado EN VIVO + nombre de estación -->
-  <div class="flex items-center justify-between shrink-0">
-    <div class="flex items-center gap-2">
-      {isLive && (
-        <span class="flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse" aria-hidden="true" />
-          <span class="font-bowlby text-xs text-red-400 uppercase tracking-widest">En vivo</span>
-        </span>
-      )}
-      <span class="font-bowlby text-brand-white text-sm uppercase tracking-widest">
-        {station}
-      </span>
-    </div>
+  <!-- EN VIVO -->
+  <div class="flex items-center justify-center gap-3 shrink-0">
+    <span class="text-brand-red leading-none" style="font-size: 2.4rem;" aria-hidden="true">⦿</span>
+    <span class="font-bowlby text-brand-red uppercase leading-none tracking-tight" style="font-size: clamp(1.8rem, 3vw, 2.4rem);">
+      {isLive ? 'EN VIVO' : 'EN VIVO'}
+    </span>
   </div>
 
-  <!-- Descripción -->
-  <p class="font-sans text-brand-white/70 text-xs leading-relaxed mt-3 max-w-50 shrink-0">
-    {description}
-  </p>
-
-  <!-- Decoración: ondas de radio animadas (isla Svelte con GSAP) -->
-  <div class="flex-1 flex items-end pb-1 opacity-80">
+  <!-- Ondas de radio -->
+  <div class="flex-1 min-h-0 py-3">
     <RadioWaves client:idle />
   </div>
 
-  <!-- Botón mute — island Svelte (solo este botón tiene JS) -->
-  <div class="absolute bottom-4 right-4">
+  <!-- Mute -->
+  <div class="shrink-0 ml-auto mr-4">
     {streamUrl ? (
       <RadioPlayer streamUrl={streamUrl} client:idle />
     ) : (
-      <!-- Sin stream configurado: ícono estático -->
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f0f4f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="opacity-40">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F0EDE8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Sin stream configurado">
         <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
         <line x1="23" y1="9" x2="17" y2="15"/>
         <line x1="17" y1="9" x2="23" y2="15"/>
       </svg>
     )}
   </div>
+
 </div>
-
-

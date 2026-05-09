@@ -1,23 +1,24 @@
 ---
 /**
  * Facade para el stream de YouTube.
- * Build-time: detecta vivo con YouTube Data API; si no hay vivo, último stream.
- * Click: carga el iframe con autoplay (solo cuando el usuario interactúa).
+ * Muestra un cover propio (95.1FM decorativo + play button) en lugar del
+ * thumbnail de YouTube, para no romper el diseño.
+ * Al hacer click carga el iframe con autoplay.
  */
-import { getYoutubeStream, getYouTubeThumbUrl } from '@/lib/youtube';
+import { getYoutubeStream } from '@/lib/youtube';
+import { Image } from 'astro:assets';
+import placeholderImg from '@/assets/youtube-placeholder.png';
 
 interface Props {
   station?: string;
   handle?: string;
-  /** Filtra por nombre de programa, ej: "Cambalache". Sin filtro → cualquier stream del canal. */
   filter?: string;
 }
 
-const { station = 'WOU! RADIO 95.1', handle = '@wounoticias', filter } = Astro.props;
+const { station = 'WOU! RADIO 95.1', filter } = Astro.props;
 
 const { videoId, isLive } = await getYoutubeStream(filter);
 
-const thumbnailUrl = videoId ? getYouTubeThumbUrl(videoId) : null;
 const embedUrl = videoId
   ? `https://www.youtube.com/embed/${videoId}?autoplay=1`
   : null;
@@ -30,46 +31,16 @@ const embedUrl = videoId
   tabindex="0"
   aria-label={`Reproducir ${station} en YouTube`}
 >
-  <!-- Thumbnail -->
-  {thumbnailUrl ? (
-    <img
-      src={thumbnailUrl}
-      alt={`Stream de ${station}`}
-      class="w-full h-full object-cover"
-      loading="lazy"
-      width="1280"
-      height="720"
-    />
-  ) : (
-    <div class="w-full h-full flex items-center justify-center bg-linear-to-br from-brand-dark to-brand-black">
-      <span class="font-barlow font-black text-brand-white text-2xl tracking-wider opacity-40">
-        WOU!
-      </span>
-    </div>
-  )}
+  <!-- Fondo: imagen placeholder optimizada -->
+  <Image
+    src={placeholderImg}
+    alt=""
+    class="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+    loading="eager"
+    aria-hidden="true"
+  />
 
-  <!-- Overlay -->
-  <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-
-  <!-- Encabezado -->
-  <div class="absolute top-0 left-0 right-0 flex items-start justify-between p-3">
-    <span class="font-barlow font-black text-brand-white text-sm tracking-wide drop-shadow">
-      {station}
-    </span>
-    <div class="flex items-center gap-2">
-      {isLive && (
-        <span class="flex items-center gap-1 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-          <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-          EN VIVO
-        </span>
-      )}
-      <span class="font-sans text-brand-white text-xs opacity-80 drop-shadow">
-        {handle}
-      </span>
-    </div>
-  </div>
-
-  <!-- Play button -->
+  <!-- Play button centrado -->
   <div class="absolute inset-0 flex items-center justify-center">
     <div class="w-14 h-10 bg-[#FF0000] rounded-lg flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -77,6 +48,13 @@ const embedUrl = videoId
       </svg>
     </div>
   </div>
+
+  <!-- Sin video disponible -->
+  {!videoId && (
+    <div class="absolute bottom-3 left-0 right-0 flex justify-center">
+      <span class="font-barlow text-brand-white/30 text-xs tracking-widest uppercase">Sin stream</span>
+    </div>
+  )}
 </div>
 
 <script>
