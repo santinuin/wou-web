@@ -112,9 +112,9 @@
     aria-label="Menú de secciones"
   >
     <div class="min-h-full flex flex-col justify-center py-8">
-      <ul class="flex flex-col gap-0.5">
+      <ul class="flex flex-col">
         {#each sections as section}
-          <li class="menu-item pl-10">
+          <li class="menu-item pl-10 pt-3">
             <span class="sweep" aria-hidden="true"></span>
             <a
               href={section.slug}

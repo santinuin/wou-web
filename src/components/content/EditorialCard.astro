@@ -99,10 +99,7 @@ const titleParts = highlightWord
       will-change: transform;
     }
 
-    .EditorialCard:hover .EC__cursor,
-    .EditorialCard:hover .EC__badge {
-      opacity: 1;
-    }
+    /* opacidad controlada por JS para que el scroll la resetee */
   }
 
   /* ── Imagen ───────────────────────────────────────────────────────── */
@@ -160,7 +157,18 @@ const titleParts = highlightWord
   if (card && cursor && badge) {
     let mouseX = 0, mouseY = 0;
     let badgeX = 0, badgeY = 0;
-    const LERP = 0.08; // 0→1: más bajo = más lento/suave
+    const LERP = 0.08;
+
+    const show = () => { cursor.style.opacity = '1'; badge.style.opacity = '1'; };
+    const hide = () => { cursor.style.opacity = '0'; badge.style.opacity = '0'; };
+
+    card.addEventListener('mouseenter', show);
+    card.addEventListener('mouseleave', hide);
+    window.addEventListener('scroll', () => {
+      const r = card.getBoundingClientRect();
+      const inside = mouseX >= r.left && mouseX <= r.right && mouseY >= r.top && mouseY <= r.bottom;
+      if (!inside) hide();
+    }, { passive: true });
 
     card.addEventListener('mousemove', (e) => {
       mouseX = e.clientX;
