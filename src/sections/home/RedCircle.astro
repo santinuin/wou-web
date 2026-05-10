@@ -140,7 +140,7 @@ const balls: BallData[] = entries.length
     text-transform: uppercase;
     white-space: nowrap;
     letter-spacing: -0.01em;
-    border-bottom: 3px solid var(--ball-color);
+    border-bottom: 8px solid var(--ball-color);
     z-index: 1;
   }
 
@@ -221,12 +221,15 @@ const balls: BallData[] = entries.length
     font-family: var(--font-boldonse, 'Boldonse', sans-serif);
     font-weight: 400;
     text-transform: uppercase;
-    line-height: 0.92;
-    font-size: clamp(1rem, 2.8vw, 3rem);
+    line-height: 1.05;
+    /* Escala proporcional al tamaño de la pelota — evita overflow en bolas chicas */
+    font-size: calc(var(--ball-individual-size, var(--ball-size)) * 0.09);
     color: var(--ball-text-color);
     transform: rotate(-6deg);
     transition: opacity 0.25s ease;
     z-index: 1;
+    word-break: break-word;
+    hyphens: none;
   }
 
   .BallPool--image {
