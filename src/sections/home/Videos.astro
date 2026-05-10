@@ -183,21 +183,12 @@ function captionKey(id: string, i: number): string {
   .VideosSection__mask-path-outer {
     fill: var(--color-brand-blue);
     fill-rule: evenodd;
-    stroke: var(--color-brand-green);
-    stroke-width: 1px;
   }
   .VideosSection__mask-path-inner {
-    fill: var(--color-brand-blue);
-    fill-rule: evenodd;
-    stroke: var(--color-brand-green);
-    stroke-width: 1px;
-    transform: translate3d(0, calc(var(--scroll-progress, 0) * 48px), 0);
-    will-change: transform;
+    display: none;
   }
   .VideosSection__mask-path-lines {
-    fill: none;
-    stroke: var(--color-brand-green);
-    stroke-width: 1px;
+    display: none;
   }
 
   /* ── Outer / Inner ─────────────────────────────────────────────────── */
@@ -219,8 +210,8 @@ function captionKey(id: string, i: number): string {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: var(--color-brand-green);
-    color: var(--color-brand-blue);
+    background: var(--color-brand-black);
+    color: var(--color-brand-green);
     transform: translate3d(0, calc(var(--scroll-progress, 0) * -15%), 0);
     will-change: clip-path, transform, scale;
     clip-path: inset(0 1rem);
@@ -256,17 +247,29 @@ function captionKey(id: string, i: number): string {
   /* ── Título (ref invisible) + ghosts ───────────────────────────────── */
   .VideosSection__title,
   .VideosSection__scene {
-    font-family: var(--font-alumni), sans-serif;
+    font-family: var(--font-boldonse), sans-serif;
     font-weight: 900;
-    font-size: min(18.75rem, 25lvh);
+    font-size: min(18rem, 20lvh);
     line-height: 1;
     text-align: center;
     text-transform: uppercase;
     letter-spacing: -0.02em;
   }
+  @media (max-width: 987px) {
+    .VideosSection__title,
+    .VideosSection__scene {
+      font-size: min(18rem, 22lvh);
+    }
+  }
+  @media (max-width: 576px) {
+    .VideosSection__title,
+    .VideosSection__scene {
+      font-size: min(28vw, 14rem);
+    }
+  }
   .VideosSection__title-inner,
   .VideosSection__scene :global(.VideosSection__ghost) {
-    line-height: 0.85;
+    line-height: 1.5;
   }
   .VideosSection__title {
     width: 0.7em;
@@ -303,7 +306,7 @@ function captionKey(id: string, i: number): string {
     top: 0;
     left: 0;
     display: block;
-    color: var(--color-brand-blue);
+    color: var(--color-brand-green);
     transform: rotateY(calc(var(--head) * -10deg * var(--state)))
       translate3d(
         calc(var(--head) * 50vw * var(--state)),
@@ -314,17 +317,7 @@ function captionKey(id: string, i: number): string {
     will-change: transform;
   }
   .VideosSection__scene :global(.VideosSection__ghost::before) {
-    content: attr(data-letter);
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: -1;
-    color: color-mix(in oklab, var(--color-brand-green) 55%, black);
-    opacity: min(calc(var(--state) * 2), 1);
-    transform: scale(1.05, 1.02)
-      translate3d(calc(var(--head) * 0.1rem * var(--state) * var(--state)), 0, 0);
-    transform-origin: calc(50% - var(--head) * 50%) -50%;
-    will-change: opacity, transform;
+    display: none;
   }
 
   /* ── Work ──────────────────────────────────────────────────────────── */
@@ -335,7 +328,7 @@ function captionKey(id: string, i: number): string {
     z-index: 2;
     margin: 0;
     padding: 0.5rem 0.5rem 0;
-    background: var(--color-brand-green);
+    background: var(--color-brand-black);
     content-visibility: hidden;
     transform-style: preserve-3d;
     will-change: transform;
@@ -385,9 +378,9 @@ function captionKey(id: string, i: number): string {
   .VideosSection__thumb {
     display: block;
     width: auto;
-    max-width: 50vw;
+    max-width: 70vw;
     aspect-ratio: 16 / 9;
-    background: var(--color-brand-blue);
+    background: var(--color-brand-black);
     overflow: hidden;
     position: relative;
   }
@@ -395,16 +388,16 @@ function captionKey(id: string, i: number): string {
     display: block;
     width: 100%;
     height: 100%;
-    max-width: 50vw;
-    max-height: 50vh;
+    max-width: 70vw;
+    max-height: 65vh;
     object-fit: cover;
     user-select: none;
     -webkit-user-drag: none;
   }
   @media (max-width: 576px) {
     .VideosSection__thumb img {
-      max-width: 80vw;
-      max-height: 80vh;
+      max-width: 92vw;
+      max-height: 85vh;
     }
   }
   .VideosSection__thumb::after {
@@ -415,7 +408,7 @@ function captionKey(id: string, i: number): string {
     width: 3rem;
     height: 3rem;
     transform: translate(-50%, -50%);
-    background-color: var(--color-brand-blue);
+    background-color: var(--color-brand-green);
     clip-path: polygon(30% 20%, 30% 80%, 80% 50%);
     opacity: 0.9;
     pointer-events: none;
@@ -427,7 +420,7 @@ function captionKey(id: string, i: number): string {
     align-items: center;
     justify-content: space-between;
     padding: 0.5rem 0.5rem;
-    color: var(--color-brand-blue);
+    color: var(--color-brand-green);
     font-family: ui-monospace, 'JetBrains Mono', monospace;
     font-weight: 700;
     font-size: 11px;
