@@ -4,6 +4,7 @@ import NewsBand from '@/components/content/NewsBand.astro';
 import AdsBand1 from '@/components/content/AdsBand1.astro';
 import AdsBand2 from '@/components/content/AdsBand2.astro';
 import ReelsBand from '@/components/content/ReelsBand.astro';
+import RedCircle from '@/sections/home/RedCircle.astro';
 import { MOCK_ARTICLES, type ArticleLike } from './mocks/newsGridMock';
 import type { CollectionEntry } from 'astro:content';
 
@@ -61,6 +62,10 @@ const ads2 = allAds.filter((a) => a.data.placement === 'ads2').sort(sortByOrder)
 
     <AdsBand2 ads={ads2} />
 
+    <div class="RC-breakout">
+      <RedCircle />
+    </div>
+
     {opinion.hero && (
       <NewsBand variant="hero-left" hero={opinion.hero} support={opinion.support} />
     )}
@@ -99,15 +104,15 @@ const ads2 = allAds.filter((a) => a.data.placement === 'ads2').sort(sortByOrder)
     const scrollable     = tsec.offsetHeight - window.innerHeight;
     // 0.85 = inicio exacto de phase 4 de TSec (dissolve del sticky)
     const textGoneScrollY = tsec.offsetTop + 0.85 * scrollable;
-    const gap = reveal.offsetTop - textGoneScrollY;
-    if (gap > 0) reveal.style.marginTop = `-${gap}px`;
+    const gap = reveal!.offsetTop - textGoneScrollY;
+    if (gap > 0) reveal!.style.marginTop = `-${gap}px`;
   }
 
   function setHeight() {
     const hh = headerHeight();
-    grid.style.top      = `${hh}px`;
-    reveal.style.height = `calc(${STICKY_VH * 100}vh + ${grid.offsetHeight}px)`;
-    cachedRevealTop     = reveal.offsetTop;
+    grid!.style.top      = `${hh}px`;
+    reveal!.style.height = `calc(${STICKY_VH * 100}vh + ${grid!.offsetHeight}px)`;
+    cachedRevealTop     = reveal!.offsetTop;
   }
 
   function onScroll() {
@@ -122,8 +127,8 @@ const ads2 = allAds.filter((a) => a.data.placement === 'ads2').sort(sortByOrder)
   function render() {
     op += (tOp - op) * LERP;
     sc += (tSc - sc) * LERP;
-    grid.style.opacity   = op.toFixed(4);
-    grid.style.transform = `scale(${sc.toFixed(4)})`;
+    grid!.style.opacity   = op.toFixed(4);
+    grid!.style.transform = `scale(${sc.toFixed(4)})`;
     requestAnimationFrame(render);
   }
 
@@ -163,5 +168,18 @@ const ads2 = allAds.filter((a) => a.data.placement === 'ads2').sort(sortByOrder)
 
   @media (max-width: 640px) {
     .NewsGrid { padding: 0.75rem; }
+  }
+
+  /* Escapa el padding horizontal del NewsGrid para que RedCircle ocupe el ancho completo */
+  .RC-breakout {
+    margin-inline: -10rem;
+  }
+
+  @media (max-width: 1024px) {
+    .RC-breakout { margin-inline: -2rem; }
+  }
+
+  @media (max-width: 640px) {
+    .RC-breakout { margin-inline: -0.75rem; }
   }
 </style>
