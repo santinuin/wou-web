@@ -13,11 +13,17 @@
   let isOpen = $state(false);
   let navEl: HTMLElement | null = null;
   let tl: gsap.core.Timeline | null = null;
+  let headerHeight = $state(88); // 5.5rem fallback
 
   const GRAY = '#FFFFFF8C'; // brand-gray token
 
   function finalColor(s: Section) {
     return s.color ?? GRAY;
+  }
+
+  function updateHeaderHeight() {
+    const header = document.getElementById('siteHeader');
+    if (header) headerHeight = header.offsetHeight;
   }
 
   function close() {
@@ -57,6 +63,7 @@
   async function onToggle() {
     isOpen = !isOpen;
     if (isOpen) {
+      updateHeaderHeight();
       await tick();
       playIntro();
     } else {
@@ -69,13 +76,6 @@
     if (e.key === 'Escape' && isOpen) close();
   }
 
-  /*
-    Click-outside: cierra el modal cuando el click cae fuera del nav.
-    Consulta el DOM directamente (en vez de leer isOpen/navEl del closure)
-    para evitar valores stale en Svelte 5.
-    Ignora clicks sobre el botón de toggle: el header ya despacha
-    sections-menu-toggle que maneja el cierre.
-  */
   function onDocumentClick(e: MouseEvent) {
     const nav = document.querySelector<HTMLElement>('[aria-label="Menú de secciones"]');
     if (!nav) return;
@@ -86,14 +86,19 @@
   }
 
   onMount(() => {
+    updateHeaderHeight();
     window.addEventListener('sections-menu-toggle', onToggle);
     window.addEventListener('keydown', onKeydown);
+    window.addEventListener('scroll', updateHeaderHeight, { passive: true });
+    window.addEventListener('resize', updateHeaderHeight);
     document.addEventListener('click', onDocumentClick);
   });
 
   onDestroy(() => {
     window.removeEventListener('sections-menu-toggle', onToggle);
     window.removeEventListener('keydown', onKeydown);
+    window.removeEventListener('scroll', updateHeaderHeight);
+    window.removeEventListener('resize', updateHeaderHeight);
     document.removeEventListener('click', onDocumentClick);
     tl?.kill();
   });
@@ -102,18 +107,20 @@
 {#if isOpen}
   <nav
     bind:this={navEl}
-    class="fixed right-0 top-0 w-1/2 h-screen bg-brand-blue pointer-events-auto z-[49] overflow-y-auto"
+    class="fixed right-0 w-1/2 bg-brand-blue pointer-events-auto z-49 overflow-y-auto"
+    style="top: {headerHeight}px; height: calc(100vh - {headerHeight}px);"
     aria-label="Menú de secciones"
   >
-    <div class="min-h-full flex flex-col justify-center px-10 py-20">
+    <div class="min-h-full flex flex-col justify-center py-8">
       <ul class="flex flex-col gap-0.5">
         {#each sections as section}
-          <li>
+          <li class="menu-item pl-10">
+            <span class="sweep" aria-hidden="true"></span>
             <a
               href={section.slug}
               data-color={finalColor(section)}
-              class="font-alumni font-extrabold uppercase leading-[0.88] inline-block"
-              style="font-size: clamp(1.75rem, 4.2vw, 5rem); color: {finalColor(section)};"
+              class="font-boldonse font-normal uppercase relative z-10 inline-block"
+              style="font-size: clamp(1.25rem, 2.5vw, 2.5rem); color: {finalColor(section)};"
             >
               {section.title}
             </a>
@@ -123,3 +130,28 @@
     </div>
   </nav>
 {/if}
+
+<style>
+  .menu-item {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .menu-item .sweep {
+    position: absolute;
+    inset: 0;
+    background: var(--color-brand-dark);
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .menu-item:hover .sweep {
+    transform: scaleY(1);
+  }
+
+  /* !important overrides the inline color set by GSAP */
+  .menu-item:hover a {
+    color: var(--color-brand-white) !important;
+  }
+</style>
