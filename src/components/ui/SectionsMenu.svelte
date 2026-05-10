@@ -112,7 +112,7 @@
     style="top: {headerHeight}px; height: calc(100vh - {headerHeight}px);"
     aria-label="Menú de secciones"
   >
-    <div class="min-h-full flex flex-col justify-center py-8">
+    <div class="min-h-full flex flex-col justify-center py-6">
       <ul class="flex flex-col">
         {#each sections as section}
           <li class="menu-item pt-2">
@@ -120,7 +120,7 @@
             <a
               href={section.slug}
               data-color={finalColor(section)}
-              class="relative z-10 block w-full pl-10 pt-3 pb-0.5"
+              class="relative z-10 block w-full pl-10 pt-4 pb-0.5"
             >
               <span
                 class="gsap-text font-boldonse font-normal uppercase inline-block leading-none align-bottom"
