@@ -38,22 +38,23 @@
     tl?.kill();
 
     const links = Array.from(navEl.querySelectorAll<HTMLElement>('a[data-color]'));
-    if (!links.length) return;
+    const spans = Array.from(navEl.querySelectorAll<HTMLElement>('span.gsap-text'));
+    if (!spans.length) return;
 
     const navWidth = navEl.clientWidth;
-    const PAD = 40; // px-10 = 2.5rem = 40px
+    const PAD = 40;
 
     tl = gsap.timeline()
-      .to(links, {
-        x: (_, el) => navWidth - PAD - el.offsetLeft - el.offsetWidth,
+      .to(spans, {
+        x: (i, el) => navWidth - PAD - el.offsetLeft - el.offsetWidth,
         color: '#ffffff',
         duration: 0.45,
         stagger: 0.07,
         ease: 'power2.inOut',
       })
-      .to(links, {
+      .to(spans, {
         x: 0,
-        color: (_, el) => (el as HTMLElement).dataset.color ?? GRAY,
+        color: (i, el) => links[i]?.dataset.color ?? GRAY,
         duration: 0.45,
         stagger: 0.07,
         ease: 'power2.inOut',
@@ -114,15 +115,19 @@
     <div class="min-h-full flex flex-col justify-center py-8">
       <ul class="flex flex-col">
         {#each sections as section}
-          <li class="menu-item pl-10 pt-3">
+          <li class="menu-item pt-2">
             <span class="sweep" aria-hidden="true"></span>
             <a
               href={section.slug}
               data-color={finalColor(section)}
-              class="font-boldonse font-normal uppercase relative z-10 inline-block"
-              style="font-size: clamp(1.25rem, 2.5vw, 2.5rem); color: {finalColor(section)};"
+              class="relative z-10 block w-full pl-10 pt-3 pb-0.5"
             >
-              {section.title}
+              <span
+                class="gsap-text font-boldonse font-normal uppercase inline-block leading-none align-bottom"
+                style="font-size: clamp(1.25rem, 2.5vw, 2.5rem); color: {finalColor(section)};"
+              >
+                {section.title}
+              </span>
             </a>
           </li>
         {/each}
@@ -151,7 +156,7 @@
   }
 
   /* !important overrides the inline color set by GSAP */
-  .menu-item:hover a {
-    color: var(--color-brand-white) !important;
+  .menu-item:hover .gsap-text {
+    color: var(--color-brand-teal) !important;
   }
 </style>
