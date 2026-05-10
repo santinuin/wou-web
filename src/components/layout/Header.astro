@@ -42,8 +42,29 @@ const MOCK_SECTIONS = [
   <div
     class="w-full px-6 h-[calc(5.5rem*var(--header-scale,1))] grid grid-cols-[1fr_auto_1fr] items-center transition-[height] duration-300"
   >
-    <!-- ── Indicador de viento ─────────────────────────────────────────── -->
-    <div class="flex items-center gap-2">
+    <!-- ── Col izquierda ───────────────────────────────────────────────── -->
+    <div class="flex items-center gap-2.5">
+
+      <!-- Solo visible en estado scrolled: mute + EN VIVO + estación -->
+      <div class="header-scrolled flex items-center gap-2.5">
+        <!-- Icono mute/speaker -->
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F0EDE8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="transform: translateY(-2px)">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <line x1="23" y1="9" x2="17" y2="15"/>
+          <line x1="17" y1="9" x2="23" y2="15"/>
+        </svg>
+        <!-- EN VIVO + estación -->
+        <div class="flex items-center gap-2 leading-none">
+          <span class="font-bowlby text-brand-red uppercase tracking-tight whitespace-nowrap" style="font-size: 0.7rem;">
+            ⦿ EN VIVO
+          </span>
+          <span class="font-bowlby text-brand-white uppercase tracking-tight whitespace-nowrap" style="font-size: 0.7rem;">
+            WOU 95.1
+          </span>
+        </div>
+      </div>
+
+      <!-- Ícono de viento (siempre visible) -->
       <img
         src="/viento.gif"
         alt=""
@@ -51,10 +72,11 @@ const MOCK_SECTIONS = [
         class="w-[calc(2.75rem*var(--header-scale,1))] h-[calc(2.75rem*var(--header-scale,1))] transition-[width,height] duration-300 object-contain"
       />
 
+      <!-- Texto de viento: "Viento | " se oculta al scrollear -->
       <span
-        class="font-bowlby text-brand-teal tracking-wide text-[calc(1rem*var(--header-scale,1))] transition-[font-size] duration-300"
+        class="font-bowlby text-brand-teal tracking-wide text-[calc(1rem*var(--header-scale,1))] transition-[font-size] duration-300 whitespace-nowrap"
       >
-        Viento | RGL: 72 KM
+        <span class="header-normal">Viento | </span>RGL: 72 KM
       </span>
     </div>
 
@@ -120,6 +142,22 @@ const MOCK_SECTIONS = [
   }
   #siteHeader.is-scrolled {
     --header-scale: 0.72;
+  }
+
+  /* Elementos que solo aparecen en estado scrolled */
+  .header-scrolled {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  #siteHeader.is-scrolled .header-scrolled {
+    display: flex;
+    opacity: 1;
+  }
+
+  /* "Viento | " se oculta al scrollear */
+  #siteHeader.is-scrolled .header-normal {
+    display: none;
   }
 </style>
 
