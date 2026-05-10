@@ -31,8 +31,9 @@
 
   interface Props {
     children?: import('svelte').Snippet;
+    floorSelector?: string;
   }
-  const { children }: Props = $props();
+  const { children, floorSelector }: Props = $props();
 
   let container: HTMLUListElement;
   let items: HTMLElement[] = [];
@@ -84,13 +85,27 @@
       isStatic: true,
       render: { visible: false },
     };
+
+    // Si hay un selector de piso, usamos el top de ese elemento como límite
+    // de caída. Permite que las bolas descansen sobre el título en lugar de
+    // en el borde inferior del contenedor.
+    let floorY = height;
+    if (floorSelector) {
+      const floorEl = document.querySelector(floorSelector);
+      if (floorEl) {
+        const containerRect = container.getBoundingClientRect();
+        const floorRect = floorEl.getBoundingClientRect();
+        floorY = floorRect.bottom - containerRect.top;
+      }
+    }
+
     // Caja: suelo + paredes laterales. El techo se agrega DESPUÉS de que los
     // cuerpos hayan terminado de entrar desde arriba (ver ceilingTimer) —
     // si se agregara ahora, los cuerpos (con y < 0) quedarían atrapados
     // fuera del viewport y no podrían caer.
     const floor = Bodies.rectangle(
       width / 2,
-      height + WALL_THICKNESS / 2,
+      floorY + WALL_THICKNESS / 2,
       width + WALL_THICKNESS * 2,
       WALL_THICKNESS,
       wallOpts,

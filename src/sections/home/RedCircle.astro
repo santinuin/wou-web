@@ -59,17 +59,9 @@ const balls: BallData[] = entries.length
 
 <section
   aria-label="Círculo Rojo"
-  class="RedCircleSection relative w-full overflow-hidden bg-brand-black"
+  class="RedCircleSection relative lg:h-[calc(100vh-7rem)] overflow-hidden bg-brand-black"
 >
-  <!-- Título estático: vive fuera del motor de física. Clases Tailwind
-       para posición, tamaño y tipografía; font-alumni viene del theme. -->
-  <h2
-    class="RedCircleTitle font-alumni pointer-events-none absolute top-[clamp(1.5rem,6vw,5rem)] left-[clamp(2rem,12vw,10rem)] z-10 m-0 font-black uppercase text-white leading-none tracking-tight text-5xl md:text-6xl lg:text-7xl xl:text-8xl select-none"
-  >
-    Círculo Rojo
-  </h2>
-
-  <BallPool client:visible>
+  <BallPool client:visible floorSelector="#rc-floor">
     {
       balls.map((ball) => (
         <li class="BallPool--ball" data-id={ball.id}>
@@ -99,6 +91,16 @@ const balls: BallData[] = entries.length
       ))
     }
   </BallPool>
+
+  <!-- Título estático abajo: actúa como suelo visual para las bolas.
+       El id="rc-floor" lo usa BallPool para posicionar el cuerpo físico. -->
+  <h2
+    id="rc-floor"
+    class="RedCircleTitle pointer-events-none select-none"
+    aria-hidden="false"
+  >
+    Círculo Rojo
+  </h2>
 </section>
 
 <style>
@@ -120,6 +122,31 @@ const balls: BallData[] = entries.length
     .RedCircleSection {
       --ball-size: 40vw;
     }
+  }
+
+  /* Título inferior — piso visual y físico de las bolas */
+  .RedCircleTitle {
+    font-family: var(--font-boldonse, 'Boldonse', sans-serif);
+    font-weight: 400;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    color: var(--ball-color);
+    font-size: clamp(2.5rem, 10vw, 13rem);
+    line-height: 0.85;
+    text-transform: uppercase;
+    white-space: nowrap;
+    letter-spacing: -0.01em;
+    border-bottom: 3px solid var(--ball-color);
+    z-index: 1;
+  }
+
+  /* Las bolas se renderizan sobre el título */
+  :global(.BallPool) {
+    z-index: 2;
   }
 
   .BallPool--ball {
@@ -191,11 +218,11 @@ const balls: BallData[] = entries.length
   }
 
   .BallPool--label {
-    font-family: var(--font-alumni, 'Alumni Sans', sans-serif);
-    font-weight: 900;
+    font-family: var(--font-boldonse, 'Boldonse', sans-serif);
+    font-weight: 400;
     text-transform: uppercase;
-    line-height: 0.9;
-    font-size: clamp(0.9rem, 1.3vw, 1.6rem);
+    line-height: 0.92;
+    font-size: clamp(1rem, 2.8vw, 3rem);
     color: var(--ball-text-color);
     transform: rotate(-6deg);
     transition: opacity 0.25s ease;
@@ -220,5 +247,4 @@ const balls: BallData[] = entries.length
     user-select: none;
     -webkit-user-drag: none;
   }
-
 </style>
