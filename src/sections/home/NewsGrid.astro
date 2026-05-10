@@ -39,127 +39,43 @@ const sortByOrder = (a: CollectionEntry<'advertisements'>, b: CollectionEntry<'a
 
 const ads1 = allAds.filter((a) => a.data.placement === 'ads1').sort(sortByOrder);
 const ads2 = allAds.filter((a) => a.data.placement === 'ads2').sort(sortByOrder);
-
 ---
 
-<div class="NGReveal">
-  <div class="NewsGrid">
-    {politica.hero && (
-      <NewsBand variant="hero-left" hero={politica.hero} support={politica.support} />
-    )}
+<div class="NewsGrid">
+  {politica.hero && (
+    <NewsBand variant="hero-left" hero={politica.hero} support={politica.support} />
+  )}
 
-    <AdsBand1 ads={ads1} />
+  <AdsBand1 ads={ads1} />
 
-    {locales.hero && (
-      <NewsBand variant="hero-right" hero={locales.hero} support={locales.support} />
-    )}
+  {locales.hero && (
+    <NewsBand variant="hero-right" hero={locales.hero} support={locales.support} />
+  )}
 
-    <ReelsBand />
+  <ReelsBand />
 
-    {policiales.hero && (
-      <NewsBand variant="hero-left" hero={policiales.hero} support={policiales.support} />
-    )}
+  {policiales.hero && (
+    <NewsBand variant="hero-left" hero={policiales.hero} support={policiales.support} />
+  )}
 
-    <AdsBand2 ads={ads2} />
+  <AdsBand2 ads={ads2} />
 
-    <div class="RC-breakout">
-      <RedCircle />
-    </div>
-
-    {opinion.hero && (
-      <NewsBand variant="hero-left" hero={opinion.hero} support={opinion.support} />
-    )}
+  <div class="RC-breakout">
+    <RedCircle />
   </div>
+
+  {opinion.hero && (
+    <NewsBand variant="hero-left" hero={opinion.hero} support={opinion.support} />
+  )}
 </div>
 
-<script>
-  const reveal = document.querySelector<HTMLElement>('.NGReveal');
-  const grid   = document.querySelector<HTMLElement>('.NewsGrid');
-  if (!reveal || !grid) throw new Error('NGReveal/NewsGrid not found');
-
-  const REDUCED     = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const LERP        = REDUCED ? 1 : 0.1;
-  const SCALE_START = 0.94;
-  // ANIM_VH: 37.5vh = duración exacta de phase 4 de TSec (0.15 × 250vh scrollable)
-  const ANIM_VH   = 0.375;
-  // STICKY_VH: duración total del sticky (animación + resistencia al scroll)
-  const STICKY_VH = 1.5;
-
-  let op = 0, tOp = 0;
-  let sc = SCALE_START, tSc = SCALE_START;
-  let cachedRevealTop = 0;
-
-  function headerHeight() {
-    return (document.getElementById('siteHeader')?.offsetHeight ?? 0);
-  }
-
-  /*
-    Superpone NGReveal con el final de TransitionSection:
-    calcula cuándo desaparece el headline "Esto es WOU" (p ≈ 0.787 en TSec)
-    y aplica un margin-top negativo para que NGReveal empiece exactamente ahí.
-  */
-  function calcOverlap() {
-    const tsec = document.querySelector<HTMLElement>('.TSec');
-    if (!tsec) return;
-    const scrollable     = tsec.offsetHeight - window.innerHeight;
-    // 0.85 = inicio exacto de phase 4 de TSec (dissolve del sticky)
-    const textGoneScrollY = tsec.offsetTop + 0.85 * scrollable;
-    const gap = reveal!.offsetTop - textGoneScrollY;
-    if (gap > 0) reveal!.style.marginTop = `-${gap}px`;
-  }
-
-  function setHeight() {
-    const hh = headerHeight();
-    grid!.style.top      = `${hh}px`;
-    reveal!.style.height = `calc(${STICKY_VH * 100}vh + ${grid!.offsetHeight}px)`;
-    cachedRevealTop     = reveal!.offsetTop;
-  }
-
-  function onScroll() {
-    const p = Math.max(0, Math.min(
-      (window.scrollY - cachedRevealTop) / (window.innerHeight * ANIM_VH),
-      1
-    ));
-    tOp = p;
-    tSc = SCALE_START + p * (1 - SCALE_START);
-  }
-
-  function render() {
-    op += (tOp - op) * LERP;
-    sc += (tSc - sc) * LERP;
-    grid!.style.opacity   = op.toFixed(4);
-    grid!.style.transform = `scale(${sc.toFixed(4)})`;
-    requestAnimationFrame(render);
-  }
-
-  calcOverlap();
-  setHeight();
-  window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', () => { calcOverlap(); setHeight(); });
-  onScroll();
-  requestAnimationFrame(render);
-</script>
-
 <style>
-  .NGReveal {
-    /* height fijado por JS: STICKY_VH*100vh + newsGrid.offsetHeight */
-    position: relative;
-    z-index: 3;
-    background: transparent;
-  }
-
   .NewsGrid {
-    position: sticky;
-    top: 0; /* sobreescrito por JS al valor real del header */
     display: flex;
     flex-direction: column;
     gap: 1rem;
     padding: 1.5rem 10rem;
     background: var(--color-brand-black);
-    opacity: 0;
-    transform: scale(0.94);
-    transform-origin: top center;
-    will-change: opacity, transform;
   }
 
   @media (max-width: 1024px) {
