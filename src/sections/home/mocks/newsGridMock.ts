@@ -47,7 +47,7 @@ export const MOCK_ARTICLES: ArticleLike[] = [
   mock('politica-4', 'El oficialismo empieza a partirse', 'Política', false),
 
   // ── Locales ───────────────────────────────────────────────────────────────
-  mock('locales-1', 'Tu muni en el celular',         'Locales', true, 'El Municipio adhiere a "Mi Muni, Mi Cuenta" y facilita el pago de impuestos.', 'celular'),
+  mock('locales-1', 'Tu muni en el celular',         'Locales', true, 'El Municipio adhiere a "Mi Muni, Mi Cuenta" y facilita el pago de impuestos.', ''),
   mock('locales-2', 'Bloqueo de celulares en cárceles', 'Locales', false),
   mock('locales-3', 'Jugarte: Primer round',         'Locales', false),
   mock('locales-4', 'Planazo en la Ortiz',           'Locales', false),
