@@ -4,7 +4,6 @@ import NewsBand from '@/components/content/NewsBand.astro';
 import AdsBand1 from '@/components/content/AdsBand1.astro';
 import AdsBand2 from '@/components/content/AdsBand2.astro';
 import ReelsBand from '@/components/content/ReelsBand.astro';
-import RedCircle from '@/sections/home/RedCircle.astro';
 import { MOCK_ARTICLES, type ArticleLike } from './mocks/newsGridMock';
 import type { CollectionEntry } from 'astro:content';
 
@@ -60,10 +59,6 @@ const ads2 = allAds.filter((a) => a.data.placement === 'ads2').sort(sortByOrder)
 
   <AdsBand2 ads={ads2} />
 
-  <div class="RC-breakout">
-    <RedCircle />
-  </div>
-
   {opinion.hero && (
     <NewsBand variant="hero-left" hero={opinion.hero} support={opinion.support} />
   )}
@@ -86,16 +81,4 @@ const ads2 = allAds.filter((a) => a.data.placement === 'ads2').sort(sortByOrder)
     .NewsGrid { padding: 0.75rem; }
   }
 
-  /* Escapa el padding horizontal del NewsGrid para que RedCircle ocupe el ancho completo */
-  .RC-breakout {
-    margin-inline: -10rem;
-  }
-
-  @media (max-width: 1024px) {
-    .RC-breakout { margin-inline: -2rem; }
-  }
-
-  @media (max-width: 640px) {
-    .RC-breakout { margin-inline: -0.75rem; }
-  }
 </style>
