@@ -1,4 +1,6 @@
 ---
+const PLACEHOLDER = '/images/placeholder-default.png';
+
 interface Props {
   title: string;
   slug: string;
@@ -8,27 +10,22 @@ interface Props {
   wide?: boolean;
 }
 
-const { title, slug, categoryTitle, imageUrl, imageAlt = title, wide = false } = Astro.props;
+const { title, slug, categoryTitle, imageUrl, imageAlt = title } = Astro.props;
+const src = imageUrl ?? PLACEHOLDER;
 ---
 
-<a
-  href={`/${slug}`}
-  class:list={['SupportCard', wide && 'SupportCard--wide']}
-  aria-label={title}
->
-  {imageUrl && (
-    <div class="SupportCard__image-wrap">
-      <img
-        src={imageUrl}
-        alt={imageAlt}
-        width={wide ? 480 : 320}
-        height={wide ? 280 : 220}
-        loading="lazy"
-        decoding="async"
-        class="SupportCard__image"
-      />
-    </div>
-  )}
+<a href={`/${slug}`} class="SupportCard" aria-label={title}>
+  <div class="SupportCard__image-zone">
+    <img
+      src={src}
+      alt={imageAlt}
+      width="560"
+      height="360"
+      loading="lazy"
+      decoding="async"
+      class="SupportCard__image"
+    />
+  </div>
 
   <div class="SupportCard__body">
     {categoryTitle && (
@@ -43,37 +40,21 @@ const { title, slug, categoryTitle, imageUrl, imageAlt = title, wide = false } =
     display: flex;
     flex-direction: column;
     height: 100%;
-    min-height: 160px;
-    background: var(--color-brand-white);
+    background: #ffffff;
     text-decoration: none;
     color: var(--color-brand-dark);
     overflow: hidden;
-    transition: brightness 0.2s ease;
+    transition: filter 0.2s ease;
   }
 
   .SupportCard:hover {
-    filter: brightness(0.96);
+    filter: brightness(0.95);
   }
 
-  /* Wide variant: imagen izquierda, texto derecha */
-  .SupportCard--wide {
-    flex-direction: row;
-  }
-
-  .SupportCard__image-wrap {
+  /* Image takes exactly half the card height */
+  .SupportCard__image-zone {
+    flex: 0 0 50%;
     overflow: hidden;
-    flex-shrink: 0;
-  }
-
-  /* Vertical: imagen ocupa ~55% del alto */
-  .SupportCard:not(.SupportCard--wide) .SupportCard__image-wrap {
-    height: 55%;
-  }
-
-  /* Horizontal: imagen ocupa ~45% del ancho */
-  .SupportCard--wide .SupportCard__image-wrap {
-    width: 45%;
-    height: 100%;
   }
 
   .SupportCard__image {
@@ -81,52 +62,49 @@ const { title, slug, categoryTitle, imageUrl, imageAlt = title, wide = false } =
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 0.3s ease;
+    transition: transform 0.35s ease;
   }
 
   .SupportCard:hover .SupportCard__image {
     transform: scale(1.03);
   }
 
+  /* White text area — badge + title */
   .SupportCard__body {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    flex: 1;
-    padding: 0.6rem 0.75rem 0.75rem;
-    min-height: 0;
-    gap: 0.25rem;
+    gap: 0.35rem;
+    padding: 0.55rem 0.75rem 0.75rem;
+    overflow: hidden;
   }
 
-  /* Sin imagen: título ocupa todo el espacio, más grande */
-  .SupportCard:not(:has(.SupportCard__image-wrap)) .SupportCard__body {
-    justify-content: flex-start;
-    padding: 0.75rem;
-  }
-
+  /* White pill with visible border (on white background) */
   .SupportCard__category {
+    display: inline-block;
+    align-self: flex-start;
+    flex-shrink: 0;
+    background: #ffffff;
+    color: var(--color-brand-dark);
     font-family: var(--font-barlow);
     font-size: 0.65rem;
     font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: color-mix(in oklab, var(--color-brand-dark) 50%, transparent);
+    padding: 0.18rem 0.65rem;
+    border-radius: 9999px;
+    line-height: 1.4;
+    border: 1.5px solid var(--color-brand-dark);
   }
 
   .SupportCard__title {
-    font-family: var(--font-franklin);
-    font-weight: 700;
-    font-size: clamp(0.95rem, 1.4vw, 1.25rem);
-    line-height: 1.2;
+    font-family: var(--font-alumni);
+    font-weight: 900;
+    font-size: clamp(2rem, 3.5vw, 3.5rem);
+    line-height: 0.92;
     margin: 0;
     color: var(--color-brand-dark);
-  }
-
-  /* Sin imagen: título más prominente */
-  .SupportCard:not(:has(.SupportCard__image-wrap)) .SupportCard__title {
-    font-family: var(--font-alumni);
-    font-size: clamp(1.4rem, 2.5vw, 2rem);
-    font-weight: 900;
-    line-height: 0.95;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 </style>

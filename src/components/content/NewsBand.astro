@@ -22,9 +22,9 @@ function imgUrl(image: unknown, width: number): string | null {
 }
 
 const heroImgUrl  = imgUrl(hero.data.mainImage, 640);
-const s1ImgUrl    = imgUrl(support[0]?.data.mainImage, 360);
+const s1ImgUrl    = imgUrl(support[0]?.data.mainImage, variant === 'hero-left' ? 560 : 360);
 const s2ImgUrl    = imgUrl(support[1]?.data.mainImage, 360);
-const s3ImgUrl    = imgUrl(support[2]?.data.mainImage, 560);
+const s3ImgUrl    = imgUrl(support[2]?.data.mainImage, variant === 'hero-right' ? 560 : 360);
 
 const heroCategory = hero.data.categories?.[0]?.title ?? null;
 ---
@@ -74,7 +74,6 @@ const heroCategory = hero.data.categories?.[0]?.title ?? null;
         categoryTitle={support[2].data.categories?.[0]?.title ?? null}
         imageUrl={s3ImgUrl}
         imageAlt={support[2].data.mainImage?.alt ?? support[2].data.title}
-        wide={true}
       />
     </div>
   )}
@@ -88,15 +87,18 @@ const heroCategory = hero.data.categories?.[0]?.title ?? null;
     background: var(--color-brand-dark);
     border-radius: 10px;
     overflow: hidden;
+    max-height: 85vh;
   }
 
-  /* Cada celda tiene sus propias esquinas redondeadas */
+  /* Cada celda es flex column para que el hijo ocupe el 100% de altura */
   .NewsBand__hero,
   .NewsBand__s1,
   .NewsBand__s2,
   .NewsBand__s3 {
     border-radius: 8px;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
   /* ── Hero-left: [2fr 1fr 1fr] ──────────────────────────────────── */
@@ -105,9 +107,9 @@ const heroCategory = hero.data.categories?.[0]?.title ?? null;
   }
 
   .NewsBand--hero-left .NewsBand__hero { grid-column: 1; grid-row: 1 / span 2; }
-  .NewsBand--hero-left .NewsBand__s1   { grid-column: 2; grid-row: 1; }
-  .NewsBand--hero-left .NewsBand__s2   { grid-column: 3; grid-row: 1; }
-  .NewsBand--hero-left .NewsBand__s3   { grid-column: 2 / span 2; grid-row: 2; }
+  .NewsBand--hero-left .NewsBand__s1   { grid-column: 2 / span 2; grid-row: 1; }
+  .NewsBand--hero-left .NewsBand__s2   { grid-column: 2; grid-row: 2; }
+  .NewsBand--hero-left .NewsBand__s3   { grid-column: 3; grid-row: 2; }
 
   /* ── Hero-right: [1fr 1fr 2fr] ─────────────────────────────────── */
   .NewsBand--hero-right {
