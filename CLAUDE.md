@@ -108,6 +108,22 @@ La API de WordPress (`wou.com.ar/wp-json/wp/v2`) es pública — no requiere tok
 - Variables de entorno: configurar en el dashboard de Cloudflare Pages (no en `wrangler.toml`).
 - `wrangler.toml` solo contiene metadatos de nombre y fecha de compatibilidad.
 
+## Actualización de contenido — Deploy Hook manual (pendiente de implementar)
+
+La home es estática: muestra el contenido del momento del último build. Las páginas de artículo (`prerender: false`) siempre están frescas vía WordPress REST API.
+
+**Estrategia elegida: webhook manual desde WordPress**
+- Cloudflare Pages provee una **Deploy Hook URL** (se genera en el dashboard, Settings → Builds → Deploy Hooks).
+- Un `POST` a esa URL dispara un nuevo build (~10 seg) sin parámetros adicionales.
+- El editor tendrá un botón "Publicar en el sitio" en WordPress que hace ese POST.
+- Implementación sugerida: snippet en `functions.php` del tema, o plugin liviano. No requiere cambios en el código de Astro.
+
+**Por qué no auto-webhook por cada publicación:**
+- El plan gratuito de Cloudflare Pages tiene 500 builds/mes.
+- El editor controla cuándo se rebuilda → evita builds innecesarios por borradores o ediciones intermedias.
+
+**Pendiente:** configurar la Deploy Hook URL en Cloudflare Pages y el botón en WordPress.
+
 ## Tailwind CSS v4
 - Configuración CSS-first en `src/styles/global.css`
 - Design tokens en bloque `@theme {}`

@@ -10,6 +10,7 @@
  *   · Col 3 (1fr, right-align) : botón "Secciones"
  */
 import SectionsMenu from '@/components/ui/SectionsMenu.svelte';
+import WindWidget from '@/components/ui/WindWidget.svelte';
 
 // TODO: reemplazar por getCollection('categories') cuando el CMS esté listo.
 const MOCK_SECTIONS = [
@@ -76,7 +77,7 @@ const MOCK_SECTIONS = [
       <span
         class="font-bowlby text-brand-teal tracking-wide text-[calc(1rem*var(--header-scale,1))] transition-[font-size] duration-300 whitespace-nowrap"
       >
-        <span class="header-normal">Viento | </span>RGL: 72 KM
+        <span class="header-normal">Viento | </span><WindWidget client:load />
       </span>
     </div>
 
