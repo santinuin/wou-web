@@ -44,7 +44,7 @@ const heroCategory = hero.data.categories?.[0]?.title ?? null;
       categoryTitle={heroCategory}
       imageUrl={heroImgUrl}
       imageAlt={hero.data.mainImage?.alt ?? hero.data.title}
-      tickerText={hero.data.excerpt ?? null}
+      tickerText={hero.data.title}
       highlightWord={hero.data.highlightWord ?? null}
     />
   </div>

@@ -15,7 +15,7 @@ const { title, slug, categoryTitle, imageUrl, imageAlt = title, tickerText, high
 const src = imageUrl ?? PLACEHOLDER;
 
 // Triplicamos para scroll continuo sin saltos
-const tickerReps = tickerText ? [tickerText, tickerText, tickerText] : [];
+const tickerReps = tickerText ? [tickerText, tickerText, tickerText, tickerText, tickerText] : [];
 
 // Partir el título en [antes, palabra destacada, después]
 type TitlePart = { text: string; highlight: boolean };
@@ -124,7 +124,6 @@ if (titleParts.length === 0) {
     font-weight: 900;
     text-transform: uppercase;
     color: var(--color-brand-black);
-    animation: hero-ticker 25s linear infinite;
   }
 
   .HeroCard__ticker-sep {
@@ -133,7 +132,7 @@ if (titleParts.length === 0) {
 
   @keyframes hero-ticker {
     from { transform: translateX(0); }
-    to   { transform: translateX(-33.333%); }
+    to   { transform: translateX(var(--ticker-shift, -20%)); }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -216,3 +215,29 @@ if (titleParts.length === 0) {
     opacity: 0.8;
   }
 </style>
+
+<script>
+  const TICKER_SPEED = 65; // px/s
+  const REPS = 5;          // debe coincidir con tickerReps.length
+
+  function calibrateTickers() {
+    document.querySelectorAll<HTMLElement>('.HeroCard__ticker-track').forEach(track => {
+      const oneRepWidth = track.scrollWidth / REPS;
+      const duration = oneRepWidth / TICKER_SPEED;
+      const shift = `${-(100 / REPS)}%`;
+
+      // Aplicar la animación completa de una vez — no modifica una animación en curso
+      track.style.setProperty('--ticker-shift', shift);
+      track.style.animation = `hero-ticker ${duration}s linear infinite`;
+    });
+  }
+
+  let resizeTimer: ReturnType<typeof setTimeout>;
+  function onResize() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(calibrateTickers, 150);
+  }
+
+  document.addEventListener('DOMContentLoaded', calibrateTickers);
+  window.addEventListener('resize', onResize);
+</script>

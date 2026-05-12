@@ -38,18 +38,33 @@ const loopedItems = [...items, ...items, ...items];
 </div>
 
 <style>
-  .ticker-track {
-    animation: ticker-scroll 30s linear infinite;
-  }
-
   @keyframes ticker-scroll {
     from { transform: translateX(0); }
-    to   { transform: translateX(-33.333%); }
+    to   { transform: translateX(var(--ticker-shift, -33.333%)); }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ticker-track {
-      animation: none;
-    }
+    .ticker-track { animation: none !important; }
   }
 </style>
+
+<script>
+  const TICKER_SPEED = 65; // px/s — igual que HeroCard ticker
+  const REPS = 3;
+
+  function calibrate() {
+    document.querySelectorAll<HTMLElement>('.ticker-track').forEach(track => {
+      const oneRepWidth = track.scrollWidth / REPS;
+      const duration = oneRepWidth / TICKER_SPEED;
+      track.style.setProperty('--ticker-shift', `${-(100 / REPS)}%`);
+      track.style.animation = `ticker-scroll ${duration}s linear infinite`;
+    });
+  }
+
+  let resizeTimer: ReturnType<typeof setTimeout>;
+  document.addEventListener('DOMContentLoaded', calibrate);
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(calibrate, 150);
+  });
+</script>
