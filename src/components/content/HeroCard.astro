@@ -66,11 +66,13 @@ if (titleParts.length === 0) {
     </div>
   </div>
 
-  <!-- Mitad inferior: fondo teal — badge top-left + título centrado -->
+  <!-- Badge posicionado en la línea divisoria entre imagen y teal -->
+  {categoryTitle && (
+    <span class="HeroCard__category">{categoryTitle}</span>
+  )}
+
+  <!-- Mitad inferior: fondo teal — título desde arriba -->
   <div class="HeroCard__body">
-    {categoryTitle && (
-      <span class="HeroCard__category">{categoryTitle}</span>
-    )}
     <h2 class="HeroCard__title">
       {titleParts.map((part) =>
         part.highlight
@@ -84,17 +86,17 @@ if (titleParts.length === 0) {
 
 <style>
   .HeroCard {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: 1fr 1fr;
     height: 100%;
     text-decoration: none;
     color: inherit;
-    overflow: visible;
+    overflow: hidden;
+    position: relative;
   }
 
   /* ── Mitad superior: ticker + imagen ───────────────────────────── */
   .HeroCard__top {
-    flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -158,22 +160,21 @@ if (titleParts.length === 0) {
 
   /* ── Mitad inferior: fondo teal — badge sobre línea + título centrado ─ */
   .HeroCard__body {
-    flex: 1;
     background: var(--color-brand-teal);
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: 0rem 3rem 0rem;
+    padding: 1.5rem 3rem 1.5rem;
     gap: 0.4rem;
-    overflow: visible;
-    position: relative;
+    overflow: hidden;
+    container-type: inline-size;
   }
 
-  /* Badge centrado sobre la línea divisoria */
+  /* Badge en la línea divisoria, relativo al card completo */
   .HeroCard__category {
     position: absolute;
-    top: 0;
+    top: 50%;
     left: 0.75rem;
     transform: translateY(-50%);
     display: inline-block;
@@ -187,18 +188,22 @@ if (titleParts.length === 0) {
     line-height: 1.2;
     border: 2px solid var(--color-brand-black);
     white-space: nowrap;
-    z-index: 1;
+    z-index: 10;
   }
 
   .HeroCard__title {
     font-family: var(--font-alumni);
     font-weight: 900;
-    font-size: clamp(3.5rem, 11vw, 11rem);
-    line-height: 0.8;
+    font-size: clamp(3.5rem, 22cqi, 16rem);
+    line-height: 0.85;
     color: var(--color-brand-dark);
     margin: 0;
     text-align: left;
     transition: opacity 0.2s ease;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   /* Palabra destacada: más grande que el resto */
