@@ -8,10 +8,8 @@
  *   [LiveCard][YouTube] │
  *   [── Ticker ──────] │ EditorialCard
  *   [── NewsList ────] │
- *
- * Datos: mock hasta que el CMS esté configurado en Sanity.
- * TODO: reemplazar MOCK_* por getCollection() / getEntry() de astro:content.
  */
+import { getCollection } from 'astro:content';
 import LiveCard from '@/components/content/LiveCard.astro';
 import YoutubeEmbed from '@/components/content/YoutubeEmbed.astro';
 import NewsTicker from '@/components/content/NewsTicker.astro';
@@ -19,26 +17,24 @@ import NewsList from '@/components/content/NewsList.astro';
 import EditorialCard from '@/components/content/EditorialCard.astro';
 import editorialImageMock from '@/assets/editorial-image-mock.png';
 
-// ── Mock data ──────────────────────────────────────────────────────────────
-// Reemplazar por queries GROQ via getCollection() cuando el CMS esté listo.
-
 const now = new Date();
-// imageUrl vendrá del CMS: urlForImage(article.mainImage).width(200).height(140).url()
-const LOREM = 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.';
-const MOCK_NEWS = [
-  { title: 'Sube el gas', publishedAt: new Date(now.getTime() - 12 * 60_000).toISOString(), slug: 'sube-el-gas', excerpt: LOREM },
-  { title: 'Fallo por YPF', publishedAt: new Date(now.getTime() - 34 * 60_000).toISOString(), slug: 'fallo-por-ypf', excerpt: LOREM },
-  { title: 'El discurso no cierra', publishedAt: new Date(now.getTime() - 60 * 60_000).toISOString(), slug: 'el-discurso-no-cierra', excerpt: LOREM },
-  { title: 'City tour de pascuas', publishedAt: new Date(now.getTime() - 3 * 60 * 60_000).toISOString(), slug: 'city-tour-de-pascuas', excerpt: LOREM },
-];
 
-const MOCK_TICKER = [
-  'Sube el gas',
-  'Fallo por YPF',
-  'El discurso no cierra',
-  'Paritaria en modo ahorro',
-  'Mi barrio festeja llega al desfile',
-];
+// Artículos recientes excluyendo "Círculo Rojo" — ya están en el collection (build-time)
+const rawArticles = await getCollection('articles');
+const newsItems = rawArticles
+  .filter((a) => !a.data.categories?.some((c) => c.title === 'Circulo Rojo' || c.title === 'Círculo Rojo'))
+  .sort((a, b) => (b.data.publishedAt ?? '').localeCompare(a.data.publishedAt ?? ''))
+  .slice(0, 5)
+  .map((a) => ({
+    title: a.data.title,
+    publishedAt: a.data.publishedAt ?? now.toISOString(),
+    slug: a.data.slug.current,
+    href: `/articles/${a.data.slug.current}`,
+    imageUrl: a.data.mainImage?.url ?? null,
+    excerpt: a.data.excerpt ?? null,
+  }));
+
+const tickerItems = newsItems.map((a) => a.title);
 
 const MOCK_EDITORIAL = {
   title: 'Sueldos de pobreza',
@@ -79,7 +75,7 @@ const MOCK_EDITORIAL = {
 
     <!-- Lista de noticias -->
     <div class="min-h-64 lg:flex-1 lg:min-h-0">
-      <NewsList articles={MOCK_NEWS} buildDate={now} />
+      <NewsList articles={newsItems} buildDate={now} />
     </div>
 
   </div>
@@ -88,7 +84,7 @@ const MOCK_EDITORIAL = {
   <div class="flex flex-col lg:min-h-0 min-h-[60svh]">
 
     <!-- Ticker al tope de la columna -->
-    <NewsTicker items={MOCK_TICKER} />
+    <NewsTicker items={tickerItems} />
 
     <!-- Editorial -->
     <EditorialCard

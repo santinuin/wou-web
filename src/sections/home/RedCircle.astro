@@ -6,18 +6,17 @@
  * viewport (100vh / 100dvh).
  *
  * Arquitectura:
- *  1. Astro (build-time) consulta la collection `redCircles`, pre-genera
- *     las URLs de imágenes Sanity y monta los `<li>` de cada bola.
- *  2. El `<ul>` contenedor es renderizado por la isla Svelte `BallPool`,
- *     que se hidrata con `client:visible` (zero JS hasta que es visible).
- *  3. La isla aplica Matter.js sobre los `<li>` y sincroniza posición /
+ *  1. Astro (build-time) fetcha las últimas 8 entradas de la categoría
+ *     "Circulo Rojo" de WordPress vía fetchWpPostsByCategory().
+ *  2. El <ul> contenedor es renderizado por la isla Svelte BallPool,
+ *     que se hidrata con client:visible (zero JS hasta que es visible).
+ *  3. La isla aplica Matter.js sobre los <li> y sincroniza posición /
  *     rotación al DOM cada frame.
  *
  * Las imágenes se revelan en hover con una transición CSS — sin JS.
  */
-import { getCollection } from 'astro:content';
 import BallPool from '@/components/ui/BallPool.svelte';
-import { urlForImage } from '@/lib/cms/image';
+import { fetchWpPostsByCategory } from '@/lib/cms';
 import { MOCK_RED_CIRCLES } from './mocks/redCircleMock';
 
 type BallData = {
@@ -28,32 +27,16 @@ type BallData = {
   imageAlt: string;
 };
 
-const entries = await getCollection('redCircles');
+const posts = await fetchWpPostsByCategory('circulo-rojo', 8);
 
-const balls: BallData[] = entries.length
-  ? entries.map((e) => {
-      const data = e.data as {
-        label: string;
-        href?: string | null;
-        slug: { current: string };
-        image: unknown;
-      };
-      return {
-        id: e.id,
-        label: data.label,
-        href: data.href || `/circulo-rojo/${data.slug.current}`,
-        imageUrl: data.image
-          ? urlForImage(data.image as Parameters<typeof urlForImage>[0])
-              .width(600)
-              .height(600)
-              .fit('crop')
-              .auto('format')
-              .url()
-          : null,
-        imageAlt:
-          ((data.image as { alt?: string })?.alt as string | undefined) ?? data.label,
-      };
-    })
+const balls: BallData[] = posts.length
+  ? posts.map((post) => ({
+      id: String(post.id),
+      label: post.title.rendered.replace(/&amp;/g, '&').replace(/&#(\d+);/gi, (_, c) => String.fromCharCode(Number(c))).replace(/&[a-z]+;/gi, ''),
+      href: `/articles/${post.slug}`,
+      imageUrl: post._embedded?.['wp:featuredmedia']?.[0]?.source_url ?? null,
+      imageAlt: post._embedded?.['wp:featuredmedia']?.[0]?.alt_text || post.title.rendered,
+    }))
   : MOCK_RED_CIRCLES.map((m) => ({ ...m, imageUrl: m.imageUrl as string | null }));
 ---
 

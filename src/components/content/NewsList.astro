@@ -6,6 +6,7 @@ interface NewsItem {
   title: string;
   publishedAt: string;
   slug: string;
+  href?: string;
   imageUrl?: string | null;
   excerpt?: string | null;
 }
@@ -43,7 +44,7 @@ const { articles, buildDate = new Date() } = Astro.props;
     {articles.map((article) => (
       <li class="group relative flex-1">
         <a
-          href={`/articulo/${article.slug}`}
+          href={article.href ?? `/articulo/${article.slug}`}
           class="relative flex items-center px-5 h-full overflow-hidden"
         >
           {/*
@@ -65,21 +66,21 @@ const { articles, buildDate = new Date() } = Astro.props;
                 <Image
                   src={article.imageUrl}
                   alt={article.title}
-                  width={200}
-                  height={140}
-                  class="w-25 h-75.5 object-cover shrink-0"
+                  width={112}
+                  height={112}
+                  class="w-14 h-14 object-cover rounded shrink-0"
                   loading="lazy"
                 />
               )}
               {article.excerpt && (
-                <span class="font-franklin text-brand-white text-sm leading-snug shrink-0 w-40">
+                <span class="font-franklin text-brand-white text-sm leading-snug shrink-0 w-40 line-clamp-3">
                   {article.excerpt}
                 </span>
               )}
             </span>
           )}
 
-          <span class="relative font-franklin font-bold text-brand-white text-2xl uppercase tracking-wide whitespace-nowrap transition-colors">
+          <span class="relative flex-1 min-w-0 font-franklin font-bold text-brand-white text-2xl uppercase tracking-wide truncate transition-colors">
             {article.title}
           </span>
 

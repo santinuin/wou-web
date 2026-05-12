@@ -79,6 +79,47 @@ export async function fetchWpPostBySlug(slug: string): Promise<WpPost | null> {
 }
 
 /**
+ * Resuelve el slug de una categoría a su ID numérico.
+ * Necesario porque la API de posts filtra por ID, no por slug.
+ */
+async function resolveCategoryId(slug: string): Promise<number | null> {
+  const res = await fetch(`${WP_BASE}/categories?slug=${encodeURIComponent(slug)}&per_page=1`);
+  if (!res.ok) return null;
+  const text = await res.text();
+  if (!text.trim()) return null;
+  try {
+    const cats: Array<{ id: number }> = JSON.parse(text);
+    return cats[0]?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Trae los N posts más recientes de una categoría específica (por slug).
+ * Usa 2 requests: 1 para resolver el ID de la categoría + 1 para los posts.
+ */
+export async function fetchWpPostsByCategory(categorySlug: string, count = 8): Promise<WpPost[]> {
+  const categoryId = await resolveCategoryId(categorySlug);
+  if (!categoryId) return [];
+
+  const res = await fetch(
+    `${WP_BASE}/posts?per_page=${Math.min(count, 50)}&page=1&status=publish&_embed&categories=${categoryId}`
+  );
+  if (!res.ok) return [];
+  const contentType = res.headers.get('content-type') ?? '';
+  if (!contentType.includes('application/json')) return [];
+  const text = await res.text();
+  if (!text.trim()) return [];
+  try {
+    const posts: WpPost[] = JSON.parse(text);
+    return Array.isArray(posts) ? posts : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
  * Trae los N posts más recientes para prerender en build-time.
  * Una sola request — la home nunca necesita el catálogo completo.
  */
