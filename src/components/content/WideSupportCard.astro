@@ -7,15 +7,14 @@ interface Props {
   categoryTitle?: string | null;
   imageUrl?: string | null;
   imageAlt?: string;
-  wide?: boolean;
 }
 
 const { title, slug, categoryTitle, imageUrl, imageAlt = title } = Astro.props;
 const src = imageUrl ?? PLACEHOLDER;
 ---
 
-<a href={`/${slug}`} class="SupportCard" aria-label={title}>
-  <div class="SupportCard__image-zone">
+<a href={`/${slug}`} class="WideSupportCard" aria-label={title}>
+  <div class="WideSupportCard__image-zone">
     <img
       src={src}
       alt={imageAlt}
@@ -23,20 +22,20 @@ const src = imageUrl ?? PLACEHOLDER;
       height="360"
       loading="lazy"
       decoding="async"
-      class="SupportCard__image"
+      class="WideSupportCard__image"
     />
   </div>
 
-  <div class="SupportCard__body">
+  <div class="WideSupportCard__body">
     {categoryTitle && (
-      <span class="SupportCard__category">{categoryTitle}</span>
+      <span class="WideSupportCard__category">{categoryTitle}</span>
     )}
-    <h3 class="SupportCard__title">{title}</h3>
+    <h3 class="WideSupportCard__title">{title}</h3>
   </div>
 </a>
 
 <style>
-  .SupportCard {
+  .WideSupportCard {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -44,20 +43,22 @@ const src = imageUrl ?? PLACEHOLDER;
     text-decoration: none;
     color: var(--color-brand-dark);
     overflow: visible;
+    border: 2px solid var(--color-brand-dark);
+    border-radius: 8px;
     transition: filter 0.2s ease;
   }
 
-  .SupportCard:hover {
+  .WideSupportCard:hover {
     filter: brightness(0.95);
   }
 
-  /* Image takes exactly half the card height */
-  .SupportCard__image-zone {
-    flex: 0 0 55%;
+  .WideSupportCard__image-zone {
+    flex: 0 0 60%;
     overflow: hidden;
+    border-radius: 6px 6px 0 0;
   }
 
-  .SupportCard__image {
+  .WideSupportCard__image {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -65,27 +66,24 @@ const src = imageUrl ?? PLACEHOLDER;
     transition: transform 0.35s ease;
   }
 
-  .SupportCard:hover .SupportCard__image {
+  .WideSupportCard:hover .WideSupportCard__image {
     transform: scale(1.03);
   }
 
-  /* White text area — badge sobre línea + title */
-  .SupportCard__body {
-    flex: 1;
+  .WideSupportCard__body {
+    flex: 0 0 40%;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 0.35rem;
-    padding: 1.8rem 1rem 0.75rem;
+    padding: 0.5rem 1.8rem 0.75rem;
     overflow: visible;
     position: relative;
   }
 
-  /* Badge centrado sobre la línea divisoria — mismo estilo que HeroCard */
-  .SupportCard__category {
+  .WideSupportCard__category {
     position: absolute;
     top: 0;
-    left: 0.75rem;
+    left: 1.25rem;
     transform: translateY(-50%);
     display: inline-block;
     background: #ffffff;
@@ -101,16 +99,15 @@ const src = imageUrl ?? PLACEHOLDER;
     z-index: 1;
   }
 
-  .SupportCard__title {
+  .WideSupportCard__title {
     font-family: var(--font-alumni);
     font-weight: 900;
-    font-size: clamp(2.2rem, 4vw, 4rem);
-    line-height: 0.92;
+    font-size: clamp(2.8rem, 5vw, 6.5rem);
+    line-height: 0.9;
     margin: 0;
     color: var(--color-brand-dark);
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+    white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
   }
 </style>

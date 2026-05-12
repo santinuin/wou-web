@@ -2,6 +2,7 @@
 import { getImageUrl } from '@/lib/cms';
 import HeroCard from './HeroCard.astro';
 import SupportCard from './SupportCard.astro';
+import WideSupportCard from './WideSupportCard.astro';
 import type { ArticleLike } from '@/sections/home/mocks/newsGridMock';
 
 interface Props {
@@ -21,10 +22,15 @@ function imgUrl(image: unknown, width: number): string | null {
   }
 }
 
+// En hero-right la wide card es s3 → ponerle el más reciente (support[0])
+const ordered = variant === 'hero-right'
+  ? [support[1], support[2], support[0]]
+  : support;
+
 const heroImgUrl  = imgUrl(hero.data.mainImage, 640);
-const s1ImgUrl    = imgUrl(support[0]?.data.mainImage, 360);
-const s2ImgUrl    = imgUrl(support[1]?.data.mainImage, 360);
-const s3ImgUrl    = imgUrl(support[2]?.data.mainImage, 560);
+const s1ImgUrl    = imgUrl(ordered[0]?.data.mainImage, variant === 'hero-left' ? 560 : 360);
+const s2ImgUrl    = imgUrl(ordered[1]?.data.mainImage, 360);
+const s3ImgUrl    = imgUrl(ordered[2]?.data.mainImage, variant === 'hero-right' ? 560 : 360);
 
 const heroCategory = hero.data.categories?.[0]?.title ?? null;
 ---
@@ -39,43 +45,61 @@ const heroCategory = hero.data.categories?.[0]?.title ?? null;
       imageUrl={heroImgUrl}
       imageAlt={hero.data.mainImage?.alt ?? hero.data.title}
       tickerText={hero.data.excerpt ?? null}
+      highlightWord={hero.data.highlightWord ?? null}
     />
   </div>
 
-  {support[0] && (
+  {ordered[0] && (
     <div class="NewsBand__s1">
-      <SupportCard
-        title={support[0].data.title}
-        slug={support[0].data.slug.current}
-        categoryTitle={support[0].data.categories?.[0]?.title ?? null}
-        imageUrl={s1ImgUrl}
-        imageAlt={support[0].data.mainImage?.alt ?? support[0].data.title}
-      />
+      {variant === 'hero-left'
+        ? <WideSupportCard
+            title={ordered[0].data.title}
+            slug={ordered[0].data.slug.current}
+            categoryTitle={ordered[0].data.categories?.[0]?.title ?? null}
+            imageUrl={s1ImgUrl}
+            imageAlt={ordered[0].data.mainImage?.alt ?? ordered[0].data.title}
+          />
+        : <SupportCard
+            title={ordered[0].data.title}
+            slug={ordered[0].data.slug.current}
+            categoryTitle={ordered[0].data.categories?.[0]?.title ?? null}
+            imageUrl={s1ImgUrl}
+            imageAlt={ordered[0].data.mainImage?.alt ?? ordered[0].data.title}
+          />
+      }
     </div>
   )}
 
-  {support[1] && (
+  {ordered[1] && (
     <div class="NewsBand__s2">
       <SupportCard
-        title={support[1].data.title}
-        slug={support[1].data.slug.current}
-        categoryTitle={support[1].data.categories?.[0]?.title ?? null}
+        title={ordered[1].data.title}
+        slug={ordered[1].data.slug.current}
+        categoryTitle={ordered[1].data.categories?.[0]?.title ?? null}
         imageUrl={s2ImgUrl}
-        imageAlt={support[1].data.mainImage?.alt ?? support[1].data.title}
+        imageAlt={ordered[1].data.mainImage?.alt ?? ordered[1].data.title}
       />
     </div>
   )}
 
-  {support[2] && (
+  {ordered[2] && (
     <div class="NewsBand__s3">
-      <SupportCard
-        title={support[2].data.title}
-        slug={support[2].data.slug.current}
-        categoryTitle={support[2].data.categories?.[0]?.title ?? null}
-        imageUrl={s3ImgUrl}
-        imageAlt={support[2].data.mainImage?.alt ?? support[2].data.title}
-        wide={true}
-      />
+      {variant === 'hero-right'
+        ? <WideSupportCard
+            title={ordered[2].data.title}
+            slug={ordered[2].data.slug.current}
+            categoryTitle={ordered[2].data.categories?.[0]?.title ?? null}
+            imageUrl={s3ImgUrl}
+            imageAlt={ordered[2].data.mainImage?.alt ?? ordered[2].data.title}
+          />
+        : <SupportCard
+            title={ordered[2].data.title}
+            slug={ordered[2].data.slug.current}
+            categoryTitle={ordered[2].data.categories?.[0]?.title ?? null}
+            imageUrl={s3ImgUrl}
+            imageAlt={ordered[2].data.mainImage?.alt ?? ordered[2].data.title}
+          />
+      }
     </div>
   )}
 </section>
@@ -88,15 +112,18 @@ const heroCategory = hero.data.categories?.[0]?.title ?? null;
     background: var(--color-brand-dark);
     border-radius: 10px;
     overflow: hidden;
+    max-height: 85vh;
   }
 
-  /* Cada celda tiene sus propias esquinas redondeadas */
+  /* Cada celda es flex column para que el hijo ocupe el 100% de altura */
   .NewsBand__hero,
   .NewsBand__s1,
   .NewsBand__s2,
   .NewsBand__s3 {
     border-radius: 8px;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
   /* ── Hero-left: [2fr 1fr 1fr] ──────────────────────────────────── */
@@ -105,9 +132,9 @@ const heroCategory = hero.data.categories?.[0]?.title ?? null;
   }
 
   .NewsBand--hero-left .NewsBand__hero { grid-column: 1; grid-row: 1 / span 2; }
-  .NewsBand--hero-left .NewsBand__s1   { grid-column: 2; grid-row: 1; }
-  .NewsBand--hero-left .NewsBand__s2   { grid-column: 3; grid-row: 1; }
-  .NewsBand--hero-left .NewsBand__s3   { grid-column: 2 / span 2; grid-row: 2; }
+  .NewsBand--hero-left .NewsBand__s1   { grid-column: 2 / span 2; grid-row: 1; }
+  .NewsBand--hero-left .NewsBand__s2   { grid-column: 2; grid-row: 2; }
+  .NewsBand--hero-left .NewsBand__s3   { grid-column: 3; grid-row: 2; }
 
   /* ── Hero-right: [1fr 1fr 2fr] ─────────────────────────────────── */
   .NewsBand--hero-right {

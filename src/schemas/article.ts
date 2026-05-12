@@ -95,6 +95,14 @@ export const articleType = defineType({
       rows: 3,
       validation: (Rule) => Rule.max(200),
     }),
+    // [EXP] Palabra del título que se destaca visualmente en la portada (más grande)
+    defineField({
+      name: 'highlightWord',
+      title: 'Palabra destacada [EXP]',
+      type: 'string',
+      description: 'Una palabra del título que se mostrará más grande en la tarjeta hero.',
+      validation: (Rule) => Rule.max(40),
+    }),
   ],
 
   preview: {

@@ -18,7 +18,7 @@ interface Props {
 const { articles, buildDate = new Date() } = Astro.props;
 ---
 
-<div class="flex flex-col bg-brand-dark h-full">
+<div class="NL flex flex-col bg-brand-dark h-full">
 
   <!-- Encabezado -->
   <div class="NL__header px-5 pt-10 border-b-10 border-brand-teal" style="container-type: inline-size;">
@@ -91,4 +91,34 @@ const { articles, buildDate = new Date() } = Astro.props;
     ))}
   </ul>
 </div>
+
+<script>
+  // Anula toda transición CSS mientras el scroll va de abajo hacia arriba.
+  // Comportamiento como página normal — sin sweep, sin reveal, sin fades.
+  const roots = document.querySelectorAll<HTMLElement>('.NL');
+  if (roots.length) {
+    let lastY = window.scrollY;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      if (y < lastY) {
+        roots.forEach((r) => r.classList.add('is-scrolling-up'));
+      }
+      lastY = y;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        roots.forEach((r) => r.classList.remove('is-scrolling-up'));
+      }, 150);
+    }, { passive: true });
+  }
+</script>
+
+<style>
+  .NL.is-scrolling-up *,
+  .NL.is-scrolling-up *::before,
+  .NL.is-scrolling-up *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+</style>
 
