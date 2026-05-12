@@ -2,6 +2,7 @@
 import { getImageUrl } from '@/lib/cms';
 import HeroCard from './HeroCard.astro';
 import SupportCard from './SupportCard.astro';
+import WideSupportCard from './WideSupportCard.astro';
 import type { ArticleLike } from '@/sections/home/mocks/newsGridMock';
 
 interface Props {
@@ -45,13 +46,22 @@ const heroCategory = hero.data.categories?.[0]?.title ?? null;
 
   {support[0] && (
     <div class="NewsBand__s1">
-      <SupportCard
-        title={support[0].data.title}
-        slug={support[0].data.slug.current}
-        categoryTitle={support[0].data.categories?.[0]?.title ?? null}
-        imageUrl={s1ImgUrl}
-        imageAlt={support[0].data.mainImage?.alt ?? support[0].data.title}
-      />
+      {variant === 'hero-left'
+        ? <WideSupportCard
+            title={support[0].data.title}
+            slug={support[0].data.slug.current}
+            categoryTitle={support[0].data.categories?.[0]?.title ?? null}
+            imageUrl={s1ImgUrl}
+            imageAlt={support[0].data.mainImage?.alt ?? support[0].data.title}
+          />
+        : <SupportCard
+            title={support[0].data.title}
+            slug={support[0].data.slug.current}
+            categoryTitle={support[0].data.categories?.[0]?.title ?? null}
+            imageUrl={s1ImgUrl}
+            imageAlt={support[0].data.mainImage?.alt ?? support[0].data.title}
+          />
+      }
     </div>
   )}
 
@@ -69,13 +79,22 @@ const heroCategory = hero.data.categories?.[0]?.title ?? null;
 
   {support[2] && (
     <div class="NewsBand__s3">
-      <SupportCard
-        title={support[2].data.title}
-        slug={support[2].data.slug.current}
-        categoryTitle={support[2].data.categories?.[0]?.title ?? null}
-        imageUrl={s3ImgUrl}
-        imageAlt={support[2].data.mainImage?.alt ?? support[2].data.title}
-      />
+      {variant === 'hero-right'
+        ? <WideSupportCard
+            title={support[2].data.title}
+            slug={support[2].data.slug.current}
+            categoryTitle={support[2].data.categories?.[0]?.title ?? null}
+            imageUrl={s3ImgUrl}
+            imageAlt={support[2].data.mainImage?.alt ?? support[2].data.title}
+          />
+        : <SupportCard
+            title={support[2].data.title}
+            slug={support[2].data.slug.current}
+            categoryTitle={support[2].data.categories?.[0]?.title ?? null}
+            imageUrl={s3ImgUrl}
+            imageAlt={support[2].data.mainImage?.alt ?? support[2].data.title}
+          />
+      }
     </div>
   )}
 </section>
