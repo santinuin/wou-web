@@ -11,11 +11,12 @@
  */
 import { getCollection } from 'astro:content';
 import LiveCard from '@/components/content/LiveCard.astro';
-import YoutubeEmbed from '@/components/content/YoutubeEmbed.astro';
+import YoutubeStream from '@/components/ui/YoutubeStream.svelte';
 import NewsTicker from '@/components/content/NewsTicker.astro';
 import NewsList from '@/components/content/NewsList.astro';
 import EditorialCard from '@/components/content/EditorialCard.astro';
 import editorialImageMock from '@/assets/editorial-image-mock.png';
+import youtubePlaceholder from '@/assets/youtube-placeholder.png';
 
 const now = new Date();
 
@@ -70,7 +71,7 @@ const MOCK_EDITORIAL = {
     <!-- LiveCard + YouTube -->
     <div class="grid grid-cols-[2fr_4fr] shrink-0 h-52 lg:h-[42%]">
       <LiveCard isLive={true} streamUrl={null} />
-      <YoutubeEmbed station="Cambalache" filter="Cambalache" />
+      <YoutubeStream station="Cambalache" placeholder={youtubePlaceholder.src} client:load />
     </div>
 
     <!-- Lista de noticias -->

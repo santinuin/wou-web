@@ -1,7 +1,7 @@
 // ── Stream del canal ────────────────────────────────────────────────────────
 
 const CHANNEL_ID = 'UC3C3wmr69AvQKvs7f3pJD9w';
-const CHANNEL_HANDLE = '@wounoticias';
+const CHANNEL_HANDLE = '@WouRadio-';
 
 export interface YoutubeStreamInfo {
   videoId: string | null;
@@ -17,13 +17,11 @@ export interface YoutubeStreamInfo {
  *                 Sin filtro, prioriza el stream en vivo del momento.
  */
 export async function getYoutubeStream(filter?: string): Promise<YoutubeStreamInfo> {
-  // Sin filtro: intentar detectar stream en vivo primero
-  if (!filter) {
-    const liveId = await detectLiveStream();
-    if (liveId) return { videoId: liveId, isLive: true };
-  }
+  // Siempre verificar si hay un vivo primero — tiene prioridad sobre el filtro
+  const liveId = await detectLiveStream();
+  if (liveId) return { videoId: liveId, isLive: true };
 
-  // Fallback: RSS del canal (último video, con filtro opcional por título)
+  // Sin vivo: RSS del canal con filtro opcional por título
   return getRssFallback(filter);
 }
 
