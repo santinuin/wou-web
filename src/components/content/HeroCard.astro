@@ -8,24 +8,46 @@ interface Props {
   imageUrl?: string | null;
   imageAlt?: string;
   tickerText?: string | null;
+  highlightWord?: string | null;
 }
 
-const { title, slug, categoryTitle, imageUrl, imageAlt = title, tickerText } = Astro.props;
+const { title, slug, categoryTitle, imageUrl, imageAlt = title, tickerText, highlightWord } = Astro.props;
 const src = imageUrl ?? PLACEHOLDER;
+
 // Triplicamos para scroll continuo sin saltos
 const tickerReps = tickerText ? [tickerText, tickerText, tickerText] : [];
+
+// Partir el título en [antes, palabra destacada, después]
+type TitlePart = { text: string; highlight: boolean };
+let titleParts: TitlePart[] = [];
+if (highlightWord) {
+  const lower = title.toLowerCase();
+  const idx = lower.indexOf(highlightWord.toLowerCase());
+  if (idx !== -1) {
+    titleParts = [
+      { text: title.slice(0, idx), highlight: false },
+      { text: title.slice(idx, idx + highlightWord.length), highlight: true },
+      { text: title.slice(idx + highlightWord.length), highlight: false },
+    ].filter((p) => p.text.length > 0);
+  }
+}
+if (titleParts.length === 0) {
+  titleParts = [{ text: title, highlight: false }];
+}
 ---
 
 <a href={`/${slug}`} class="HeroCard">
 
   <!-- Mitad superior: ticker animado + imagen -->
+  <!-- position: relative para anclar el badge en la línea divisoria -->
   <div class="HeroCard__top">
     {tickerText && (
       <div class="HeroCard__ticker" aria-label="Sumario">
         <div class="HeroCard__ticker-track">
-          {tickerReps.map((text, i) => (
+          {tickerReps.map((text) => (
             <>
               <span>{text}</span>
+              <span class="HeroCard__ticker-sep" aria-hidden="true">·</span>
             </>
           ))}
         </div>
@@ -44,12 +66,18 @@ const tickerReps = tickerText ? [tickerText, tickerText, tickerText] : [];
     </div>
   </div>
 
-  <!-- Mitad inferior: fondo teal, badge + título -->
+  <!-- Mitad inferior: fondo teal — badge top-left + título centrado -->
   <div class="HeroCard__body">
     {categoryTitle && (
       <span class="HeroCard__category">{categoryTitle}</span>
     )}
-    <h2 class="HeroCard__title">{title}</h2>
+    <h2 class="HeroCard__title">
+      {titleParts.map((part) =>
+        part.highlight
+          ? <span class="HeroCard__title--highlight">{part.text}</span>
+          : <span>{part.text}</span>
+      )}
+    </h2>
   </div>
 
 </a>
@@ -64,16 +92,17 @@ const tickerReps = tickerText ? [tickerText, tickerText, tickerText] : [];
     overflow: hidden;
   }
 
-  /* ── Mitad superior: ticker + imagen (50% altura) ──────────────── */
+  /* ── Mitad superior: ticker + imagen ───────────────────────────── */
   .HeroCard__top {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
     overflow: hidden;
+    position: relative;
   }
 
-  /* Ticker fino, sin badge, solo scroll de texto */
+  /* Ticker fino animado */
   .HeroCard__ticker {
     flex-shrink: 0;
     height: 1.5rem;
@@ -97,7 +126,7 @@ const tickerReps = tickerText ? [tickerText, tickerText, tickerText] : [];
   }
 
   .HeroCard__ticker-sep {
-    opacity: 0.5;
+    opacity: 0.4;
   }
 
   @keyframes hero-ticker {
@@ -127,43 +156,53 @@ const tickerReps = tickerText ? [tickerText, tickerText, tickerText] : [];
     transform: scale(1.03);
   }
 
-  /* ── Mitad inferior: fondo teal, badge + título (50% altura) ───── */
+  /* ── Mitad inferior: fondo teal — badge arriba + título centrado ─ */
   .HeroCard__body {
     flex: 1;
     background: var(--color-brand-teal);
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 0.75rem;
-    gap: 0.5rem;
+    padding: 0.6rem 0.75rem 0.75rem;
+    gap: 0.4rem;
     overflow: hidden;
-    text-align: center;
   }
 
+  /* Badge top-left, compacto */
   .HeroCard__category {
     display: inline-block;
+    align-self: flex-start;
+    flex-shrink: 0;
     background: #ffffff;
     color: var(--color-brand-dark);
     font-family: var(--font-barlow);
     font-size: 0.68rem;
     font-weight: 600;
-    padding: 0.2rem 0.75rem;
+    padding: 0.2rem 0.65rem;
     border-radius: 9999px;
     line-height: 1.4;
     border: 1.5px solid var(--color-brand-dark);
-    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .HeroCard__title {
     font-family: var(--font-alumni);
     font-weight: 900;
     font-size: clamp(3.5rem, 11vw, 11rem);
-    line-height: 0.85;
+    line-height: 0.8;
     color: var(--color-brand-dark);
     margin: 0;
-    transition: opacity 0.2s ease;
     text-align: left;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: opacity 0.2s ease;
+  }
+
+  /* Palabra destacada: más grande que el resto */
+  .HeroCard__title--highlight {
+    font-size: 1.35em;
+    line-height: 0.78;
   }
 
   .HeroCard:hover .HeroCard__title {
