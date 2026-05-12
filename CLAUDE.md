@@ -3,106 +3,110 @@
 Source of truth para Claude Code. Leer antes de cualquier tarea.
 
 ## Stack
-Astro v6 (output: 'static') · Bun · Sanity v3 · Tailwind CSS v4 · TypeScript strict · GSAP 3 (animaciones) · Matter.js 0.19 (físicas DOM)
+Astro v6 (output: 'static') · Bun · WordPress REST API (headless) · Tailwind CSS v4 · TypeScript strict · GSAP 3 (animaciones) · Matter.js 0.19 (físicas DOM)
 
 ## Invariante central
-**Build-time-only data fetching.**
-Sanity se consulta SOLO durante `astro build` / `astro dev`.
-Cero llamadas a la API en runtime. Esto garantiza 100% autonomía del CDN.
+**Dos modos de fetch, sin mezclar:**
+
+| Ruta | Cuándo se ejecuta | Qué fetcha |
+|------|-------------------|------------|
+| Home y páginas estáticas | `astro build` | `fetchRecentWpPosts(50)` — 1 request, 50 artículos recientes |
+| Páginas de artículo | Runtime (Cloudflare Worker) | `fetchWpPostBySlug(slug)` — 1 request, cacheada 30 días en el edge |
+
+`fetchAllWpPosts()` existe pero está reservado para sitemaps y migraciones. **Nunca usarlo en el build normal** — tarda ~5 min (188 requests a donWeb).
 
 ## Arquitectura de datos
 
-    Sanity CMS
-        │
-        ▼
-    src/lib/cms/            ← capa adaptadora (único contacto con Sanity)
-      client.ts             ← sanityClient
-      queries.ts            ← todas las queries GROQ
-      image.ts              ← urlForImage / getImageUrl
-      index.ts              ← re-exporta todo
-        │
-        ▼
-    src/content.config.ts   ← loaders (fetch en build-time)
-        │
-        ▼
-    getCollection() / getEntry() de 'astro:content'
-        │
-        ▼
-    páginas .astro          ← nunca importan @sanity/client directamente
+    WordPress REST API (donWeb)
+        https://wou.com.ar/wp-json/wp/v2
+                │
+                ▼
+    src/lib/cms/wordpress.ts     ← único contacto con la API de WordPress
+      fetchRecentWpPosts(n)      ← build-time: N artículos recientes (1 request)
+      fetchWpPostBySlug(slug)    ← runtime: artículo individual por slug
+      fetchAllWpPosts()          ← migraciones/sitemaps únicamente
+      extractElementorContent()  ← extrae texto del HTML de Elementor
+                │
+                ▼
+    src/lib/cms/index.ts         ← re-exporta todo (punto de entrada público)
+                │
+          ┌─────┴──────────────────┐
+          ▼                        ▼
+    src/content.config.ts    src/pages/articles/[slug].astro
+    (loader build-time)      (prerender: false → on-demand)
+          │
+          ▼
+    getCollection('articles')
+          │
+          ▼
+    secciones .astro (NewsGrid, etc.)
 
 ## Reglas de datos (no negociables)
-1. Todas las queries GROQ viven en `src/lib/cms/queries.ts` — nunca inline.
-2. Los loaders de Content Collections en `src/content.config.ts` son el único fetch point.
-3. Las páginas `.astro` usan solo `getCollection()` / `getEntry()` de `astro:content`.
-4. `sanityClient` no se importa en páginas `.astro` bajo ningún concepto.
-5. No usar `asset->` en GROQ para imágenes — rompe el schema Zod y es innecesario.
-6. Los componentes importan de `@/lib/cms`, nunca de `@sanity/client` directamente.
+1. `src/lib/cms/wordpress.ts` es el único archivo que hace `fetch()` a la API de WordPress.
+2. El loader de `articles` en `src/content.config.ts` es el único fetch point en build-time.
+3. Las páginas y secciones `.astro` acceden a artículos via `getCollection('articles')`.
+4. Las páginas on-demand (`prerender: false`) usan `fetchWpPostBySlug()` importado de `@/lib/cms`.
+5. Ningún componente importa de `wordpress.ts` directamente — siempre via `@/lib/cms`.
+6. `fetchAllWpPosts()` no se llama durante el build normal.
 
-## Gotchas críticos Sanity + Zod
-- Sanity retorna `null` (no `undefined`) para campos opcionales vacíos.
-- `z.optional()` falla con `null`. Usar `.nullish()` en todos los campos escalares opcionales.
-- Objetos complejos (imágenes, rich text): `z.any()` en el schema de la Collection.
-- Solo el núcleo invariante (`title`, `slug`, `publishedAt`, `body`) tiene tipado estricto.
+## Gotchas críticos WordPress + Astro
+- **`per_page` máximo con `_embed`**: donWeb cierra la conexión con valores > 50. Nunca superar 50.
+- **Sin header `Accept: application/json`**: donWeb/Apache devuelve body vacío cuando está presente. Omitirlo siempre.
+- **`source_url` puede no existir**: algunos media son videos o embeds sin URL de imagen. Verificar `post._embedded?.['wp:featuredmedia']?.[0]?.source_url` específicamente, no solo el objeto.
+- **Elementor**: el contenido real está dentro de `div.elementor-text-editor`. `extractElementorContent()` usa un contador de profundidad (no regex) para manejar divs anidados. Posts sin Elementor se devuelven tal cual.
+- **Zod y campos opcionales**: WordPress devuelve `null` (no `undefined`) para campos vacíos. Usar `.nullish()` en todos los escalares opcionales del schema.
+
+## Shape normalizado de artículo
+Los componentes existentes esperan este shape (compatible con el anterior de Sanity):
+
+```typescript
+{
+  id: string;                        // String(post.id)
+  data: {
+    wpId: number;
+    title: string;
+    slug: { current: string };       // normalizado — antes era Sanity slug
+    publishedAt: string | null;
+    modifiedAt: string | null;
+    content: string | null;          // HTML procesado por extractElementorContent()
+    excerpt: string | null;          // texto plano (sin tags HTML)
+    mainImage: { url: string; alt: string | null } | null;
+    categories: { _id: string; title: string; slug: { current: string } }[];
+    tags: any;
+    author: string | null;
+    originalUrl: string;
+  }
+}
+```
+
+`getImageUrl()` en `src/lib/cms/image.ts` detecta el objeto `{ url, alt }` y devuelve `url` directamente, sin pasar por el builder de Sanity.
 
 ## Desacoplamiento del CMS
-Para cambiar de CMS: reemplazar `src/lib/cms/`.
-Páginas, layouts y componentes no requieren modificación.
-Fuga de abstracción conocida: `blockContent` usa PortableText, formato propio de Sanity.
-
-## Schemas Sanity
-- Ubicación: `src/schemas/` (importados por `sanity.config.ts`)
-- Tipos: `article`, `author`, `category`, `blockContent`
-- Nombres de campo en inglés; labels del Studio en español
-- El formato editorial (news/opinion/analysis...) es el campo `format`, no un tipo separado
-- Campos marcados `[EXP]` son experimentales y pueden cambiar sin consenso
-- Tras modificar schemas: `bun run typegen`
-
-## Evolución de schemas (fase exploratoria)
-Los campos `[EXP]` pueden cambiar libremente porque:
-- Los campos escalares opcionales usan `.nullish()` en content.config.ts
-- Los objetos complejos usan `z.any()`
-- Solo el núcleo invariante tiene tipos estrictos
-
-Proceso para evolucionar un campo:
-1. Modificar `src/schemas/<tipo>.ts`
-2. `bun run typegen` para regenerar tipos
-3. Agregar el campo a la query en `src/lib/cms/queries.ts`
-4. Si el campo es complejo: mantenerlo `z.any()` hasta que la estructura esté estable
-
-Para explorar datos en vivo: `bun run studio` → pestaña "Vision" (GROQ playground).
+Para cambiar de CMS: reemplazar `src/lib/cms/wordpress.ts` y el loader en `src/content.config.ts`.
+Páginas, layouts y componentes no requieren modificación — consumen el shape normalizado.
 
 ## Configuración de entorno
-| Variable                  | Contexto            | Propósito                          |
-|---------------------------|---------------------|------------------------------------|
-| PUBLIC_SANITY_PROJECT_ID  | import.meta.env     | Project ID (expuesto al browser)   |
-| PUBLIC_SANITY_DATASET     | import.meta.env     | Dataset (expuesto al browser)      |
-| SANITY_API_READ_TOKEN     | import.meta.env     | Token de lectura (solo build)      |
-| SANITY_STUDIO_*           | import.meta.env     | Expuestas por `bun run studio`     |
-| PUBLIC_* en CLI           | process.env         | sanity.cli.ts — contexto Node.js   |
+| Variable                 | Contexto        | Propósito                                        |
+|--------------------------|-----------------|--------------------------------------------------|
+| PUBLIC_SANITY_PROJECT_ID | import.meta.env | Aún presente — colecciones auxiliares (Sanity)   |
+| PUBLIC_SANITY_DATASET    | import.meta.env | Aún presente — colecciones auxiliares (Sanity)   |
+| SANITY_API_READ_TOKEN    | import.meta.env | Aún presente — colecciones auxiliares (Sanity)   |
+
+La API de WordPress (`wou.com.ar/wp-json/wp/v2`) es pública — no requiere token.
 
 ## astro.config.mjs — notas críticas
-- Interop guard para `@sanity/astro` es obligatorio (ambigüedad CJS/ESM).
-- `studioBasePath` omitido intencionalmente — su presencia rompe `output: 'static'`.
-- Studio local: `bun run studio` → http://localhost:3333
+- `output: 'static'` con adapter `@astrojs/cloudflare@12.x` (v13 tiene bug con ASSETS binding en Pages).
+- `imageService: 'passthrough'` — las imágenes de WordPress se sirven directamente desde donWeb/Cloudflare CDN; no se optimizan en build.
+- `platformProxy: { enabled: false }` — evita que wrangler valide el binding ASSETS en build local. En Cloudflare Pages el binding es automático.
+- `wou.com.ar` en `remotePatterns` — necesario para que Astro permita imágenes del dominio WordPress.
+- La integración `@sanity/astro` sigue presente para las colecciones auxiliares (autores, programas, etc.).
 
-## Sanity Studio — arquitectura separada
-El Studio vive en `studio/` (subcarpeta del repo) con su propio `package.json`.
-**Separación necesaria**: Bun no instala peer dependencies de Sanity correctamente
-cuando se mezcla con el proyecto Astro (falla con `styled-components`).
-
-```
-studio/
-├── package.json      ← deps propias: sanity, react, styled-components
-├── sanity.config.ts  ← importa schemas desde ../src/schemas (fuente única)
-├── sanity.cli.ts     ← lee SANITY_STUDIO_* de studio/.env
-└── .env              ← SANITY_STUDIO_PROJECT_ID, SANITY_STUDIO_DATASET
-```
-
-Reglas:
-- Los schemas viven SOLO en `src/schemas/` — el Studio los importa desde ahí.
-- El root `package.json` mantiene `sanity` solo para `typegen` y `schema deploy`.
-- `bun run studio` (root) hace `cd studio && bun run dev`.
-- Si falla por ENOSPC: `echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p`
+## Deploy — Cloudflare Pages + Workers
+- **Build**: `bun run build` · **Publish dir**: `dist/client`
+- El adapter genera un Cloudflare Worker en `dist/server/` para las rutas `prerender: false`.
+- Las rutas on-demand (artículos) responden con `Cache-Control: s-maxage=2592000` (30 días en el edge).
+- Variables de entorno: configurar en el dashboard de Cloudflare Pages (no en `wrangler.toml`).
+- `wrangler.toml` solo contiene metadatos de nombre y fecha de compatibilidad.
 
 ## Tailwind CSS v4
 - Configuración CSS-first en `src/styles/global.css`
@@ -117,10 +121,8 @@ Nunca usar `npm`, `npx`, `yarn` ni `pnpm`.
 | Comando               | Propósito                                       |
 |-----------------------|-------------------------------------------------|
 | `bun run dev`         | Servidor de desarrollo Astro                    |
-| `bun run build`       | Build estático de producción                    |
-| `bun run preview`     | Preview del build                               |
-| `bun run studio`      | Sanity Studio local (http://localhost:3333)     |
-| `bun run typegen`     | Generar tipos TypeScript desde schemas Sanity   |
+| `bun run build`       | Build estático de producción (~10 seg)          |
+| `bun run preview`     | Preview del build con Wrangler                  |
 | `bun run check`       | TypeScript check de archivos .astro             |
 | `bun run audit`       | Auditoría A11y + console errors con Playwright  |
 | `bun run audit:report`| Ídem con reporte HTML                           |
@@ -130,15 +132,23 @@ Nunca usar `npm`, `npx`, `yarn` ni `pnpm`.
 ```
 src/
 ├── layouts/          shells de página (BaseLayout, ArticleLayout futuro...)
-├── pages/            rutas Astro (index.astro, [slug].astro...)
+├── pages/            rutas Astro
+│   ├── index.astro                  prerender: true (home estático)
+│   └── articles/[slug].astro        prerender: false (on-demand + edge cache)
 ├── sections/         composiciones grandes, específicas de una página
-│   └── home/         Hero, RedCircle, TransitionSection (+ mocks locales)
+│   └── home/         Hero, TransitionSection, NewsGrid, etc.
 ├── components/       piezas reutilizables entre páginas
 │   ├── layout/       .astro — Header, Footer, estructura global
-│   ├── content/      .astro — cards y bloques (ArticleCard, LiveCard, NewsList, etc.)
+│   ├── content/      .astro — cards y bloques (ArticleCard, LiveCard, etc.)
 │   └── ui/           .svelte para interactivos / .astro para estáticos atómicos
-├── lib/              lógica pura, sin markup (cms/, utils.ts, mocks/)
-├── schemas/          schemas Sanity (importados por sanity.config.ts)
+├── lib/              lógica pura, sin markup
+│   └── cms/
+│       ├── wordpress.ts  ← API client WordPress (fuente de verdad de artículos)
+│       ├── client.ts     ← sanityClient (colecciones auxiliares)
+│       ├── queries.ts    ← queries GROQ para colecciones Sanity
+│       ├── image.ts      ← getImageUrl() — soporta WP {url,alt} y Sanity refs
+│       └── index.ts      ← re-exporta todo
+├── schemas/          schemas Sanity (colecciones auxiliares)
 ├── styles/           global.css (Tailwind v4 @theme)
 └── content.config.ts loaders de Content Collections
 ```
@@ -151,20 +161,11 @@ Los tres niveles de composición, diferenciados:
 | `sections/`    | Composiciones grandes (full-viewport o bloques)     | Vive en UNA sola página                 |
 | `components/`  | Piezas reutilizables (cards, embeds, badges, UI)    | Se importa desde más de una página/sección |
 
-Regla práctica: si un archivo puede importarse desde otra página o sección,
-va en `components/`. Si es único de una página (como `Hero`), va en
-`sections/<page>/`. Los mocks locales de una sección viven junto a ella.
-
 **Direcciones de import válidas:**
-- `pages/*` → `layouts/`, `sections/*`, `components/*`
+- `pages/*` → `layouts/`, `sections/*`, `components/*`, `lib/*`
 - `sections/<page>/*` → `components/*`, `lib/*`
 - `components/*` → `components/*` (entre sí), `lib/*`
 - Nunca: `components/` importa de `sections/`, ni `lib/` de componentes.
-
-## Deploy (Netlify)
-- Build: `bun run build` · Publish: `dist`
-- SECRETS_SCAN_OMIT_KEYS configurado para PUBLIC_* (son intencionalmente públicas)
-- Cache: `/_astro/*` → `max-age=31536000, immutable`
 
 ## Islands architecture — Svelte
 
@@ -185,21 +186,10 @@ Usar Svelte **únicamente** cuando un componente requiere interactividad real en
 | `client:visible` | Al entrar al viewport            | Componentes below the fold      |
 | `client:media`   | Al cumplirse una media query     | Menú mobile                     |
 
-**Uso en páginas .astro:**
-```astro
----
-import SearchBar from '@/components/ui/SearchBar.svelte';
----
-
-<!-- client:visible → solo hidrata cuando el usuario llega a este punto -->
-<SearchBar client:visible placeholder="Buscar artículos..." />
-```
-
 Ejemplos de componentes que SÍ deben ser islands Svelte:
 - SearchBar.svelte — búsqueda con filtrado en tiempo real
 - MobileMenu.svelte — drawer de navegación con estado open/close
 - NewsletterForm.svelte — formulario con validación y feedback
-- ArticleReactions.svelte — likes/reacciones con estado optimista
 - BreakingNewsTicker.svelte — ticker con scroll automático
 
 Ejemplos de componentes que NO deben ser islands:
@@ -210,64 +200,30 @@ Ejemplos de componentes que NO deben ser islands:
 ## Animaciones — GSAP 3
 
 **GSAP (`gsap`)** es la herramienta estándar para animaciones complejas del sitio.
-Decisión de arquitectura: GSAP se elige por su performance, control de timelines
-y compatibilidad con ScrollTrigger para efectos sincronizados al scroll.
 
 **Regla de oro — jerarquía de animación:**
-1. **Transiciones CSS / Tailwind** → efectos simples de 1-2 propiedades
-   (hover, focus, reveals lineales). No traer GSAP para esto.
+1. **Transiciones CSS / Tailwind** → efectos simples de 1-2 propiedades (hover, focus, reveals lineales).
 2. **Keyframes CSS** → animaciones cíclicas sin estado (ticker, pulses).
-3. **GSAP** → secuencias, timelines encadenados, ScrollTrigger, física
-   (stagger, easing avanzado, morph), o cuando CSS se vuelve inmanejable.
+3. **GSAP** → secuencias, timelines encadenados, ScrollTrigger, física (stagger, easing avanzado, morph).
 
 **Dónde vive GSAP:**
 - Solo dentro de islas Svelte (`client:*`). Nunca en componentes `.astro`.
-- Importar desde el componente que lo consume, no globalmente:
-  ```svelte
-  <script>
-    import { gsap } from 'gsap';
-    import { onMount } from 'svelte';
-    onMount(() => {
-      gsap.from('.hero-title', { y: 40, opacity: 0, duration: 0.8, ease: 'power3.out' });
-    });
-  </script>
-  ```
-- Los plugins (`ScrollTrigger`, `Flip`, etc.) se importan por separado y se
-  registran una sola vez: `gsap.registerPlugin(ScrollTrigger)`.
-
-**Performance:**
-- Preferir `client:visible` para islas con animaciones below-the-fold — GSAP
-  no se descarga ni ejecuta hasta que el usuario llega al componente.
-- `gsap.context()` / `ctx.revert()` en `onDestroy` para evitar memory leaks
-  en componentes que se montan/desmontan.
+- Importar desde el componente que lo consume, no globalmente.
+- Los plugins (`ScrollTrigger`, `Flip`, etc.) se registran una sola vez: `gsap.registerPlugin(ScrollTrigger)`.
+- `gsap.context()` / `ctx.revert()` en `onDestroy` para evitar memory leaks.
 
 ## Físicas interactivas — Matter.js
 
-**`matter-js` 0.19** es la librería estándar para simulación de física 2D
-en interacciones arrastrables (ball-pool, draggables con gravedad, rebotes).
-Decisión: se eligió sobre alternativas (rapier-wasm, p5.physics) por:
-  - cero dependencias (JS puro, ~90kb), sin WASM ni bundling especial
-  - API estable y documentada — engine, runner, bodies, constraints, mouse
-  - `MouseConstraint` resuelve drag & throw sin código custom
-  - compatibilidad con render DOM sincronizado (no requiere canvas)
+**`matter-js` 0.19** para simulación de física 2D (ball-pool, draggables con gravedad).
 
-**Regla: Matter.js NO usa canvas.** Los cuerpos son invisibles para el
-render engine; sincronizamos `body.position` y `body.angle` al DOM cada
-frame vía `transform: translate(x,y) rotate(rad)` sobre elementos HTML.
-Esto permite que cada bola sea un `<a>`/`<li>` con `<Image>` de Astro
-optimizada en build-time.
+**Regla: Matter.js NO usa canvas.** Los cuerpos sincronizan `body.position` y `body.angle`
+al DOM cada frame vía `transform: translate(x,y) rotate(rad)` sobre elementos HTML.
 
 **Dónde vive Matter.js:**
 - Solo dentro de islas Svelte (`client:*`). Nunca en componentes `.astro`.
-- `client:visible` por defecto — no se descarga hasta que el usuario
-  scrollea hasta la sección. La librería pesa ~90kb gzipped.
-- `Runner.stop()` + `Engine.clear()` + `World.clear()` en `onDestroy`
-  para evitar memory leaks en navegaciones SPA o resize.
+- `client:visible` por defecto — no se descarga hasta que el usuario llega a la sección.
+- `Runner.stop()` + `Engine.clear()` + `World.clear()` en `onDestroy` para evitar memory leaks.
 
 **Performance:**
-- Bajar `timing.timeScale` durante el boot (intro) y volver a 1 después
-  del asentamiento para controlar la sensación de caída.
-- `Mouse.create(container)` — el receptor de eventos debe ser el contenedor
-  DOM que abarca el área física, no `document`.
-- En touch, `touch-action: pan-y` deja pasar scroll vertical cuando no hay
-  drag activo; bloquear `preventDefault` solo si `mouseConstraint.body` existe.
+- `Mouse.create(container)` — el receptor de eventos debe ser el contenedor DOM del área física.
+- En touch, `touch-action: pan-y` deja pasar scroll vertical cuando no hay drag activo.

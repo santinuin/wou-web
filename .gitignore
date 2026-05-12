@@ -33,6 +33,9 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .env.production.local
 .env.local
 
+# Wrangler (Cloudflare Workers CLI — estado local del emulador)
+.wrangler/
+
 # caches
 .eslintcache
 .cache

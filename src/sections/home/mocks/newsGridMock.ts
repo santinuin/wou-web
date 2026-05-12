@@ -3,14 +3,16 @@
 export type ArticleLike = {
   id: string;
   data: {
-    _id: string;
+    _id?: string;
+    wpId?: number;
     title: string;
     slug: { current: string };
     publishedAt?: string | null;
     excerpt?: string | null;
     featured?: boolean | null;
     highlightWord?: string | null;
-    mainImage?: { alt?: string | null; [key: string]: unknown } | null;
+    // Acepta tanto referencias Sanity como objetos { url } de WordPress
+    mainImage?: { url?: string | null; alt?: string | null; [key: string]: unknown } | null;
     categories?: { _id: string; title: string }[] | null;
   };
 };

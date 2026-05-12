@@ -2,13 +2,13 @@ import { defineCollection, z } from 'astro:content';
 import { sanityClient, isSanityConfigured } from './lib/cms/client';
 import {
   ALL_ADVERTISEMENTS_QUERY,
-  ALL_ARTICLES_QUERY,
   ALL_AUTHORS_QUERY,
   ALL_CATEGORIES_QUERY,
   ALL_PROGRAMS_QUERY,
   ALL_RADIO_SHOWS_QUERY,
   ALL_RED_CIRCLES_QUERY,
 } from './lib/cms/queries';
+import { fetchRecentWpPosts, extractElementorContent } from './lib/cms/wordpress';
 
 /**
  * Gotchas críticos de Sanity + Zod codificados aquí:
@@ -34,43 +34,71 @@ const SanitySlugSchema = z.object({
   current: z.string(),
 });
 
-// ─── Articles ─────────────────────────────────────────────────────────────────
+// ─── Articles (WordPress headless) ────────────────────────────────────────────
 
 const articles = defineCollection({
   loader: async () => {
-    if (!isSanityConfigured) return [];
-    type RawArticle = {
-      _id: string;
-      slug: { _type: 'slug'; current: string };
-      [key: string]: unknown;
-    };
-    const data = await sanityClient.fetch<RawArticle[]>(ALL_ARTICLES_QUERY);
-    return data.map((a) => ({ id: a.slug.current, ...a }));
+    const posts = await fetchRecentWpPosts(50);
+    return posts.map((post) => ({
+      // id requerido por Astro Content Collections
+      id: String(post.id),
+      wpId: post.id,
+      title: post.title.rendered,
+      // Normalizado a la misma forma que Sanity para que los componentes no cambien
+      slug: { current: post.slug },
+      publishedAt: post.date,
+      modifiedAt: post.modified,
+      content: extractElementorContent(post.content.rendered),
+      excerpt: post.excerpt.rendered.replace(/<[^>]+>/g, '').trim(),
+      // mainImage como { url, alt } — getImageUrl() lo detecta y devuelve url directo
+      // Verificar source_url específicamente: algunos media no lo tienen (videos, embeds)
+      mainImage: post._embedded?.['wp:featuredmedia']?.[0]?.source_url
+        ? {
+            url: post._embedded['wp:featuredmedia'][0].source_url,
+            alt: post._embedded['wp:featuredmedia'][0].alt_text || null,
+          }
+        : null,
+      // Categorías normalizadas al shape { _id, title } que usan los componentes
+      categories:
+        post._embedded?.['wp:term']?.[0]?.map((c) => ({
+          _id: String(c.id),
+          title: c.name,
+          slug: { current: c.slug },
+        })) ?? [],
+      tags:
+        post._embedded?.['wp:term']?.[1]?.map((t) => ({
+          _id: String(t.id),
+          name: t.name,
+          slug: t.slug,
+        })) ?? [],
+      author: post._embedded?.author?.[0]?.name ?? null,
+      originalUrl: post.link,
+    }));
   },
 
   schema: z.object({
-    // Núcleo invariante: tipado estricto
-    _id: z.string(),
+    wpId: z.number(),
     title: z.string(),
-    slug: SanitySlugSchema,
+    slug: z.object({ current: z.string() }),
     publishedAt: z.string().nullish(),
-    body: z.array(z.any()).nullish(),
-    // Experimental: z.any() / .nullish() hasta que los campos se estabilicen
-    format: z.string().nullish(),
-    featured: z.boolean().nullish(),
+    modifiedAt: z.string().nullish(),
+    content: z.string().nullish(),
     excerpt: z.string().nullish(),
-    mainImage: z.any(),
-    author: z.any(),
+    mainImage: z
+      .object({ url: z.string(), alt: z.string().nullish() })
+      .nullish(),
     categories: z
       .array(
         z.object({
           _id: z.string(),
           title: z.string(),
-          slug: SanitySlugSchema.nullish(),
-          color: z.string().nullish(),
+          slug: z.object({ current: z.string() }).nullish(),
         })
       )
       .nullish(),
+    tags: z.any(),
+    author: z.string().nullish(),
+    originalUrl: z.string().nullish(),
   }),
 });
 

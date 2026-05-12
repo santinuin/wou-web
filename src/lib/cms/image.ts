@@ -4,29 +4,33 @@ import { sanityClient } from './client';
 
 const builder = imageUrlBuilder(sanityClient);
 
-/**
- * Retorna un ImageUrlBuilder fluido para encadenar (.width().format().url()).
- *
- * La URL resultante apunta a cdn.sanity.io y se pasa al componente <Image>
- * de Astro, que la descarga y re-optimiza en build-time.
- * El HTML final referencia /_astro/... — nunca cdn.sanity.io directamente.
- *
- * @example
- * const url = urlForImage(article.mainImage).width(1200).format('webp').url();
- * <Image src={url} width={1200} height={630} alt="..." />
- */
+// Imagen proveniente de WordPress: objeto con url directa
+type WpImageSource = { url: string; alt?: string | null };
+
+function isWpImage(source: unknown): source is WpImageSource {
+  return (
+    typeof source === 'object' &&
+    source !== null &&
+    'url' in source &&
+    typeof (source as WpImageSource).url === 'string'
+  );
+}
+
 export function urlForImage(source: SanityImageSource) {
   return builder.image(source);
 }
 
 /**
- * Helper de conveniencia: URL lista a las dimensiones indicadas con formato automático.
+ * Devuelve una URL de imagen lista para usar.
+ * Acepta tanto referencias de Sanity como objetos { url } de WordPress.
  */
 export function getImageUrl(
-  source: SanityImageSource,
+  source: SanityImageSource | WpImageSource | string,
   options: { width?: number; height?: number } = {}
 ): string {
-  let ref = builder.image(source).auto('format');
+  if (typeof source === 'string') return source;
+  if (isWpImage(source)) return source.url;
+  let ref = builder.image(source as SanityImageSource).auto('format');
   if (options.width) ref = ref.width(options.width);
   if (options.height) ref = ref.height(options.height);
   return ref.url();

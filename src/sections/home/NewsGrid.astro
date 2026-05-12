@@ -28,10 +28,11 @@ function getBand(categoryTitle: string): { hero: ArticleLike | null; support: Ar
   return { hero: sorted[0] ?? null, support: sorted.slice(1, 4) };
 }
 
+// Nombres de categorías tal como vienen de WordPress
 const politica   = getBand('Política');
 const locales    = getBand('Locales');
 const policiales = getBand('Policiales');
-const opinion    = getBand('Opinión');
+const opinion    = getBand('Economía');
 
 const sortByOrder = (a: CollectionEntry<'advertisements'>, b: CollectionEntry<'advertisements'>) =>
   (a.data.order ?? 99) - (b.data.order ?? 99);
