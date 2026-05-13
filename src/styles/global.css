@@ -2,27 +2,38 @@
 
 @theme {
   /* ── Paleta ──────────────────────────────────────────────────────────── */
-  --color-brand-dark:   #080F1A;   /* fondo header y secciones oscuras */
-  --color-brand-black:  #070A0F;   /* fondo LiveCard y news list */
-  --color-brand-teal:   #00C9B1;   /* acento principal */
-  --color-brand-orange: #FB923C;   /* badge "ESTÁ PASANDO" */
-  --color-brand-white:  #F0F4F8;   /* texto sobre fondos oscuros */
-  --color-brand-green:  #B9FFC1;
-  --color-brand-gray:   #FFFFFF8C;
-  --color-brand-blue:   #01236A;
-  --color-brand-red:    #E24B4A;
+  --color-brand-dark: #080F1A;
+  /* fondo header y secciones oscuras */
+  --color-brand-black: #070A0F;
+  /* fondo LiveCard y news list */
+  --color-brand-teal: #00C9B1;
+  /* acento principal */
+  --color-brand-orange: #FB923C;
+  /* badge "ESTÁ PASANDO" */
+  --color-brand-white: #F0F4F8;
+  /* texto sobre fondos oscuros */
+  --color-brand-green: #B9FFC1;
+  --color-brand-gray: #FFFFFF8C;
+  --color-brand-blue: #01236A;
+  --color-brand-red: #E24B4A;
+  --color-brand-blue-light: #081830;
 
   /* Alias semánticos */
   --color-primary: var(--color-brand-dark);
-  --color-accent:  var(--color-brand-teal);
+  --color-accent: var(--color-brand-teal);
 
   /* ── Tipografía ──────────────────────────────────────────────────────── */
-  --font-sans:    'Inter', system-ui, sans-serif;
-  --font-boldonse:'Boldonse', sans-serif;  /* badge "ESTÁ PASANDO"    */
-  --font-bowlby:  'Bowlby One';           /* titulares e indicadores */
-  --font-barlow:  'Barlow', sans-serif;   /* titulares y ticker      */
-  --font-alumni:  'Alumni Sans', sans-serif;       /* títulos editoriales     */
-  --font-franklin:'Libre Franklin', sans-serif;    /* bajadas en negrita       */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-boldonse: 'Boldonse', sans-serif;
+  /* badge "ESTÁ PASANDO"    */
+  --font-bowlby: 'Bowlby One';
+  /* titulares e indicadores */
+  --font-barlow: 'Barlow', sans-serif;
+  /* titulares y ticker      */
+  --font-alumni: 'Alumni Sans', sans-serif;
+  /* títulos editoriales     */
+  --font-franklin: 'Libre Franklin', sans-serif;
+  /* bajadas en negrita       */
 }
 
 html,
@@ -34,6 +45,7 @@ body {
 * {
   scrollbar-width: none;
 }
+
 *::-webkit-scrollbar {
   display: none;
 }

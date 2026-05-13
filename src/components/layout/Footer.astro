@@ -29,7 +29,7 @@ const EMAIL = 'mail@radiowou.com.ar';
 <footer
   id="siteFooter"
   role="contentinfo"
-  class="FooterWOU relative w-full overflow-hidden bg-brand-blue text-brand-teal"
+  class="FooterWOU relative w-full overflow-hidden bg-brand-dark text-brand-teal"
   aria-label="Pie de página"
 >
   <!-- ── Esquina superior izquierda ────────────────────────────────────── -->
@@ -122,10 +122,10 @@ const EMAIL = 'mail@radiowou.com.ar';
   /* ───────────────────────────────────────────────────────────────────
      Tokens locales
      ─────────────────────────────────────────────────────────────────── */
-  .FooterWOU {
-    --color-navy:   #080F1A;               /* fondo (brand-dark) */
+  .FooterWOU {//TODO pasar a variables
+    --color-navy:   var(--color-brand-blue);               /* fondo (brand-dark) */
     --color-teal:   #00C9B1;               /* acento turquesa   */
-    --color-ink:    #070A0F;               /* círculo oscuro    */
+    --color-ink:    var(--color-brand-blue);               /* círculo oscuro    */
     --color-cream:  #EDE6D6;               /* logo y mail hover */
     --color-black:  #080F1A;               /* logo en reposo    */
 
