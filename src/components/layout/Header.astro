@@ -147,18 +147,30 @@ const MOCK_SECTIONS = [
 
   /* Elementos que solo aparecen en estado scrolled */
   .header-scrolled {
-    display: none;
+    display: flex;
+    max-width: 0;
+    overflow: hidden;
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: max-width 0.3s ease, opacity 0.2s ease;
   }
   #siteHeader.is-scrolled .header-scrolled {
-    display: flex;
+    max-width: 16rem;
     opacity: 1;
   }
 
   /* "Viento | " se oculta al scrollear */
+  .header-normal {
+    display: inline-block;
+    max-width: 8rem;
+    overflow: hidden;
+    white-space: nowrap;
+    vertical-align: bottom;
+    transition: max-width 0.3s ease, opacity 0.2s ease;
+    opacity: 1;
+  }
   #siteHeader.is-scrolled .header-normal {
-    display: none;
+    max-width: 0;
+    opacity: 0;
   }
 </style>
 
