@@ -3,9 +3,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "postinstall": "node scripts/patch-adapter.cjs",
     "dev": "astro dev",
     "build": "astro build",
+    "postbuild": "node scripts/patch-wrangler-output.cjs",
     "preview": "astro preview",
     "studio": "cd studio && bun run dev",
     "studio:deploy": "cd studio && bun run deploy",
