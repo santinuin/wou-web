@@ -3,6 +3,11 @@ compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = "./dist/client"
 
+[assets]
+# Binding name distinto de "ASSETS" (reservado por CF Pages).
+# CF Pages provee env.ASSETS automáticamente; el Worker lo usa así hardcodeado.
+binding = "STATIC_ASSETS"
+
 [vars]
 # Variables de entorno públicas (no secretos)
 # Los secretos se configuran en el dashboard de Cloudflare Pages
