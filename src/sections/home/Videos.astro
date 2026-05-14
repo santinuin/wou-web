@@ -63,7 +63,7 @@ function captionKey(id: string, i: number): string {
 ---
 
 <section class="VideosSection" aria-label="Videos de WOU">
-  <ScrollCarousel client:idle count={total}>
+  <ScrollCarousel client:load count={total}>
     <div class="VideosSection__outer" data-outer>
       <div class="VideosSection__inner" data-inner>
         <h2 class="VideosSection__title" aria-hidden="true">
@@ -173,7 +173,7 @@ function captionKey(id: string, i: number): string {
     height: 100%;
     will-change: scale, transform;
     opacity: 0;
-    transition: opacity 0.15s ease;
+    transition: opacity 0.4s ease;
   }
   .VideosSection[data-mask-ready] .VideosSection__mask {
     opacity: 1;
