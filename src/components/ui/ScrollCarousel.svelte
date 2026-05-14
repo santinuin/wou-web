@@ -448,6 +448,7 @@
       setMask();
       setPoints();
       setLetters();
+      section?.setAttribute('data-mask-ready', '');
     }
 
     Promise.all([

@@ -172,6 +172,11 @@ function captionKey(id: string, i: number): string {
     width: 100%;
     height: 100%;
     will-change: scale, transform;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .VideosSection[data-mask-ready] .VideosSection__mask {
+    opacity: 1;
   }
   .VideosSection__mask-svg {
     position: absolute;
