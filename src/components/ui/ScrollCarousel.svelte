@@ -440,6 +440,16 @@
   onMount(() => {
     let cancelled = false;
 
+    // Set mask paths immediately (no GSAP needed) so the SVG is ready
+    // before GSAP chunks finish downloading — avoids the flash on production.
+    if (queryRefs()) {
+      setCtxStyle();
+      setSize();
+      setMask();
+      setPoints();
+      setLetters();
+    }
+
     Promise.all([
       import('gsap'),
       import('gsap/ScrollTrigger'),
