@@ -15,8 +15,10 @@
  *
  * Las imágenes se revelan en hover con una transición CSS — sin JS.
  */
+import { Image } from 'astro:assets';
 import BallPool from '@/components/ui/BallPool.svelte';
 import { fetchWpPostsByCategory } from '@/lib/cms';
+import { getPlaceholder } from '@/lib/placeholders';
 import { MOCK_RED_CIRCLES } from './mocks/redCircleMock';
 
 type BallData = {
@@ -56,18 +58,12 @@ const balls: BallData[] = posts.length
           >
             <span class="BallPool--category--body">
               <span class="BallPool--label">{ball.label}</span>
-              {ball.imageUrl && (
-                <span class="BallPool--image">
-                  <img
-                    src={ball.imageUrl}
-                    alt={ball.imageAlt}
-                    width={600}
-                    height={600}
-                    loading="lazy"
-                    draggable={false}
-                  />
-                </span>
-              )}
+              <span class="BallPool--image">
+                {ball.imageUrl
+                  ? <img src={ball.imageUrl} alt={ball.imageAlt} width={600} height={600} loading="lazy" draggable={false} />
+                  : <Image src={getPlaceholder('Circulo Rojo')} alt={ball.imageAlt} width={600} height={600} loading="lazy" />
+                }
+              </span>
             </span>
           </a>
         </li>

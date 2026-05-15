@@ -1,5 +1,6 @@
 ---
-const PLACEHOLDER = '/images/placeholder-default.png';
+import { Image } from 'astro:assets';
+import { getPlaceholder } from '@/lib/placeholders';
 
 interface Props {
   title: string;
@@ -12,7 +13,6 @@ interface Props {
 }
 
 const { title, slug, categoryTitle, imageUrl, imageAlt = title, tickerText, highlightWord } = Astro.props;
-const src = imageUrl ?? PLACEHOLDER;
 
 // Triplicamos para scroll continuo sin saltos
 const tickerReps = tickerText ? [tickerText, tickerText, tickerText, tickerText, tickerText] : [];
@@ -54,15 +54,10 @@ if (titleParts.length === 0) {
       </div>
     )}
     <div class="HeroCard__image-zone">
-      <img
-        src={src}
-        alt={imageAlt}
-        width="640"
-        height="480"
-        loading="lazy"
-        decoding="async"
-        class="HeroCard__image"
-      />
+      {imageUrl
+        ? <img src={imageUrl} alt={imageAlt} width="640" height="480" loading="lazy" decoding="async" class="HeroCard__image" />
+        : <Image src={getPlaceholder(categoryTitle)} alt={imageAlt} width={640} height={480} loading="lazy" decoding="async" class="HeroCard__image" />
+      }
     </div>
   </div>
 
