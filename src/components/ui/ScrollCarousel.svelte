@@ -82,6 +82,7 @@
   let tl: ReturnType<NonNullable<GsapModule>['timeline']> | null = null;
 
   let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+  let lastResizeWidth = 0;
   let lastRender = { anim: -1, pts: -1 };
   let speed = 1;
 
@@ -427,17 +428,26 @@
     setSize();
     setMask();
     setPoints();
+    // Limpiar el transform que GSAP haya aplicado al scene antes de medir:
+    // getBoundingClientRect() devuelve coordenadas visuales (con escala),
+    // pero los ghosts se posicionan en coordenadas lógicas (sin escala).
+    if (gsap && scene) gsap.set(scene, { clearProps: 'transform' });
     setLetters();
     buildTimeline();
     ScrollTrigger?.refresh();
   }
   function handleResize() {
+    const currentWidth = window.innerWidth;
+    if (currentWidth === lastResizeWidth) return;
+    lastResizeWidth = currentWidth;
     if (resizeTimer) clearTimeout(resizeTimer);
     resizeTimer = setTimeout(recompute, 200);
   }
 
   onMount(() => {
     let cancelled = false;
+
+    lastResizeWidth = window.innerWidth;
 
     Promise.all([
       import('gsap'),
