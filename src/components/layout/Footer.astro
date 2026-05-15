@@ -43,17 +43,17 @@ const EMAIL = 'mail@radiowou.com.ar';
   <!-- ── Esquina superior derecha: redes sociales ─────────────────────── -->
   <ul class="FooterWOU__top-right" aria-label="Redes sociales">
     <li>
-      <a href="https://facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="Facebook de WOU">
+      <a href="https://www.facebook.com/wounoticias" target="_blank" rel="noopener noreferrer" aria-label="Facebook de WOU">
         Facebook
       </a>
     </li>
     <li>
-      <a href="https://instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram de WOU">
+      <a href="https://www.instagram.com/wounoticias/" target="_blank" rel="noopener noreferrer" aria-label="Instagram de WOU">
         Instagram
       </a>
     </li>
     <li>
-      <a href="https://youtube.com/" target="_blank" rel="noopener noreferrer" aria-label="YouTube de WOU">
+      <a href="https://www.youtube.com/@-WouRadio-" target="_blank" rel="noopener noreferrer" aria-label="YouTube de WOU">
         YouTube
       </a>
     </li>
@@ -122,12 +122,15 @@ const EMAIL = 'mail@radiowou.com.ar';
   /* ───────────────────────────────────────────────────────────────────
      Tokens locales
      ─────────────────────────────────────────────────────────────────── */
-  .FooterWOU {//TODO pasar a variables
-    --color-navy:   var(--color-brand-blue);               /* fondo (brand-dark) */
-    --color-teal:   #00C9B1;               /* acento turquesa   */
-    --color-ink:    var(--color-brand-blue);               /* círculo oscuro    */
-    --color-cream:  #EDE6D6;               /* logo y mail hover */
-    --color-black:  #080F1A;               /* logo en reposo    */
+  .FooterWOU {
+    --color-navy:   var(--color-brand-blue);
+    --color-teal:   var(--color-brand-teal);
+    --color-teal-55: color-mix(in srgb, var(--color-brand-teal) 55%, transparent);
+    --color-teal-65: color-mix(in srgb, var(--color-brand-teal) 65%, transparent);
+    --color-white-35: color-mix(in srgb, var(--color-brand-white) 35%, transparent);
+    --color-ink:    var(--color-brand-blue);
+    --color-cream:  var(--color-brand-white);
+    --color-dark:   var(--color-brand-dark);
 
     --circle-size:  clamp(220px, 32vw, 420px);
     --scale-hover:  1.7;
@@ -173,8 +176,8 @@ const EMAIL = 'mail@radiowou.com.ar';
   }
 
   .FooterWOU__location {
-    margin: clamp(2.5rem, 5vw, 4rem) 0 0;
-    color: rgb(0 201 177 / 0.55);
+    margin: clamp(0.75rem, 1.8vw, 1.25rem) 0 0;
+    color: var(--color-teal-55);
     font-weight: 400;
     font-size: 0.85rem;
     letter-spacing: 0.01em;
@@ -216,12 +219,12 @@ const EMAIL = 'mail@radiowou.com.ar';
 
   .FooterWOU__bottom-left {
     left: var(--pad-x);
-    color: rgb(0 201 177 / 0.55);
+    color: var(--color-teal-55);
   }
 
   .FooterWOU__bottom-right {
     right: var(--pad-x);
-    color: rgb(240 244 248 / 0.35);
+    color: var(--color-white-35);
   }
 
   /* ───────────────────────────────────────────────────────────────────
@@ -381,13 +384,18 @@ const EMAIL = 'mail@radiowou.com.ar';
   }
 
   .FooterWOU__logo-letter {
-    fill: var(--color-black);
+    fill: var(--color-dark);
     transition: fill 0.4s ease;
   }
 
   .FooterWOU__logo-dot {
-    fill: var(--color-black);
-    transition: fill 0.4s ease;
+    fill: var(--color-dark);
+    transition: opacity 0.3s ease;
+  }
+
+  @keyframes FooterWOU-dot-reveal {
+    0%   { opacity: 0; fill: var(--color-teal); }
+    100% { opacity: 1; fill: var(--color-teal); }
   }
 
   .FooterWOU__cta:hover .FooterWOU__logo-letter,
@@ -397,7 +405,7 @@ const EMAIL = 'mail@radiowou.com.ar';
 
   .FooterWOU__cta:hover .FooterWOU__logo-dot,
   .FooterWOU__cta:focus-visible .FooterWOU__logo-dot {
-    fill: var(--color-teal);
+    animation: FooterWOU-dot-reveal 0.4s var(--ease-expand) 0.25s both;
   }
 
   /* ───────────────────────────────────────────────────────────────────
@@ -415,7 +423,7 @@ const EMAIL = 'mail@radiowou.com.ar';
 
   .FooterWOU__email--below {
     font-size: 0.85rem;
-    color: rgb(0 201 177 / 0.65);
+    color: var(--color-teal-65);
     opacity: 1;
     transition: opacity 0.3s ease;
   }
