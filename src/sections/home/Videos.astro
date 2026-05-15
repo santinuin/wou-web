@@ -132,6 +132,82 @@ function captionKey(id: string, i: number): string {
   </ScrollCarousel>
 </section>
 
+<script is:inline>
+  // Runs synchronously during HTML parse, before first paint.
+  // Computes mask SVG paths so the overlay is in its correct initial state
+  // before the Svelte island JS bundle downloads and executes.
+  (function () {
+    function initMask() {
+      var section = document.querySelector('.VideosSection');
+      if (!section) return;
+
+      var maskEl   = section.querySelector('[data-mask]');
+      var maskSvg  = section.querySelector('[data-mask-svg]');
+      var maskInner = section.querySelector('[data-mask-inner]');
+      var maskOuter = section.querySelector('[data-mask-outer]');
+      var maskLines = section.querySelector('[data-mask-lines]');
+      var ruler     = section.querySelector('[data-ruler]');
+
+      if (!maskEl || !maskSvg || !maskInner || !maskOuter || !maskLines || !ruler) return;
+
+      var width  = maskEl.clientWidth;
+      var height = maskEl.clientHeight;
+
+      maskSvg.style.width  = width  + 'px';
+      maskSvg.style.height = height + 'px';
+
+      var elRect    = section.getBoundingClientRect();
+      var rulerRect = ruler.getBoundingClientRect();
+      var offsetX   = rulerRect.left - elRect.left;
+      var offsetY   = rulerRect.top  - elRect.top;
+      var rulerW    = rulerRect.width;
+      var rulerH    = rulerRect.height;
+
+      var dOuter = 'M -1 0 L ' + (width + 2) + ' 0 L ' + (width + 2) + ' ' + height + ' L -1 ' + height + ' Z';
+
+      var r = (rulerW) / 2;
+      var tl = { x: offsetX,        y: offsetY };
+      var tr = { x: offsetX + rulerW, y: offsetY };
+      var br = { x: offsetX + rulerW, y: offsetY + rulerH };
+      var bl = { x: offsetX,          y: offsetY + rulerH };
+
+      var dInner = 'M ' + tl.x + ' ' + (tl.y + r) + ' A ' + r + ' ' + r + ' 0 0 1 ' + tr.x + ' ' + (tr.y + r) + ' L ' + br.x + ' ' + (br.y - r) + ' A ' + r + ' ' + r + ' 0 0 1 ' + bl.x + ' ' + (bl.y - r) + ' Z';
+      var linesClip = dOuter + ' ' + dInner;
+
+      maskOuter.setAttribute('d', dOuter + ' ' + dInner);
+
+      var thick = window.innerWidth > 767 ? 16 : 8;
+      tl.x += thick; tl.y += thick;
+      tr.x -= thick; tr.y += thick;
+      br.x -= thick; br.y -= thick;
+      bl.x += thick; bl.y -= thick;
+      r = (tr.x - tl.x) / 2;
+      dInner = 'M ' + tl.x + ' ' + (tl.y + r) + ' A ' + r + ' ' + r + ' 0 0 1 ' + tr.x + ' ' + (tr.y + r) + ' L ' + br.x + ' ' + (br.y - r) + ' A ' + r + ' ' + r + ' 0 0 1 ' + bl.x + ' ' + (bl.y - r) + ' Z';
+
+      maskInner.setAttribute('d', dOuter + ' ' + dInner);
+
+      var vLines = window.innerWidth > 767 ? 12 : 8;
+      var gapX   = width / vLines;
+      var gapY   = height * 0.1;
+      var hLines = Math.ceil(height / gapY);
+      var dLines = '';
+      for (var i = 1; i < vLines; i++) dLines += 'M ' + (gapX * i) + ' 0 L ' + (gapX * i) + ' ' + height + ' ';
+      for (var j = 0; j < hLines; j++) dLines += 'M 0 ' + (gapY * j) + ' L ' + width + ' ' + (gapY * j) + ' ';
+
+      maskLines.setAttribute('d', dLines);
+      maskLines.style.clipPath = "path(evenodd, '" + linesClip + "')";
+
+      section.setAttribute('data-mask-ready', '');
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initMask);
+    } else {
+      initMask();
+    }
+  })();
+</script>
+
 <style>
   .VideosSection {
     /* --height lo setea la isla: videos.length * 50lvh */
