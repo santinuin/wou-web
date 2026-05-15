@@ -419,7 +419,6 @@
     section.style.setProperty('--scroll-progress', scrollProgress.toFixed(4));
 
     moveLetters();
-    drawPoints();
   }
 
   // ── Resize (debounced) ─────────────────────────────────────────────

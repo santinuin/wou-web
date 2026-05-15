@@ -201,7 +201,7 @@ function captionKey(id: string, i: number): string {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: var(--color-brand-black);
+    background: var(--color-brand-dark);
     color: var(--color-brand-green);
     transform: translate3d(0, calc(var(--scroll-progress, 0) * -15%), 0);
     will-change: clip-path, transform, scale;
@@ -319,7 +319,7 @@ function captionKey(id: string, i: number): string {
     z-index: 2;
     margin: 0;
     padding: 0.5rem 0.5rem 0;
-    background: var(--color-brand-black);
+    background: var(--color-brand-dark);
     content-visibility: hidden;
     transform-style: preserve-3d;
     will-change: transform;
@@ -371,7 +371,7 @@ function captionKey(id: string, i: number): string {
     width: auto;
     max-width: 100vw;
     aspect-ratio: 16 / 9;
-    background: var(--color-brand-black);
+    background: var(--color-brand-dark);
     overflow: hidden;
     position: relative;
   }
@@ -441,19 +441,8 @@ function captionKey(id: string, i: number): string {
     }
   }
 
-  /* ── Canvas (textura de puntos) ────────────────────────────────────── */
+  /* ── Canvas (textura de puntos) — desactivado ──────────────────────── */
   .VideosSection__canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1;
-    width: 100%;
-    height: 100%;
-    transform: translate3d(0, calc(var(--scroll-progress, 0) * -5%), 0);
-  }
-  @media (max-width: 576px) {
-    .VideosSection__canvas {
-      transform: none;
-    }
+    display: none;
   }
 </style>

@@ -9,6 +9,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Videos — animación scroll-driven', () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
+    await page.emulateMedia({ colorScheme: 'dark' });
   });
 
   test('diagnóstico completo: estado inicial + scroll', async ({ page }) => {
