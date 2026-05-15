@@ -111,7 +111,7 @@
   // ── setSize ─────────────────────────────────────────────────────────
   function setSize() {
     if (!section || !canvas) return;
-    section.style.setProperty('--height', `${count * 50}lvh`);
+    section.style.setProperty('--height', `${count * 50 - 5}lvh`);
 
     bounding = { width: window.innerWidth, height: window.innerHeight };
 

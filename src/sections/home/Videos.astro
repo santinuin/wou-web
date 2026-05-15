@@ -139,19 +139,10 @@ function captionKey(id: string, i: number): string {
     position: relative;
     z-index: 2;
     height: var(--height);
+    margin-bottom: -1px;
     background: var(--color-brand-blue);
     color: var(--color-brand-green);
     isolation: isolate;
-  }
-  .VideosSection::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 2;
-    width: 100%;
-    height: 1px;
-    background: var(--color-brand-green);
   }
 
   /* ── Mask píldora (sticky en el viewport) ──────────────────────────── */

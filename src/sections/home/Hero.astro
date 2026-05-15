@@ -25,7 +25,7 @@ const rawArticles = await getCollection('articles');
 const newsItems = rawArticles
   .filter((a) => !a.data.categories?.some((c) => c.title === 'Circulo Rojo' || c.title === 'Círculo Rojo'))
   .sort((a, b) => (b.data.publishedAt ?? '').localeCompare(a.data.publishedAt ?? ''))
-  .slice(0, 5)
+  .slice(0, 4)
   .map((a) => ({
     title: a.data.title,
     publishedAt: a.data.publishedAt ?? now.toISOString(),
