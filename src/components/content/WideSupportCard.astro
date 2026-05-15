@@ -16,7 +16,7 @@ const { title, slug, categoryTitle, imageUrl, imageAlt = title } = Astro.props;
 <a href={`/${slug}`} class="WideSupportCard" aria-label={title}>
   <div class="WideSupportCard__image-zone">
     {imageUrl
-      ? <img src={imageUrl} alt={imageAlt} width="560" height="360" loading="lazy" decoding="async" class="WideSupportCard__image" />
+      ? <Image src={imageUrl} alt={imageAlt} width={560} height={360} loading="lazy" decoding="async" class="WideSupportCard__image" />
       : <Image src={getPlaceholder(categoryTitle)} alt={imageAlt} width={560} height={360} loading="lazy" decoding="async" class="WideSupportCard__image" />
     }
   </div>
@@ -57,6 +57,7 @@ const { title, slug, categoryTitle, imageUrl, imageAlt = title } = Astro.props;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center 20%;
     display: block;
     transition: transform 0.35s ease;
   }
@@ -89,7 +90,7 @@ const { title, slug, categoryTitle, imageUrl, imageAlt = title } = Astro.props;
     padding: 0rem 0.7rem;
     border-radius: 9999px;
     line-height: 1.2;
-    border: 2px solid var(--color-brand-black);
+    border: 2px solid var(--color-brand-dark);
     white-space: nowrap;
     z-index: 1;
   }

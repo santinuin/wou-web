@@ -55,7 +55,7 @@ if (titleParts.length === 0) {
     )}
     <div class="HeroCard__image-zone">
       {imageUrl
-        ? <img src={imageUrl} alt={imageAlt} width="640" height="480" loading="lazy" decoding="async" class="HeroCard__image" />
+        ? <Image src={imageUrl} alt={imageAlt} width={640} height={480} loading="lazy" decoding="async" class="HeroCard__image" />
         : <Image src={getPlaceholder(categoryTitle)} alt={imageAlt} width={640} height={480} loading="lazy" decoding="async" class="HeroCard__image" />
       }
     </div>
@@ -118,7 +118,7 @@ if (titleParts.length === 0) {
     font-size: 0.9rem;
     font-weight: 900;
     text-transform: uppercase;
-    color: var(--color-brand-black);
+    color: var(--color-brand-dark);
   }
 
   .HeroCard__ticker-sep {
@@ -144,6 +144,7 @@ if (titleParts.length === 0) {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center 50%;
     display: block;
     transition: transform 0.35s ease;
   }
@@ -180,7 +181,7 @@ if (titleParts.length === 0) {
     padding: 0rem 0.7rem;
     border-radius: 9999px;
     line-height: 1.2;
-    border: 2px solid var(--color-brand-black);
+    border: 2px solid var(--color-brand-dark);
     white-space: nowrap;
     z-index: 10;
   }
@@ -206,9 +207,6 @@ if (titleParts.length === 0) {
     line-height: 0.78;
   }
 
-  .HeroCard:hover .HeroCard__title {
-    opacity: 0.8;
-  }
 </style>
 
 <script>
