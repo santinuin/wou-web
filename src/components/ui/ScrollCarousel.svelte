@@ -30,11 +30,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import type { Snippet } from 'svelte';
-  import { gsap } from 'gsap';
-  import { SlowMo } from 'gsap/EasePack';
-  import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-  gsap.registerPlugin(ScrollTrigger, SlowMo);
+  type GsapModule = typeof import('gsap').gsap;
+  type ScrollTriggerModule = typeof import('gsap/ScrollTrigger').default;
 
   interface Props {
     count: number;
@@ -79,7 +77,9 @@
   const animationProgress = { value: 0 };
   const pointsProgress = { value: 0 };
 
-  let tl: ReturnType<typeof gsap.timeline> | null = null;
+  let gsap: GsapModule | null = null;
+  let ScrollTrigger: ScrollTriggerModule | null = null;
+  let tl: ReturnType<NonNullable<GsapModule>['timeline']> | null = null;
 
   let resizeTimer: ReturnType<typeof setTimeout> | null = null;
   let lastRender = { anim: -1, pts: -1 };
@@ -328,7 +328,7 @@
 
   // ── Timeline ───────────────────────────────────────────────────────
   function buildTimeline() {
-    if (!section || !maskEl || !scene || !inner) return;
+    if (!gsap || !ScrollTrigger || !section || !maskEl || !scene || !inner) return;
 
     if (tl) tl.kill();
 
@@ -411,7 +411,7 @@
 
   // ── tick (por frame) ───────────────────────────────────────────────
   function tick() {
-    if (!section) return;
+    if (!section || !ScrollTrigger) return;
     const scrollProgress =
       Math.max(Math.min(1, ScrollTrigger.positionInViewport(section, 'top')), 0) * -1 +
       (1 - Math.max(Math.min(1, ScrollTrigger.positionInViewport(section, 'bottom')), 0));
@@ -430,7 +430,7 @@
     setPoints();
     setLetters();
     buildTimeline();
-    ScrollTrigger.refresh();
+    ScrollTrigger?.refresh();
   }
   function handleResize() {
     if (resizeTimer) clearTimeout(resizeTimer);
@@ -438,20 +438,34 @@
   }
 
   onMount(() => {
-    if (!queryRefs()) return;
+    let cancelled = false;
 
-    recompute();
-    section?.setAttribute('data-mask-ready', '');
+    Promise.all([
+      import('gsap'),
+      import('gsap/ScrollTrigger'),
+      import('gsap/EasePack'),
+    ]).then(([g, st, ep]) => {
+      if (cancelled) return;
+      gsap = g.gsap;
+      ScrollTrigger = st.default;
+      const SlowMo = (ep as { SlowMo: object }).SlowMo;
+      gsap.registerPlugin(ScrollTrigger, SlowMo);
 
-    gsap.ticker.add(tick);
-    tick();
+      if (!queryRefs()) return;
+
+      recompute();
+
+      gsap.ticker.add(tick);
+      tick();
+    });
 
     window.addEventListener('resize', handleResize, { passive: true });
 
     return () => {
+      cancelled = true;
       window.removeEventListener('resize', handleResize);
       if (resizeTimer) clearTimeout(resizeTimer);
-      gsap.ticker.remove(tick);
+      if (gsap) gsap.ticker.remove(tick);
       if (tl) tl.kill();
       letters.forEach((l) => l.ghosts.forEach((g) => g.el.remove()));
       letters = [];
