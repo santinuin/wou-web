@@ -1,66 +1,31 @@
 ---
-import ReelCard from './ReelCard.astro';
+import ReelsCarousel from '@/components/ui/ReelsCarousel.svelte';
 import { getLatestYoutubeShorts } from '@/lib/youtube';
 
-const items = await getLatestYoutubeShorts(5);
+const items = await getLatestYoutubeShorts(8);
 ---
 
 {items.length > 0 && (
   <section class="ReelsBand" aria-label="Últimos reels">
-    <p class="ReelsBand__label">Últimos videos</p>
-    <div class="ReelsBand__grid">
-      {items.map((item) => (
-        <ReelCard
-          videoId={item.videoId}
-          title={item.title}
-          thumbUrl={item.thumbUrl}
-        />
-      ))}
-    </div>
+    <h2 class="ReelsBand__title">Últimos videos</h2>
+    <ReelsCarousel client:only="svelte" {items} />
   </section>
 )}
 
 <style>
   .ReelsBand {
-    background: color-mix(in oklab, var(--color-brand-dark) 85%, black);
-    border-radius: 10px;
-    padding: 1.25rem 1rem 1.5rem;
+    background: var(--color-brand-dark);
+    padding: 2rem 0 2.5rem;
   }
 
-  .ReelsBand__label {
-    font-family: var(--font-barlow);
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
+  .ReelsBand__title {
+    font-family: var(--font-boldonse), sans-serif;
+    font-weight: 400;
+    font-size: clamp(1.4rem, 3.2vw, 2.6rem);
+    color: var(--color-brand-blue);
     text-transform: uppercase;
-    color: var(--color-brand-teal);
-    margin: 0 0 0.875rem;
-  }
-
-  .ReelsBand__grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 0.5rem;
-  }
-
-  @media (max-width: 900px) {
-    .ReelsBand__grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    /* Ocultar el 4to y 5to reel en tablet para evitar overflow */
-    .ReelsBand__grid > :nth-child(n+4) {
-      display: none;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .ReelsBand__grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    .ReelsBand__grid > :nth-child(n+3) {
-      display: none;
-    }
+    letter-spacing: -0.01em;
+    line-height: 1;
+    margin: 0 0 1.25rem;
   }
 </style>
