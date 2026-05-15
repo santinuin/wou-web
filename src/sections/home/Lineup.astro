@@ -1,7 +1,20 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import LineupWaves from '@/components/ui/LineupWaves.svelte';
 import { MOCK_SHOWS, type ShowItem } from './mocks/lineupMock';
+import cambalache  from '@/assets/programs/cambalache.png';
+import elRefugio   from '@/assets/programs/el-refugio.png';
+import vamosviendo from '@/assets/programs/vamos-viendo.png';
+import pintoVermut from '@/assets/programs/pinto-vermut.png';
+
+const LOGOS: Record<string, ImageMetadata> = {
+  'mock-cambalache':   cambalache,
+  'mock-el-refugio':  elRefugio,
+  'mock-vamos-viento': vamosviendo,
+  'mock-pinto-vermut': pintoVermut,
+};
 
 const entries = await getCollection('radioShows');
 
@@ -32,27 +45,40 @@ const shows: ShowItem[] = entries.length
     <!-- Grilla de programas — se mueve con scroll via --col-ty -->
     <div class="LineupSection__column" data-col>
 
-      <!-- Labels van dentro de la columna, justo sobre la primera card -->
+      <!-- Títulos sobre la primera card -->
       <div class="LineupSection__header" aria-hidden="true">
-        <span class="LineupSection__header-label">Programas</span>
-        <span class="LineupSection__header-label">95.1 FM</span>
+        <span class="LineupSection__header-programas">Programas</span>
+        <div class="LineupSection__header-freq">95.1 FM</div>
       </div>
 
       <div class="LineupSection__cap" aria-hidden="true"></div>
 
-      {shows.map((show, i) => (
-        <div
-          class="LineupSection__card"
-          data-card
-          data-theme={i % 2 === 0 ? 'green' : 'blue'}
-        >
-          <h3 class="LineupSection__card-title">{show.name}</h3>
-          <div class="LineupSection__card-meta">
-            <span>{show.days ?? ''}</span>
-            <span>{show.time ?? ''}</span>
+      {shows.map((show, i) => {
+        const logo = LOGOS[show.id] ?? null;
+        return (
+          <div
+            class="LineupSection__card"
+            data-card
+            data-theme={i % 2 === 0 ? 'green' : 'blue'}
+          >
+            <div class="LineupSection__card-meta">
+              <span>{show.days ?? ''}</span>
+              <span>{show.time ?? ''}</span>
+            </div>
+            {logo ? (
+              <Image
+                src={logo}
+                alt={show.name}
+                class="LineupSection__card-logo"
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <h3 class="LineupSection__card-title">{show.name}</h3>
+            )}
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       <a
         class="LineupSection__cta"
@@ -63,7 +89,6 @@ const shows: ShowItem[] = entries.length
         Ver grilla completa
       </a>
 
-      <div class="LineupSection__cap" aria-hidden="true"></div>
     </div>
 
   </div>
@@ -87,21 +112,39 @@ const shows: ShowItem[] = entries.length
     isolation: isolate;
   }
 
-  /* ── Labels (dentro de la columna, justo sobre la primera card) ─────────── */
+  /* ── Títulos (dentro de la columna, sobre la primera card) ──────────────── */
   .LineupSection__header {
     display: flex;
+    flex-direction: row;
+    align-items: flex-end;
     justify-content: space-between;
-    padding: 0 0 0.5rem;
     pointer-events: none;
+    /* sangra hacia abajo solapando el cap */
+    margin-bottom: -0.7em;
   }
 
-  .LineupSection__header-label {
-    font-family: var(--font-barlow), sans-serif;
-    font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.15em;
+  /* "PROGRAMAS" — pequeño, verde, boldonse, izquierda, alineado al baseline del freq */
+  .LineupSection__header-programas {
+    font-family: var(--font-boldonse), sans-serif;
+    font-size: clamp(0.65rem, 1.1vw, 0.85rem);
+    color: var(--color-brand-green);
     text-transform: uppercase;
-    color: var(--color-brand-teal);
+    letter-spacing: 0.08em;
+    line-height: 1;
+    /* baja un poco para alinearse visualmente con la base del 95.1 FM */
+    padding-bottom: 0.7em;
+    flex-shrink: 0;
+  }
+
+  /* "95.1 FM" — grande, azul, derecha */
+  .LineupSection__header-freq {
+    font-family: var(--font-franklin), sans-serif;
+    font-weight: 900;
+    font-size: clamp(3rem, 8vw, 5.5rem);
+    color: var(--color-brand-blue);
+    text-align: right;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
   }
 
   /* ── Columna de programas ────────────────────────────────────────────────── */
@@ -130,15 +173,18 @@ const shows: ShowItem[] = entries.length
     background: var(--color-brand-blue);
     height: 1.5rem;
   }
+  .LineupSection__cap--bottom {
+    height: 12rem;
+  }
 
   /* ── Cards ───────────────────────────────────────────────────────────────── */
   .LineupSection__card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 1.5rem;
-    min-height: clamp(11rem, 26vh, 15rem);
+    justify-content: space-between;
+    padding: 1rem 1rem 1rem;
+    min-height: clamp(13rem, 30vh, 18rem);
   }
 
   .LineupSection__card[data-theme='green'] {
@@ -151,7 +197,16 @@ const shows: ShowItem[] = entries.length
     color: var(--color-brand-green);
   }
 
-  /* ── Título del programa ─────────────────────────────────────────────────── */
+  /* ── Logo del programa ───────────────────────────────────────────────────── */
+  .LineupSection__card-logo {
+    display: block;
+    width: 92%;
+    max-height: 13rem;
+    object-fit: contain;
+    margin: auto;
+  }
+
+  /* ── Título fallback (sin logo) ──────────────────────────────────────────── */
   .LineupSection__card-title {
     margin: 0;
     flex: 1;
@@ -163,7 +218,6 @@ const shows: ShowItem[] = entries.length
     font-weight: 800;
     font-size: clamp(2.5rem, 6vw, 4rem);
     line-height: 0.9;
-    text-transform: uppercase;
     letter-spacing: -0.01em;
   }
 
@@ -171,13 +225,11 @@ const shows: ShowItem[] = entries.length
   .LineupSection__card-meta {
     display: flex;
     justify-content: space-between;
-    width: 100%;
-    font-family: var(--font-barlow), sans-serif;
-    font-size: clamp(0.6rem, 1.1vw, 0.72rem);
-    font-weight: 500;
+    align-self: stretch;
+    font-family: var(--font-franklin), sans-serif;
+    font-size: clamp(0.72rem, 1.3vw, 0.88rem);
+    font-weight: 700;
     letter-spacing: 0.08em;
-    text-transform: uppercase;
-    opacity: 0.75;
     line-height: 1.2;
   }
 
@@ -187,13 +239,14 @@ const shows: ShowItem[] = entries.length
     align-items: center;
     justify-content: center;
     /* más angosto y sobresale lateralmente de la columna */
+    margin-top: 1.5rem;
     padding: 0.45rem 1rem;
-    margin-inline: -1rem;
-    width: calc(100% + 2rem);
+    border-radius: 0.35rem;
+    width: calc(100%);
     background: var(--color-brand-green);
     color: var(--color-brand-blue);
-    font-family: var(--font-barlow), sans-serif;
-    font-size: 0.65rem;
+    font-family: var(--font-franklin), sans-serif;
+    font-size: clamp(0.72rem, 1.3vw, 0.88rem);
     font-weight: 700;
     letter-spacing: 0.15em;
     text-transform: uppercase;
@@ -225,7 +278,8 @@ const shows: ShowItem[] = entries.length
     function init() {
       const vpH = window.innerHeight;
       const gap = col!.offsetTop; // margen CSS 'top', se aplica también abajo
-      colTravel = Math.max(0, col!.offsetHeight - (vpH - 2 * gap));
+      // La columna sube hasta que el 50% queda fuera del viewport
+      colTravel = col!.offsetHeight * 0.8;
       section!.style.setProperty('--lineup-h', `${vpH + colTravel}px`);
     }
 
