@@ -335,7 +335,7 @@
     tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
-        start: 'top 25%',
+        start: 'top top',
         end: 'bottom 75%',
         scrub: 1,
       },
