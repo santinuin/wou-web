@@ -26,7 +26,7 @@ const chars = TEXT.split("");
   const WAVELENGTH = 2200;
   const LERP       = 0.08;
   // padding entre letras (px). Más grande = más holgura entre caracteres.
-  const PAD        = 18;
+  const PAD        = 2;
   // padding extra para los espacios entre palabras
   const WORD_GAP   = 40;
 
@@ -109,9 +109,9 @@ const chars = TEXT.split("");
     top: 0;
     left: 50%;
     display: inline-block;
-    font-size: clamp(4rem, 9vw, 9.5rem);
-    font-weight: 900;
-    font-family: var(--font-alumni);
+    font-size: clamp(4rem, 9vw, 10rem);
+    font-family: var(--font-boldonse);
+    font-weight: 700;
     color: var(--color-brand-green);
     line-height: 1;
     will-change: transform;
