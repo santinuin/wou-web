@@ -8,7 +8,7 @@ import {
   ALL_RADIO_SHOWS_QUERY,
   ALL_RED_CIRCLES_QUERY,
 } from './lib/cms/queries';
-import { fetchRecentWpPosts, extractElementorContent } from './lib/cms/wordpress';
+import { fetchWpPostsForCategories, fetchRecentWpPosts, extractElementorContent } from './lib/cms/wordpress';
 
 /**
  * Gotchas críticos de Sanity + Zod codificados aquí:
@@ -38,7 +38,10 @@ const SanitySlugSchema = z.object({
 
 const articles = defineCollection({
   loader: async () => {
-    const posts = await fetchRecentWpPosts(50);
+    const posts = await fetchWpPostsForCategories(
+      ['Política', 'Locales', 'Policiales', 'Opinión'],
+      4
+    );
     return posts.map((post) => ({
       // id requerido por Astro Content Collections
       id: String(post.id),

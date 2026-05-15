@@ -142,6 +142,61 @@ export async function fetchRecentWpPosts(count = 50): Promise<WpPost[]> {
 }
 
 /**
+ * Trae los N posts más recientes de varias categorías (por nombre de display),
+ * en paralelo. Un único request para resolver IDs + N requests de posts.
+ * Devuelve los posts deduplicados por ID.
+ */
+// IDs fijos de las categorías de la home — evita el lookup dinámico en build
+const HOME_CATEGORY_IDS: Record<string, number> = {
+  'Política':   95,
+  'Locales':   101,
+  'Policiales':  98,
+  'Opinión':     97,
+};
+
+export async function fetchWpPostsForCategories(
+  categoryNames: string[],
+  perCategory = 4
+): Promise<WpPost[]> {
+  const categoryIds = categoryNames
+    .map((name) => HOME_CATEGORY_IDS[name] ?? null)
+    .filter((id): id is number => id !== null);
+
+  if (categoryIds.length === 0) return [];
+
+  // 4 requests en paralelo, una por categoría
+  const batches = await Promise.all(
+    categoryIds.map(async (catId) => {
+      const r = await fetch(
+        `${WP_BASE}/posts?per_page=${Math.min(perCategory, 50)}&page=1&status=publish&_embed&categories=${catId}`
+      );
+      if (!r.ok) return [];
+      const t = await r.text();
+      if (!t.trim()) return [];
+      try {
+        const posts: WpPost[] = JSON.parse(t);
+        return Array.isArray(posts) ? posts : [];
+      } catch {
+        return [];
+      }
+    })
+  );
+
+  // Deduplicar por ID (un post puede estar en varias categorías)
+  const seen = new Set<number>();
+  const result: WpPost[] = [];
+  for (const batch of batches) {
+    for (const post of batch) {
+      if (!seen.has(post.id)) {
+        seen.add(post.id);
+        result.push(post);
+      }
+    }
+  }
+  return result;
+}
+
+/**
  * Trae todos los posts publicados paginando de 50 en 50.
  * Solo usar si se necesita el catálogo completo (migraciones, sitemaps, etc.).
  */

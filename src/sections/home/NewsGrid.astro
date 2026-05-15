@@ -32,7 +32,7 @@ function getBand(categoryTitle: string): { hero: ArticleLike | null; support: Ar
 const politica   = getBand('Política');
 const locales    = getBand('Locales');
 const policiales = getBand('Policiales');
-const opinion    = getBand('Economía');
+const opinion    = getBand('Opinión');
 
 const sortByOrder = (a: CollectionEntry<'advertisements'>, b: CollectionEntry<'advertisements'>) =>
   (a.data.order ?? 99) - (b.data.order ?? 99);
