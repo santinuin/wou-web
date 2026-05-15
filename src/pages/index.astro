@@ -12,6 +12,7 @@ import Lineup from '@/sections/home/Lineup.astro';
 import Videos from '@/sections/home/Videos.astro';
 import NewsGrid from '@/sections/home/NewsGrid.astro';
 import RedCircle from '@/sections/home/RedCircle.astro';
+import SectionsButton from '@/components/ui/SectionsButton.astro';
 ---
 
 <BaseLayout title="Portada">
@@ -20,8 +21,10 @@ import RedCircle from '@/sections/home/RedCircle.astro';
   <TransitionSection />
   <NewsGrid />
   <RedCircle />
+  <SectionsButton />
   <TextSeparator />
   <Lineup />
   <Videos />
   <Footer slot="footer" />
 </BaseLayout>
+
