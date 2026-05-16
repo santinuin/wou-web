@@ -1,0 +1,105 @@
+---
+import SupportCard from '@/components/content/SupportCard.astro';
+import WideSupportCard from '@/components/content/WideSupportCard.astro';
+import { getImageUrl } from '@/lib/cms';
+import type { ArticleLike } from '@/sections/home/mocks/newsGridMock';
+
+interface Props {
+  articles: ArticleLike[];
+}
+
+const { articles } = Astro.props;
+
+// Patrón cíclico de columnas por fila — mismo orden que continúa LoadMore
+const ROW_PATTERN = [2, 3, 2, 1, 2, 3];
+
+type Row = { cols: number; items: ArticleLike[] };
+const rows: Row[] = [];
+let cursor = 0;
+let patternIdx = 0;
+
+while (cursor < articles.length) {
+  const cols = ROW_PATTERN[patternIdx % ROW_PATTERN.length];
+  const items = articles.slice(cursor, cursor + cols);
+  if (items.length === 0) break;
+  rows.push({ cols, items });
+  cursor += cols;
+  patternIdx++;
+}
+---
+
+<div class="CategoryGrid">
+  {rows.map(({ cols, items }) => (
+    <div class={`CategoryGrid__row CategoryGrid__row--${cols}`}>
+      {items.map((article) => {
+        const imageUrl = getImageUrl(article.data.mainImage);
+        const slug = article.data.slug.current;
+        const title = article.data.title;
+        const categoryTitle = article.data.categories?.[0]?.title ?? null;
+        const imageAlt = article.data.mainImage?.alt ?? title;
+
+        return cols === 1
+          ? (
+            <WideSupportCard
+              title={title}
+              slug={slug}
+              categoryTitle={categoryTitle}
+              imageUrl={imageUrl}
+              imageAlt={imageAlt}
+            />
+          )
+          : (
+            <SupportCard
+              title={title}
+              slug={slug}
+              categoryTitle={categoryTitle}
+              imageUrl={imageUrl}
+              imageAlt={imageAlt}
+            />
+          );
+      })}
+    </div>
+  ))}
+</div>
+
+<style>
+  .CategoryGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .CategoryGrid__row {
+    display: grid;
+    gap: 8px;
+  }
+
+  .CategoryGrid__row--1 {
+    grid-template-columns: 1fr;
+    min-height: 360px;
+  }
+
+  .CategoryGrid__row--2 {
+    grid-template-columns: 1fr 1fr;
+    min-height: 360px;
+  }
+
+  .CategoryGrid__row--3 {
+    grid-template-columns: repeat(3, 1fr);
+    min-height: 320px;
+  }
+
+  @media (max-width: 768px) {
+    .CategoryGrid__row--3 {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .CategoryGrid__row--2,
+    .CategoryGrid__row--3 {
+      grid-template-columns: 1fr;
+      min-height: 280px;
+    }
+  }
+</style>

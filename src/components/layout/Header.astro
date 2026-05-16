@@ -12,20 +12,19 @@
 import SectionsMenu from '@/components/ui/SectionsMenu.svelte';
 import WindWidget from '@/components/ui/WindWidget.svelte';
 
-// TODO: reemplazar por getCollection('categories') cuando el CMS esté listo.
-const MOCK_SECTIONS = [
-  { title: 'Círculo Rojo', slug: '/circulo-rojo', color: null },
-  { title: 'Política',     slug: '/politica',     color: null },
-  { title: 'Locales',      slug: '/locales',      color: null },
-  { title: 'Policiales',   slug: '/policiales',   color: null },
-  { title: 'Opinión',      slug: '/opinion',      color: null },
-  { title: 'Deportes',     slug: '/deportes',     color: null },
-  { title: 'Sociedad',     slug: '/sociedad',     color: null },
-  { title: 'Cultura',      slug: '/cultura',      color: null },
-  { title: 'Economía',     slug: '/economia',     color: null },
-  { title: 'Turismo',      slug: '/turismo',      color: null },
-  { title: 'Ambiente',     slug: '/ambiente',     color: null },
-  { title: 'Nacionales',   slug: '/nacionales',   color: null },
+const SECTIONS = [
+  { title: 'Círculo Rojo', slug: '/categoria/circulo-rojo' },
+  { title: 'Política',     slug: '/categoria/politica'     },
+  { title: 'Locales',      slug: '/categoria/locales'      },
+  { title: 'Policiales',   slug: '/categoria/policiales'   },
+  { title: 'Opinión',      slug: '/categoria/opinion'      },
+  { title: 'Deportes',     slug: '/categoria/deportes'     },
+  { title: 'Sociedad',     slug: '/categoria/sociedad'     },
+  { title: 'Cultura',      slug: '/categoria/cultura'      },
+  { title: 'Economía',     slug: '/categoria/economia'     },
+  { title: 'Turismo',      slug: '/categoria/turismo'      },
+  { title: 'Ambiente',     slug: '/categoria/ambiente'     },
+  { title: 'Nacionales',   slug: '/categoria/nacionales'   },
 ];
 ---
 
@@ -130,9 +129,9 @@ const MOCK_SECTIONS = [
 <!--
   SectionsMenu: fixed al viewport, mitad derecha, debajo del header (z-[49] < header z-50).
   Visible desde cualquier sección de la página al hacer scroll.
-  TODO: pasar getCollection('categories') en vez de MOCK_SECTIONS cuando el CMS esté listo.
+  TODO: pasar getCollection('categories') cuando las categorías estén en Sanity.
 -->
-<SectionsMenu sections={MOCK_SECTIONS} client:only="svelte" />
+<SectionsMenu sections={SECTIONS} client:only="svelte" />
 
 <style>
   /* --header-scale: 1 cuando está en reposo, 0.72 al scrollear. Un solo

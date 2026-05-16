@@ -1,0 +1,46 @@
+---
+import HeroCard from '@/components/content/HeroCard.astro';
+import { getImageUrl } from '@/lib/cms';
+import type { ArticleLike } from '@/sections/home/mocks/newsGridMock';
+
+interface Props {
+  article: ArticleLike;
+  categoryDisplay: string;
+}
+
+const { article, categoryDisplay } = Astro.props;
+
+const imageUrl = getImageUrl(article.data.mainImage);
+const categoryTitle = article.data.categories?.[0]?.title ?? categoryDisplay;
+const tickerText = article.data.excerpt ?? article.data.title;
+---
+
+<div class="CategoryHero">
+  <HeroCard
+    title={article.data.title}
+    slug={article.data.slug.current}
+    categoryTitle={categoryTitle}
+    imageUrl={imageUrl}
+    imageAlt={article.data.mainImage?.alt ?? article.data.title}
+    tickerText={tickerText}
+  />
+</div>
+
+<style>
+  .CategoryHero {
+    height: 70vh;
+    max-height: 780px;
+    min-height: 480px;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  @media (max-width: 640px) {
+    .CategoryHero {
+      height: auto;
+      min-height: 480px;
+    }
+  }
+</style>

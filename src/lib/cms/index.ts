@@ -10,4 +10,4 @@
 export { sanityClient, isSanityConfigured } from './client';
 export { urlForImage, getImageUrl } from './image';
 export * from './queries';
-export { fetchRecentWpPosts, fetchAllWpPosts, fetchWpPostBySlug, fetchWpPostsByCategory, fetchWpPostsForCategories, extractElementorContent } from './wordpress';
+export { fetchRecentWpPosts, fetchAllWpPosts, fetchWpPostBySlug, fetchWpPostsByCategory, fetchWpPostsForCategories, extractElementorContent, resolveCategoryId } from './wordpress';

@@ -82,7 +82,7 @@ export async function fetchWpPostBySlug(slug: string): Promise<WpPost | null> {
  * Resuelve el slug de una categoría a su ID numérico.
  * Necesario porque la API de posts filtra por ID, no por slug.
  */
-async function resolveCategoryId(slug: string): Promise<number | null> {
+export async function resolveCategoryId(slug: string): Promise<number | null> {
   const res = await fetch(`${WP_BASE}/categories?slug=${encodeURIComponent(slug)}&per_page=1`);
   if (!res.ok) return null;
   const text = await res.text();

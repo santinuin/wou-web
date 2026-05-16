@@ -5,7 +5,6 @@
   interface Section {
     title: string;
     slug: string;
-    color?: string | null;
   }
 
   let { sections = [] }: { sections: Section[] } = $props();
@@ -14,12 +13,6 @@
   let navEl: HTMLElement | null = null;
   let tl: gsap.core.Timeline | null = null;
   let headerHeight = $state(88); // 5.5rem fallback
-
-  const GRAY = '#FFFFFF8C'; // brand-gray token
-
-  function finalColor(s: Section) {
-    return s.color ?? GRAY;
-  }
 
   function updateHeaderHeight() {
     const header = document.getElementById('siteHeader');
@@ -37,7 +30,6 @@
     if (!navEl) return;
     tl?.kill();
 
-    const links = Array.from(navEl.querySelectorAll<HTMLElement>('a[data-color]'));
     const spans = Array.from(navEl.querySelectorAll<HTMLElement>('span.gsap-text'));
     if (!spans.length) return;
 
@@ -47,14 +39,14 @@
     tl = gsap.timeline()
       .to(spans, {
         x: (i, el) => navWidth - PAD - el.offsetLeft - el.offsetWidth,
-        color: '#ffffff',
+        color: 'var(--color-brand-white)',
         duration: 0.45,
         stagger: 0.07,
         ease: 'power2.inOut',
       })
       .to(spans, {
         x: 0,
-        color: (i, el) => links[i]?.dataset.color ?? GRAY,
+        color: 'var(--color-brand-gray)',
         duration: 0.45,
         stagger: 0.07,
         ease: 'power2.inOut',
@@ -119,12 +111,11 @@
             <span class="sweep" aria-hidden="true"></span>
             <a
               href={section.slug}
-              data-color={finalColor(section)}
               class="relative z-10 block w-full pl-10 pt-4 pb-0.5"
             >
               <span
                 class="gsap-text font-boldonse font-normal uppercase inline-block leading-none align-bottom"
-                style="font-size: clamp(1.25rem, 2.5vw, 2.5rem); color: {finalColor(section)};"
+                style="font-size: clamp(1.25rem, 2.5vw, 2.5rem); color: var(--color-brand-gray);"
               >
                 {section.title}
               </span>

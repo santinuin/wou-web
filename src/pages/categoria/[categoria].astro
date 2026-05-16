@@ -1,0 +1,212 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Header from '@/components/layout/Header.astro';
+import Footer from '@/components/layout/Footer.astro';
+import CategoryHero from '@/sections/category/CategoryHero.astro';
+import CategoryGrid from '@/sections/category/CategoryGrid.astro';
+import LoadMore from '@/components/ui/LoadMore.svelte';
+import { fetchWpPostsByCategory, resolveCategoryId } from '@/lib/cms';
+import type { ArticleLike } from '@/sections/home/mocks/newsGridMock';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const CATEGORIES: Array<{ slug: string; wpSlug: string; display: string }> = [
+    { slug: 'circulo-rojo',  wpSlug: 'circulo-rojo', display: 'Círculo Rojo' },
+    { slug: 'politica',      wpSlug: 'politica',     display: 'Política'     },
+    { slug: 'locales',       wpSlug: 'locales',      display: 'Locales'      },
+    { slug: 'policiales',    wpSlug: 'policiales',   display: 'Policiales'   },
+    { slug: 'opinion',       wpSlug: 'opinion',      display: 'Opinión'      },
+    { slug: 'deportes',      wpSlug: 'deportes',     display: 'Deportes'     },
+    { slug: 'sociedad',      wpSlug: 'sociedad',     display: 'Sociedad'     },
+    { slug: 'cultura',       wpSlug: 'cultura',      display: 'Cultura'      },
+    { slug: 'economia',      wpSlug: 'economia',     display: 'Economía'     },
+    { slug: 'turismo',       wpSlug: 'turismo',      display: 'Turismo'      },
+    { slug: 'ambiente',      wpSlug: 'ambiente',     display: 'Ambiente'     },
+    { slug: 'nacionales',    wpSlug: 'nacionales',   display: 'Nacionales'   },
+  ];
+
+  const paths = await Promise.all(
+    CATEGORIES.map(async ({ slug, wpSlug, display }) => {
+      const [posts, categoryId] = await Promise.all([
+        fetchWpPostsByCategory(wpSlug, 16),
+        resolveCategoryId(wpSlug),
+      ]);
+
+      const articles: ArticleLike[] = posts.map((post) => ({
+        id: String(post.id),
+        data: {
+          wpId: post.id,
+          title: post.title.rendered,
+          slug: { current: post.slug },
+          publishedAt: post.date,
+          modifiedAt: post.modified,
+          content: null,
+          excerpt: post.excerpt?.rendered?.replace(/<[^>]+>/g, '').trim() ?? null,
+          mainImage: post._embedded?.['wp:featuredmedia']?.[0]?.source_url
+            ? {
+                url: post._embedded['wp:featuredmedia'][0].source_url,
+                alt: post._embedded['wp:featuredmedia'][0].alt_text ?? null,
+              }
+            : null,
+          categories:
+            post._embedded?.['wp:term']?.[0]?.map((c) => ({
+              _id: String(c.id),
+              title: c.name,
+              slug: { current: c.slug },
+            })) ?? [],
+          tags: [],
+          author: post._embedded?.author?.[0]?.name ?? null,
+          originalUrl: post.link,
+        },
+      }));
+
+      return {
+        params: { categoria: slug },
+        props: { display, categoryId, articles },
+      };
+    })
+  );
+
+  return paths;
+}
+
+interface Props {
+  display: string;
+  categoryId: number | null;
+  articles: ArticleLike[];
+}
+
+const { display, categoryId, articles } = Astro.props;
+
+const heroArticle = articles[0] ?? null;
+const gridArticles = articles.slice(1);
+
+// Mismo patrón cíclico que CategoryGrid — para que LoadMore continúe
+// la secuencia desde el offset correcto.
+const ROW_PATTERN = [2, 3, 2, 1, 2, 3];
+let initialPatternOffset = 0;
+let cursor = 0;
+while (cursor < gridArticles.length) {
+  const cols = ROW_PATTERN[initialPatternOffset % ROW_PATTERN.length];
+  cursor += cols;
+  initialPatternOffset++;
+}
+---
+
+<BaseLayout title={display}>
+  <Header slot="header" />
+
+  <div class="CategoryPage">
+    <span class="CategoryPage__watermark CategoryPage__watermark--left" aria-hidden="true">
+      {display}
+    </span>
+    <span class="CategoryPage__watermark CategoryPage__watermark--right" aria-hidden="true">
+      {display}
+    </span>
+
+    <div class="CategoryPage__container">
+      {heroArticle && (
+        <CategoryHero article={heroArticle} categoryDisplay={display} />
+      )}
+
+      {gridArticles.length > 0 && (
+        <CategoryGrid articles={gridArticles} />
+      )}
+
+      {categoryId && articles.length > 0 && (
+        <LoadMore
+          categoryId={categoryId}
+          initialPage={2}
+          initialPatternOffset={initialPatternOffset}
+          client:visible
+        />
+      )}
+
+      {articles.length === 0 && (
+        <div class="CategoryPage__empty">
+          <p>No hay artículos disponibles en esta sección.</p>
+        </div>
+      )}
+    </div>
+  </div>
+
+  <Footer slot="footer" />
+</BaseLayout>
+
+<style>
+  .CategoryPage {
+    position: relative;
+    background: var(--color-brand-dark);
+    overflow: hidden;
+  }
+
+  .CategoryPage__container {
+    padding: 1.5rem 13.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Watermarks laterales — texto rotado vertical en los márgenes */
+  .CategoryPage__watermark {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    font-family: var(--font-alumni);
+    font-weight: 900;
+    font-size: clamp(4rem, 8vw, 9rem);
+    text-transform: uppercase;
+    color: var(--color-brand-blue);
+    opacity: 0.35;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
+    display: flex;
+    align-items: center;
+    letter-spacing: -0.02em;
+  }
+
+  .CategoryPage__watermark--left {
+    left: 1.5rem;
+    transform: rotate(180deg);
+  }
+
+  .CategoryPage__watermark--right {
+    right: 1.5rem;
+  }
+
+  .CategoryPage__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40vh;
+    color: var(--color-brand-white);
+    font-family: var(--font-alumni);
+    font-size: 2rem;
+    opacity: 0.5;
+  }
+
+  @media (max-width: 1280px) {
+    .CategoryPage__container { padding: 1.5rem 6rem; }
+  }
+
+  @media (max-width: 1024px) {
+    .CategoryPage__container { padding: 1.25rem 3rem; }
+    .CategoryPage__watermark {
+      font-size: 4rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .CategoryPage__container { padding: 0.75rem 1rem; }
+    .CategoryPage__watermark {
+      display: none;
+    }
+  }
+</style>
