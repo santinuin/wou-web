@@ -4,7 +4,9 @@ import Header from '@/components/layout/Header.astro';
 import Footer from '@/components/layout/Footer.astro';
 import CategoryHero from '@/sections/category/CategoryHero.astro';
 import CategoryGrid from '@/sections/category/CategoryGrid.astro';
+import CategoryNav from '@/sections/category/CategoryNav.astro';
 import LoadMore from '@/components/ui/LoadMore.svelte';
+import { BAND_PATTERN } from '@/sections/category/bandPattern';
 import { fetchWpPostsByCategory, resolveCategoryId } from '@/lib/cms';
 import type { ArticleLike } from '@/sections/home/mocks/newsGridMock';
 
@@ -82,13 +84,12 @@ const { display, categoryId, articles } = Astro.props;
 const heroArticle = articles[0] ?? null;
 const gridArticles = articles.slice(1);
 
-// Mismo patrón cíclico que CategoryGrid — para que LoadMore continúe
-// la secuencia desde el offset correcto.
-const ROW_PATTERN = [2, 3, 2, 1, 2, 3];
+// Cuenta cuántas filas consume el grid inicial para que LoadMore
+// continúe el patrón de banda desde el offset correcto.
 let initialPatternOffset = 0;
 let cursor = 0;
 while (cursor < gridArticles.length) {
-  const cols = ROW_PATTERN[initialPatternOffset % ROW_PATTERN.length];
+  const cols = BAND_PATTERN[initialPatternOffset % BAND_PATTERN.length].cols;
   cursor += cols;
   initialPatternOffset++;
 }
@@ -128,6 +129,8 @@ while (cursor < gridArticles.length) {
           <p>No hay artículos disponibles en esta sección.</p>
         </div>
       )}
+
+      <CategoryNav />
     </div>
   </div>
 

@@ -1,0 +1,26 @@
+---
+/**
+ * Botón pill reutilizable. Variantes:
+ *  · primary  → CTA grande naranja (ej: "+ SECCIONES", "+ NOTICIAS")
+ *  · category → badge/tag con borde (ej: nombre de sección)
+ *
+ * Las clases viven en global.css, así también las puede usar
+ * cualquier island Svelte (ver LoadMore.svelte).
+ */
+interface Props {
+  href: string;
+  label: string;
+  variant?: 'primary' | 'category';
+  ariaLabel?: string;
+}
+
+const { href, label, variant = 'primary', ariaLabel } = Astro.props;
+---
+
+<a
+  href={href}
+  class={`PillButton PillButton--${variant}`}
+  aria-label={ariaLabel ?? label}
+>
+  {label}
+</a>

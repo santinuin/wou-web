@@ -1,4 +1,6 @@
 ---
+import PillButton from './PillButton.astro';
+
 interface Props {
   href?: string;
   label?: string;
@@ -8,31 +10,5 @@ const { href = '/secciones', label = '+ SECCIONES' } = Astro.props;
 ---
 
 <div class="flex justify-center items-center py-40 pb-0 bg-brand-dark">
-  <a href={href} class="secciones-pill" aria-label="Ver todas las secciones">
-    {label}
-  </a>
+  <PillButton href={href} label={label} variant="primary" ariaLabel="Ver todas las secciones" />
 </div>
-
-<style>
-  .secciones-pill {
-    display: inline-block;
-    background: var(--color-brand-orange);
-    color: var(--color-brand-dark);
-    font-family: var(--font-boldonse);
-    font-weight: 400;
-    font-size: clamp(1.5rem, 3vw, 3.5rem);
-    text-transform: uppercase;
-    text-decoration: none;
-    padding: 0.40em 0.7em;
-    border-radius: 9999px;
-    letter-spacing: 0.01em;
-    transition: filter 0.2s ease, transform 0.2s ease;
-    line-height: 1.15;
-  }
-
-  .secciones-pill:hover {
-    filter: brightness(0.9);
-    transform: scale(1.03);
-    background: var(--color-brand-blue);
-  }
-</style>

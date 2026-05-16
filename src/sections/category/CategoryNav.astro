@@ -1,0 +1,39 @@
+---
+/**
+ * Navegación de secciones — pill buttons al pie de la página de categoría.
+ * Usa la misma lista que el menú del header.
+ */
+import PillButton from '@/components/ui/PillButton.astro';
+
+const SECTIONS = [
+  { label: 'Círculo Rojo', href: '/categoria/circulo-rojo' },
+  { label: 'Política',     href: '/categoria/politica'     },
+  { label: 'Locales',      href: '/categoria/locales'      },
+  { label: 'Policiales',   href: '/categoria/policiales'   },
+  { label: 'Opinión',      href: '/categoria/opinion'      },
+  { label: 'Deportes',     href: '/categoria/deportes'     },
+  { label: 'Sociedad',     href: '/categoria/sociedad'     },
+  { label: 'Cultura',      href: '/categoria/cultura'      },
+  { label: 'Economía',     href: '/categoria/economia'     },
+  { label: 'Turismo',      href: '/categoria/turismo'      },
+  { label: 'Ambiente',     href: '/categoria/ambiente'     },
+  { label: 'Nacionales',   href: '/categoria/nacionales'   },
+];
+---
+
+<nav class="CategoryNav" aria-label="Otras secciones">
+  {SECTIONS.map(({ label, href }) => (
+    <PillButton href={href} label={label} variant="category" />
+  ))}
+</nav>
+
+<style>
+  .CategoryNav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.6rem 0.75rem;
+    padding: 3rem 1rem 1rem;
+  }
+</style>

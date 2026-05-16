@@ -28,19 +28,31 @@ const tickerText = article.data.excerpt ?? article.data.title;
 
 <style>
   .CategoryHero {
-    height: 70vh;
-    max-height: 780px;
-    min-height: 480px;
+    height: 88vh;
+    max-height: 1000px;
+    min-height: 620px;
     border-radius: 10px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    border: 2px solid var(--color-brand-dark);
+  }
+
+  /* Variante del hero de sección:
+       · Bloque del título con fondo BLANCO y texto oscuro (vs teal en home)
+       · Ticker con fondo teal (texto oscuro hereda de HeroCard)            */
+  .CategoryHero :global(.HeroCard__body) {
+    background: var(--color-brand-white);
+  }
+
+  .CategoryHero :global(.HeroCard__ticker) {
+    background: var(--color-brand-teal);
   }
 
   @media (max-width: 640px) {
     .CategoryHero {
       height: auto;
-      min-height: 480px;
+      min-height: 520px;
     }
   }
 </style>

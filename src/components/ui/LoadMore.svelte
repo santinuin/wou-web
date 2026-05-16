@@ -1,12 +1,12 @@
 <script lang="ts">
+  import { BAND_PATTERN, type BandType } from '@/sections/category/bandPattern';
+
   export let categoryId: number;
   export let initialPage: number = 2;
   export let initialPatternOffset: number = 0;
 
   const WP_BASE = 'https://wou.com.ar/wp-json/wp/v2';
   const PER_PAGE = 12;
-  // Mismo patrón que CategoryGrid.astro
-  const ROW_PATTERN = [2, 3, 2, 1, 2, 3];
 
   let page = initialPage;
   let loading = false;
@@ -78,11 +78,11 @@
     </a>`;
   }
 
-  function buildRowHTML(articles: NormalizedArticle[], cols: number): string {
+  function buildRowHTML(articles: NormalizedArticle[], cols: number, type: BandType): string {
     const cards = articles
       .map((a) => (cols === 1 ? buildWideSupportCard(a) : buildSupportCard(a)))
       .join('');
-    return `<div class="CategoryGrid__row CategoryGrid__row--${cols}">${cards}</div>`;
+    return `<div class="CategoryGrid__row CategoryGrid__row--${type}">${cards}</div>`;
   }
 
   async function loadMore() {
@@ -103,11 +103,11 @@
       let cursor = 0;
 
       while (cursor < articles.length) {
-        const cols = ROW_PATTERN[patternOffset % ROW_PATTERN.length];
-        const chunk = articles.slice(cursor, cursor + cols);
+        const slot = BAND_PATTERN[patternOffset % BAND_PATTERN.length];
+        const chunk = articles.slice(cursor, cursor + slot.cols);
         if (chunk.length === 0) break;
-        container.insertAdjacentHTML('beforeend', buildRowHTML(chunk, cols));
-        cursor += cols;
+        container.insertAdjacentHTML('beforeend', buildRowHTML(chunk, slot.cols, slot.type));
+        cursor += slot.cols;
         patternOffset++;
       }
 
@@ -126,7 +126,7 @@
 {#if hasMore}
   <div class="LoadMore__wrap">
     <button
-      class="LoadMore__btn"
+      class="PillButton PillButton--primary"
       on:click={loadMore}
       disabled={loading}
       aria-label="Cargar más noticias"
@@ -148,69 +148,9 @@
     margin-top: 8px;
   }
 
-  :global(.LoadMore__rows .CategoryGrid__row) {
-    display: grid;
-    gap: 8px;
-  }
-
-  :global(.LoadMore__rows .CategoryGrid__row--1) {
-    grid-template-columns: 1fr;
-    min-height: 360px;
-  }
-
-  :global(.LoadMore__rows .CategoryGrid__row--2) {
-    grid-template-columns: 1fr 1fr;
-    min-height: 360px;
-  }
-
-  :global(.LoadMore__rows .CategoryGrid__row--3) {
-    grid-template-columns: repeat(3, 1fr);
-    min-height: 320px;
-  }
-
-  @media (max-width: 768px) {
-    :global(.LoadMore__rows .CategoryGrid__row--3) {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
-  @media (max-width: 480px) {
-    :global(.LoadMore__rows .CategoryGrid__row--2),
-    :global(.LoadMore__rows .CategoryGrid__row--3) {
-      grid-template-columns: 1fr;
-      min-height: 280px;
-    }
-  }
-
   .LoadMore__wrap {
     display: flex;
     justify-content: center;
-    padding: 2.5rem 0 1rem;
-  }
-
-  .LoadMore__btn {
-    background: var(--color-brand-orange);
-    color: var(--color-brand-dark);
-    font-family: var(--font-alumni);
-    font-weight: 900;
-    font-size: 2.2rem;
-    padding: 0.4rem 2.8rem;
-    border: none;
-    border-radius: 9999px;
-    cursor: pointer;
-    transition: filter 0.2s ease, transform 0.15s ease;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-    line-height: 1.1;
-  }
-
-  .LoadMore__btn:hover:not(:disabled) {
-    filter: brightness(1.08);
-    transform: scale(1.03);
-  }
-
-  .LoadMore__btn:disabled {
-    opacity: 0.7;
-    cursor: wait;
+    padding: 3rem 0 1rem;
   }
 </style>

@@ -3,6 +3,7 @@ import SupportCard from '@/components/content/SupportCard.astro';
 import WideSupportCard from '@/components/content/WideSupportCard.astro';
 import { getImageUrl } from '@/lib/cms';
 import type { ArticleLike } from '@/sections/home/mocks/newsGridMock';
+import { BAND_PATTERN, type BandRow } from './bandPattern';
 
 interface Props {
   articles: ArticleLike[];
@@ -10,27 +11,24 @@ interface Props {
 
 const { articles } = Astro.props;
 
-// Patrón cíclico de columnas por fila — mismo orden que continúa LoadMore
-const ROW_PATTERN = [2, 3, 2, 1, 2, 3];
-
-type Row = { cols: number; items: ArticleLike[] };
+type Row = BandRow & { items: ArticleLike[] };
 const rows: Row[] = [];
 let cursor = 0;
 let patternIdx = 0;
 
 while (cursor < articles.length) {
-  const cols = ROW_PATTERN[patternIdx % ROW_PATTERN.length];
-  const items = articles.slice(cursor, cursor + cols);
+  const slot = BAND_PATTERN[patternIdx % BAND_PATTERN.length];
+  const items = articles.slice(cursor, cursor + slot.cols);
   if (items.length === 0) break;
-  rows.push({ cols, items });
-  cursor += cols;
+  rows.push({ ...slot, items });
+  cursor += slot.cols;
   patternIdx++;
 }
 ---
 
 <div class="CategoryGrid">
-  {rows.map(({ cols, items }) => (
-    <div class={`CategoryGrid__row CategoryGrid__row--${cols}`}>
+  {rows.map(({ cols, type, items }) => (
+    <div class={`CategoryGrid__row CategoryGrid__row--${type}`}>
       {items.map((article) => {
         const imageUrl = getImageUrl(article.data.mainImage);
         const slug = article.data.slug.current;
@@ -62,7 +60,7 @@ while (cursor < articles.length) {
   ))}
 </div>
 
-<style>
+<style is:global>
   .CategoryGrid {
     display: flex;
     flex-direction: column;
@@ -74,30 +72,173 @@ while (cursor < articles.length) {
     gap: 8px;
   }
 
-  .CategoryGrid__row--1 {
-    grid-template-columns: 1fr;
-    min-height: 360px;
+  /* Borde oscuro en todas las cards del grid (también para las cargadas vía LoadMore). */
+  .CategoryGrid .SupportCard,
+  .CategoryGrid .WideSupportCard,
+  .LoadMore__rows .SupportCard,
+  .LoadMore__rows .WideSupportCard {
+    border: 2px solid var(--color-brand-dark);
+    border-radius: 8px;
+    /* min-height:0 evita que el min-content (imagen) empuje la card
+       más allá del height del row. */
+    min-height: 0;
+    overflow: hidden;
   }
 
-  .CategoryGrid__row--2 {
+  /* Imagen como background absoluto — desacopla el aspect-ratio
+     intrínseco del flex/grid sizing. */
+  .CategoryGrid .SupportCard__image-zone,
+  .LoadMore__rows .SupportCard__image-zone,
+  .CategoryGrid .WideSupportCard__image-zone,
+  .LoadMore__rows .WideSupportCard__image-zone {
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .CategoryGrid .SupportCard__image-zone {
+    border-radius: 6px 6px 0 0;
+  }
+
+  .CategoryGrid .SupportCard__image,
+  .LoadMore__rows .SupportCard__image,
+  .CategoryGrid .WideSupportCard__image,
+  .LoadMore__rows .WideSupportCard__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .CategoryGrid .SupportCard__body,
+  .LoadMore__rows .SupportCard__body,
+  .CategoryGrid .WideSupportCard__body,
+  .LoadMore__rows .WideSupportCard__body {
+    min-height: 0;
+  }
+
+  /* Tamaño de título ajustado para que entre cómodo en cards angostas.
+     Override del default (clamp(2.2rem, 4vw, 4rem)) que era demasiado
+     grande para 3-col y los lados angostos de bandas asimétricas.       */
+  .CategoryGrid .SupportCard__title,
+  .LoadMore__rows .SupportCard__title {
+    font-size: clamp(1.5rem, 2.4vw, 2.8rem);
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Cards más anchas (lado wider de bandas asimétricas y banda C) pueden
+     usar título un poco más grande. */
+  .CategoryGrid__row--a > .SupportCard:nth-child(1) .SupportCard__title,
+  .CategoryGrid__row--d > .SupportCard:nth-child(2) .SupportCard__title,
+  .CategoryGrid__row--f > .SupportCard:nth-child(2) .SupportCard__title,
+  .CategoryGrid__row--c .SupportCard__title,
+  .LoadMore__rows .CategoryGrid__row--a > .SupportCard:nth-child(1) .SupportCard__title,
+  .LoadMore__rows .CategoryGrid__row--d > .SupportCard:nth-child(2) .SupportCard__title,
+  .LoadMore__rows .CategoryGrid__row--f > .SupportCard:nth-child(2) .SupportCard__title,
+  .LoadMore__rows .CategoryGrid__row--c .SupportCard__title {
+    font-size: clamp(2rem, 3.4vw, 3.8rem);
+  }
+
+  /* ── Banda A: 2 cols asimétrica, izquierda más ancha ───────────── */
+  .CategoryGrid__row--a {
+    grid-template-columns: 1.6fr 1fr;
+    height: 420px;
+  }
+
+  /* ── Banda B: 3 cols equal ─────────────────────────────────────── */
+  .CategoryGrid__row--b {
+    grid-template-columns: 1fr 1fr 1fr;
+    height: 340px;
+  }
+
+  /* ── Banda C: 2 cols equal (más alta — featured) ───────────────── */
+  .CategoryGrid__row--c {
     grid-template-columns: 1fr 1fr;
-    min-height: 360px;
+    height: 540px;
   }
 
-  .CategoryGrid__row--3 {
-    grid-template-columns: repeat(3, 1fr);
-    min-height: 320px;
+  /* ── Banda D: 2 cols asimétrica, derecha más ancha (mirror A) ──── */
+  .CategoryGrid__row--d {
+    grid-template-columns: 1fr 1.6fr;
+    height: 420px;
+  }
+
+  /* ── Banda E: 1 card a todo el ancho — layout HORIZONTAL ──────── */
+  .CategoryGrid__row--e {
+    grid-template-columns: 1fr;
+    height: 260px;
+  }
+
+  .CategoryGrid__row--e .WideSupportCard,
+  .LoadMore__rows .CategoryGrid__row--e .WideSupportCard {
+    flex-direction: row;
+  }
+
+  .CategoryGrid__row--e .WideSupportCard__image-zone,
+  .LoadMore__rows .CategoryGrid__row--e .WideSupportCard__image-zone {
+    flex: 0 0 32%;
+    border-radius: 6px 0 0 6px;
+  }
+
+  .CategoryGrid__row--e .WideSupportCard__body,
+  .LoadMore__rows .CategoryGrid__row--e .WideSupportCard__body {
+    flex: 1 1 auto;
+    justify-content: center;
+    padding: 1.5rem 2.5rem;
+  }
+
+  .CategoryGrid__row--e .WideSupportCard__category,
+  .LoadMore__rows .CategoryGrid__row--e .WideSupportCard__category {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    align-self: flex-start;
+    margin-bottom: 0.5rem;
+  }
+
+  .CategoryGrid__row--e .WideSupportCard__title,
+  .LoadMore__rows .CategoryGrid__row--e .WideSupportCard__title {
+    white-space: normal;
+    font-size: clamp(2.2rem, 3.6vw, 4.5rem);
+  }
+
+  /* ── Banda F: 2 cols, derecha mucho más ancha ──────────────────── */
+  .CategoryGrid__row--f {
+    grid-template-columns: 1fr 2fr;
+    height: 400px;
+  }
+
+  /* ── Banda G: 3 cols equal ─────────────────────────────────────── */
+  .CategoryGrid__row--g {
+    grid-template-columns: 1fr 1fr 1fr;
+    height: 340px;
   }
 
   @media (max-width: 768px) {
-    .CategoryGrid__row--3 {
+    .CategoryGrid__row--a,
+    .CategoryGrid__row--d,
+    .CategoryGrid__row--f {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .CategoryGrid__row--b,
+    .CategoryGrid__row--g {
       grid-template-columns: 1fr 1fr;
     }
   }
 
   @media (max-width: 480px) {
-    .CategoryGrid__row--2,
-    .CategoryGrid__row--3 {
+    .CategoryGrid__row--a,
+    .CategoryGrid__row--b,
+    .CategoryGrid__row--c,
+    .CategoryGrid__row--d,
+    .CategoryGrid__row--f,
+    .CategoryGrid__row--g {
       grid-template-columns: 1fr;
       min-height: 280px;
     }
