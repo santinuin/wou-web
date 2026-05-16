@@ -7,7 +7,14 @@ export const prerender = false;
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Header from '@/components/layout/Header.astro';
 import Footer from '@/components/layout/Footer.astro';
-import { fetchWpPostBySlug, extractElementorContent } from '@/lib/cms/wordpress';
+import ArticleCard from '@/sections/article/ArticleCard.astro';
+import NewsList from '@/components/content/NewsList.astro';
+import CategoryNav from '@/sections/category/CategoryNav.astro';
+import {
+  fetchWpPostBySlug,
+  fetchWpPostsByCategory,
+  extractElementorContent,
+} from '@/lib/cms/wordpress';
 
 const { slug } = Astro.params;
 
@@ -27,15 +34,29 @@ Astro.response.headers.set(
 const title = post.title.rendered;
 const content = extractElementorContent(post.content.rendered);
 const excerpt = post.excerpt.rendered.replace(/<[^>]+>/g, '').trim();
-const featuredImage = post._embedded?.['wp:featuredmedia']?.[0]?.source_url ?? null;
+const featuredMedia = post._embedded?.['wp:featuredmedia']?.[0] ?? null;
+const featuredImage = featuredMedia?.source_url ?? null;
+const featuredImageAlt = featuredMedia?.alt_text ?? title;
+const featuredImageWidth = featuredMedia?.media_details?.width ?? 1200;
+const featuredImageHeight = featuredMedia?.media_details?.height ?? 675;
 const categories = post._embedded?.['wp:term']?.[0] ?? [];
-const author = post._embedded?.author?.[0]?.name ?? null;
 
-const publishedDate = new Date(post.date).toLocaleDateString('es-AR', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-});
+// Relacionados: hasta 4 artículos de la primera categoría, excluyendo este post.
+const primaryCategory = categories[0] ?? null;
+const relatedPosts = primaryCategory
+  ? (await fetchWpPostsByCategory(primaryCategory.slug, 5))
+      .filter((p) => p.slug !== post.slug)
+      .slice(0, 4)
+  : [];
+
+const relatedArticles = relatedPosts.map((p) => ({
+  title: p.title.rendered,
+  publishedAt: p.date,
+  slug: p.slug,
+  href: `/articles/${p.slug}`,
+  imageUrl: p._embedded?.['wp:featuredmedia']?.[0]?.source_url ?? null,
+  excerpt: p.excerpt?.rendered?.replace(/<[^>]+>/g, '').trim() ?? null,
+}));
 ---
 
 <BaseLayout
@@ -46,187 +67,98 @@ const publishedDate = new Date(post.date).toLocaleDateString('es-AR', {
 >
   <Header slot="header" />
 
-  <article class="Article">
-    <header class="Article__header">
-      {categories.length > 0 && (
-        <div class="Article__categories">
-          {categories.map(cat => (
-            <a href={`/category/${cat.slug}`} class="Article__category">
-              {cat.name}
-            </a>
-          ))}
-        </div>
-      )}
+  <div class="ArticlePage">
+    <div class="ArticlePage__container">
+      <ArticleCard
+        title={title}
+        excerpt={excerpt}
+        content={content}
+        publishedAt={post.date}
+        featuredImage={featuredImage}
+        featuredImageAlt={featuredImageAlt}
+        featuredImageWidth={featuredImageWidth}
+        featuredImageHeight={featuredImageHeight}
+        categories={categories.map((c) => ({ name: c.name, slug: c.slug }))}
+      />
+    </div>
 
-      <h1 class="Article__title" set:html={title} />
-
-      <div class="Article__meta">
-        {author && <span class="Article__author">{author}</span>}
-        <time datetime={post.date} class="Article__date">{publishedDate}</time>
-      </div>
-    </header>
-
-    {featuredImage && (
-      <div class="Article__hero-image">
-        <img
-          src={featuredImage}
-          alt={post._embedded?.['wp:featuredmedia']?.[0]?.alt_text || title}
-          width="1200"
-          height="630"
-          loading="eager"
-          decoding="async"
-        />
-      </div>
+    {relatedArticles.length > 0 && (
+      <>
+        <hr class="ArticlePage__separator" aria-hidden="true" />
+        <section class="ArticlePage__related" aria-label="Más noticias de la sección">
+          <NewsList
+            articles={relatedArticles}
+            showHeader={false}
+            itemMinHeight="9rem"
+            expandedPreview={true}
+          />
+        </section>
+      </>
     )}
 
-    <div class="Article__content" set:html={content} />
-  </article>
+    <div class="ArticlePage__nav">
+      <CategoryNav />
+    </div>
+  </div>
 
   <Footer slot="footer" />
 </BaseLayout>
 
 <style>
-  .Article {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem 1.5rem 4rem;
+  .ArticlePage {
+    background: var(--color-brand-dark);
+    padding-top: 1.5rem;
+    padding-bottom: 1rem;
   }
 
-  .Article__header {
-    margin-bottom: 2rem;
+  .ArticlePage__container {
+    padding: 0 clamp(1rem, 4vw, 3rem);
   }
 
-  .Article__categories {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
-  }
-
-  .Article__category {
-    display: inline-block;
-    background: var(--color-brand-teal, #00b4b4);
-    color: #fff;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 0.2rem 0.7rem;
-    border-radius: 9999px;
-    text-decoration: none;
-  }
-
-  .Article__category:hover {
-    opacity: 0.85;
-  }
-
-  .Article__title {
-    font-size: clamp(1.75rem, 4vw, 2.75rem);
-    font-weight: 900;
-    line-height: 1.1;
-    margin: 0 0 1rem;
-    color: #111;
-  }
-
-  .Article__meta {
-    display: flex;
-    gap: 1rem;
-    font-size: 0.875rem;
-    color: #666;
-    flex-wrap: wrap;
-  }
-
-  .Article__author {
-    font-weight: 700;
-    color: #444;
-  }
-
-  .Article__hero-image {
-    margin: 0 -1.5rem 2rem;
-    aspect-ratio: 16/9;
-    overflow: hidden;
-  }
-
-  .Article__hero-image img {
+  /* Separador blanco fino entre el artículo y la lista de relacionados. */
+  .ArticlePage__separator {
+    border: 0;
+    height: 4px;
+    background: var(--color-brand-white);
+    margin: 3rem 0 0;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
   }
 
-  /* Estilos del contenido del artículo (proveniente de WordPress/Elementor) */
-  .Article__content {
-    font-size: 1.05rem;
-    line-height: 1.75;
-    color: #222;
+  /* Lista de relacionados: ocupa casi todo el ancho del viewport,
+     alineada con el mismo padding lateral que el CategoryNav (1rem). */
+  .ArticlePage__related {
+    margin-top: 0;
+    padding: 0 1rem;
   }
 
-  .Article__content :global(h2),
-  .Article__content :global(h3),
-  .Article__content :global(h4) {
-    font-weight: 800;
-    line-height: 1.2;
-    margin: 2rem 0 0.75rem;
-    color: #111;
+  /* En la página de artículo el CategoryNav se distribuye con
+     space-between para ocupar todo el ancho con botones más grandes.    */
+  .ArticlePage__nav :global(.CategoryNav) {
+    gap: 0.5rem;
+    padding: 3rem 1rem 2rem;
   }
 
-  .Article__content :global(h2) { font-size: 1.5rem; }
-  .Article__content :global(h3) { font-size: 1.25rem; }
-  .Article__content :global(h4) { font-size: 1.1rem; }
-
-  .Article__content :global(p) {
-    margin: 0 0 1.25rem;
+  .ArticlePage__nav :global(.CategoryNav .PillButton--category) {
+    font-size: 1.95rem;
+    padding: 0.1rem 1rem;
   }
 
-  .Article__content :global(img) {
-    max-width: 100%;
-    height: auto;
-    border-radius: 6px;
-    margin: 1.5rem auto;
-    display: block;
-  }
-
-  .Article__content :global(a) {
-    color: var(--color-brand-teal, #00b4b4);
-    text-decoration: underline;
-  }
-
-  .Article__content :global(ul),
-  .Article__content :global(ol) {
-    padding-left: 1.5rem;
-    margin: 0 0 1.25rem;
-  }
-
-  .Article__content :global(li) {
-    margin-bottom: 0.4rem;
-  }
-
-  .Article__content :global(strong) {
-    font-weight: 700;
-  }
-
-  .Article__content :global(blockquote) {
-    border-left: 4px solid var(--color-brand-teal, #00b4b4);
-    padding-left: 1rem;
-    margin: 1.5rem 0;
-    color: #555;
-    font-style: italic;
-  }
-
-  /* Ocultar divs vacíos que deja Elementor */
-  .Article__content :global(.elementor-section),
-  .Article__content :global(.elementor-container),
-  .Article__content :global(.elementor-widget-container) {
-    display: contents;
+  @media (max-width: 900px) {
+    .ArticlePage__nav :global(.CategoryNav) {
+      justify-content: center;
+    }
+    .ArticlePage__nav :global(.CategoryNav .PillButton--category) {
+      font-size: 1.5rem;
+    }
   }
 
   @media (max-width: 640px) {
-    .Article {
-      padding: 1.5rem 1rem 3rem;
+    .ArticlePage {
+      padding-top: 1rem;
     }
 
-    .Article__hero-image {
-      margin: 0 -1rem 1.5rem;
+    .ArticlePage__separator {
+      margin-top: 2rem;
     }
   }
 </style>

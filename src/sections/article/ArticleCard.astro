@@ -1,0 +1,269 @@
+---
+/**
+ * Tarjeta principal de la página de artículo.
+ *
+ * Contenedor blanco redondeado centrado sobre el fondo dark. Contiene:
+ *   · Header: categoría (izquierda) + fecha (derecha)
+ *   · Título grande (Bowlby One)
+ *   · Bajada (Franklin bold)
+ *   · Imagen destacada (full-width interno)
+ *   · Cuerpo HTML proveniente de WordPress/Elementor
+ *
+ * El cuerpo se inyecta con `set:html` — los estilos del contenido viven en
+ * `.ArticleCard__content :global(...)` para alcanzar el HTML inyectado.
+ */
+import { Image } from 'astro:assets';
+import { formatDateLong } from '@/lib/utils';
+
+interface Category {
+  name: string;
+  slug: string;
+}
+
+interface Props {
+  title: string;
+  excerpt?: string | null;
+  content: string;
+  publishedAt: string;
+  featuredImage?: string | null;
+  featuredImageAlt?: string | null;
+  featuredImageWidth?: number;
+  featuredImageHeight?: number;
+  categories?: Category[];
+}
+
+const {
+  title,
+  excerpt,
+  content,
+  publishedAt,
+  featuredImage,
+  featuredImageAlt,
+  featuredImageWidth = 1200,
+  featuredImageHeight = 675,
+  categories = [],
+} = Astro.props;
+
+const primaryCategory = categories[0] ?? null;
+const dateLabel = formatDateLong(publishedAt);
+---
+
+<article class="ArticleCard">
+  <header class="ArticleCard__header">
+    {primaryCategory && (
+      <a
+        class="ArticleCard__category"
+        href={`/categoria/${primaryCategory.slug}`}
+      >
+        {primaryCategory.name}
+      </a>
+    )}
+    <time class="ArticleCard__date" datetime={publishedAt}>{dateLabel}</time>
+  </header>
+
+  <h1 class="ArticleCard__title" set:html={title} />
+
+  {excerpt && (
+    <p class="ArticleCard__excerpt">{excerpt}</p>
+  )}
+
+  {featuredImage && (
+    <figure class="ArticleCard__figure">
+      <Image
+        src={featuredImage}
+        alt={featuredImageAlt ?? ''}
+        width={featuredImageWidth}
+        height={featuredImageHeight}
+        loading="eager"
+        decoding="async"
+      />
+    </figure>
+  )}
+
+  <div class="ArticleCard__content" set:html={content} />
+</article>
+
+<style>
+  .ArticleCard {
+    background: var(--color-brand-white);
+    color: var(--color-brand-dark);
+    border-radius: 12px;
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 2.75rem clamp(1.5rem, 5vw, 4rem) 3rem;
+    box-sizing: border-box;
+  }
+
+  /* ── Header: categoría + fecha ───────────────────────────────────── */
+  .ArticleCard__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .ArticleCard__category {
+    font-family: var(--font-franklin);
+    font-weight: 900;
+    font-size: 0.95rem;
+    text-transform: none;
+    color: var(--color-brand-dark);
+    text-decoration: none;
+    letter-spacing: 0;
+  }
+
+  .ArticleCard__category:hover {
+    color: var(--color-brand-teal);
+  }
+
+  .ArticleCard__date {
+    font-family: var(--font-franklin);
+    font-weight: 400;
+    font-size: 0.85rem;
+    color: color-mix(in srgb, var(--color-brand-dark) 60%, transparent);
+  }
+
+  /* ── Título ─────────────────────────────────────────────────────── */
+  .ArticleCard__title {
+    font-family: var(--font-bowlby);
+    font-weight: 400;
+    font-size: clamp(2.75rem, 7.5vw, 5.5rem);
+    line-height: 0.95;
+    color: var(--color-brand-dark);
+    margin: 0 0 1.5rem;
+    letter-spacing: -0.01em;
+    word-break: break-word;
+  }
+
+  /* ── Bajada ─────────────────────────────────────────────────────── */
+  .ArticleCard__excerpt {
+    font-family: var(--font-franklin);
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 1.2;
+    color: var(--color-brand-dark);
+    margin: 0 0 2rem;
+  }
+
+  /* ── Imagen destacada ───────────────────────────────────────────── */
+  .ArticleCard__figure {
+    margin: 0 auto 2rem;
+    border-radius: 6px;
+    overflow: hidden;
+    max-width: 900px;
+  }
+
+  .ArticleCard__figure :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 480px;
+    object-fit: cover;
+  }
+
+  /* ── Cuerpo del artículo (HTML inyectado de WordPress) ──────────── */
+  .ArticleCard__content {
+    font-family: var(--font-franklin);
+    font-weight: 400;
+    font-size: 35px;
+    line-height: 1.35;
+    color: var(--color-brand-dark);
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .ArticleCard__content :global(h2),
+  .ArticleCard__content :global(h3),
+  .ArticleCard__content :global(h4) {
+    font-family: var(--font-franklin);
+    font-weight: 900;
+    line-height: 1.2;
+    margin: 1.75rem 0 0.75rem;
+    color: var(--color-brand-dark);
+  }
+
+  .ArticleCard__content :global(h2) { font-size: 1.35em; }
+  .ArticleCard__content :global(h3) { font-size: 1.15em; }
+  .ArticleCard__content :global(h4) { font-size: 1.05em; }
+
+  .ArticleCard__content :global(p) {
+    margin: 0 0 1rem;
+  }
+
+  .ArticleCard__content :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .ArticleCard__content :global(strong) {
+    font-weight: 700;
+  }
+
+  .ArticleCard__content :global(a) {
+    color: var(--color-brand-blue);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .ArticleCard__content :global(a:hover) {
+    color: var(--color-brand-teal);
+  }
+
+  .ArticleCard__content :global(ul),
+  .ArticleCard__content :global(ol) {
+    padding-left: 1.25rem;
+    margin: 0 0 1rem;
+  }
+
+  .ArticleCard__content :global(li) {
+    margin-bottom: 0.35rem;
+  }
+
+  .ArticleCard__content :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin: 1.25rem auto;
+    display: block;
+  }
+
+  .ArticleCard__content :global(blockquote) {
+    border-left: 4px solid var(--color-brand-teal);
+    padding-left: 1rem;
+    margin: 1.25rem 0;
+    color: color-mix(in srgb, var(--color-brand-dark) 75%, transparent);
+    font-style: italic;
+  }
+
+  /* Aplanar wrappers de Elementor que puedan haber sobrevivido a la
+     extracción para que no inyecten márgenes inesperados. */
+  .ArticleCard__content :global(.elementor-section),
+  .ArticleCard__content :global(.elementor-container),
+  .ArticleCard__content :global(.elementor-widget-container) {
+    display: contents;
+  }
+
+  @media (max-width: 640px) {
+    .ArticleCard {
+      border-radius: 10px;
+      padding: 1.75rem 1.25rem 2rem;
+    }
+
+    .ArticleCard__title {
+      font-size: clamp(2.25rem, 12vw, 3.5rem);
+    }
+
+    .ArticleCard__header {
+      margin-bottom: 1rem;
+    }
+
+    .ArticleCard__category {
+      font-size: 0.85rem;
+    }
+
+    .ArticleCard__date {
+      font-size: 0.75rem;
+    }
+  }
+</style>

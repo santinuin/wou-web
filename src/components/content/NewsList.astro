@@ -14,24 +14,62 @@ interface NewsItem {
 interface Props {
   articles: NewsItem[];
   buildDate?: Date;
+  showHeader?: boolean;
+  itemMinHeight?: string;
+  /**
+   * Modo expandido: ítems más altos, preview (imagen + bajada) ocupa todo
+   * el ancho disponible al hacer hover y empuja al título. Usado en la
+   * página de artículo donde el listado tiene mucho espacio horizontal.
+   */
+  expandedPreview?: boolean;
 }
 
-const { articles, buildDate = new Date() } = Astro.props;
+const {
+  articles,
+  buildDate = new Date(),
+  showHeader = true,
+  itemMinHeight,
+  expandedPreview = false,
+} = Astro.props;
+
+// Clases dependientes del modo expandido. Se calculan acá para que el
+// markup no se vuelva ilegible y para que Tailwind v4 detecte las clases
+// completas durante el scan estático.
+const previewWrapClasses = expandedPreview
+  ? 'group-hover:max-w-[30%]'
+  : 'group-hover:max-w-70';
+const previewImageClasses = expandedPreview
+  ? 'w-20 h-20'
+  : 'w-14 h-14';
+// En modo expandido la descripción usa ancho FIJO (no flex-1) para que
+// el texto no re-fluya durante la animación de hover. El wrap clipea
+// con overflow:hidden hasta llegar al final del barrido.
+const previewExcerptClasses = expandedPreview
+  ? 'w-[20rem] shrink-0 font-bold'
+  : 'w-40 shrink-0';
+const titleClasses = expandedPreview
+  ? 'text-4xl'
+  : 'text-2xl';
+const timeClasses = expandedPreview
+  ? 'text-sm'
+  : 'text-xs';
 ---
 
 <div class="NL flex flex-col bg-brand-dark h-full">
 
-  <!-- Encabezado -->
-  <div class="NL__header px-5 pt-10 border-b-10 border-brand-teal" style="container-type: inline-size;">
-    <div class="flex items-end gap-3 leading-none pb-0">
-      <span class="NL__title font-boldonse text-brand-teal leading-none whitespace-nowrap pl-4" style="font-size: 8.5cqw;">
-        PONETE AL DÍA
-      </span>
-      <span class="NL__date font-franklin font-bold text-brand-teal leading-none whitespace-nowrap shrink-0 -mb-1.75" style="font-size: 4cqw;">
-        {formatDateDots(buildDate)}
-      </span>
+  {showHeader && (
+    <!-- Encabezado -->
+    <div class="NL__header px-5 pt-10 border-b-10 border-brand-teal" style="container-type: inline-size;">
+      <div class="flex items-end gap-3 leading-none pb-0">
+        <span class="NL__title font-boldonse text-brand-teal leading-none whitespace-nowrap pl-4" style="font-size: 8.5cqw;">
+          PONETE AL DÍA
+        </span>
+        <span class="NL__date font-franklin font-bold text-brand-teal leading-none whitespace-nowrap shrink-0 -mb-1.75" style="font-size: 4cqw;">
+          {formatDateDots(buildDate)}
+        </span>
+      </div>
     </div>
-  </div>
+  )}
 
   <!--
     Lista de noticias.
@@ -42,10 +80,13 @@ const { articles, buildDate = new Date() } = Astro.props;
   -->
   <ul class="flex-1 flex flex-col">
     {articles.map((article) => (
-      <li class="group relative flex-1">
+      <li
+        class="group relative flex flex-1"
+        style={itemMinHeight ? `min-height: ${itemMinHeight}` : undefined}
+      >
         <a
           href={article.href ?? `/articulo/${article.slug}`}
-          class="relative flex items-center px-5 h-full overflow-hidden"
+          class="relative flex flex-1 items-center px-5 overflow-hidden"
         >
           {/*
             Sweep background — barrido vertical del color de hover.
@@ -61,30 +102,45 @@ const { articles, buildDate = new Date() } = Astro.props;
             empujando al título al entrar en hover.
           */}
           {(article.imageUrl || article.excerpt) && (
-            <span class="relative flex items-center gap-4 max-w-0 opacity-0 overflow-hidden transition-all duration-500 ease-out group-hover:max-w-70 group-hover:opacity-100 group-hover:mr-6">
+            <span class:list={[
+              'relative flex items-center gap-4 max-w-0 opacity-0 overflow-hidden transition-all duration-500 ease-out group-hover:opacity-100 group-hover:mr-6',
+              previewWrapClasses,
+            ]}>
               {article.imageUrl && (
                 <Image
                   src={article.imageUrl}
                   alt={article.title}
-                  width={112}
-                  height={112}
-                  class="w-14 h-14 object-cover rounded shrink-0"
+                  width={160}
+                  height={160}
+                  class:list={[
+                    previewImageClasses,
+                    'object-cover rounded shrink-0',
+                  ]}
                   loading="lazy"
                 />
               )}
               {article.excerpt && (
-                <span class="font-franklin text-brand-white text-sm leading-snug shrink-0 w-40 line-clamp-3">
+                <span class:list={[
+                  'font-franklin text-brand-white text-sm leading-snug line-clamp-3',
+                  previewExcerptClasses,
+                ]}>
                   {article.excerpt}
                 </span>
               )}
             </span>
           )}
 
-          <span class="relative flex-1 min-w-0 font-franklin font-bold text-brand-white text-2xl uppercase tracking-wide truncate transition-colors">
+          <span class:list={[
+            'relative flex-1 min-w-0 font-franklin font-bold text-brand-white uppercase tracking-wide truncate transition-colors',
+            titleClasses,
+          ]}>
             {article.title}
           </span>
 
-          <span class="relative ml-auto font-sans text-brand-white/40 text-xs shrink-0 pl-4 group-hover:text-brand-white/70 transition-colors">
+          <span class:list={[
+            'relative ml-auto font-sans text-brand-white/40 shrink-0 pl-4 group-hover:text-brand-white/70 transition-colors',
+            timeClasses,
+          ]}>
             {timeAgo(article.publishedAt)}
           </span>
         </a>
