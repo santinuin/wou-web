@@ -30,7 +30,7 @@ const newsItems = rawArticles
     title: a.data.title,
     publishedAt: a.data.publishedAt ?? now.toISOString(),
     slug: a.data.slug.current,
-    href: `/articles/${a.data.slug.current}`,
+    href: `/articulo/${a.data.slug.current}`,
     imageUrl: a.data.mainImage?.url ?? null,
     excerpt: a.data.excerpt ?? null,
   }));

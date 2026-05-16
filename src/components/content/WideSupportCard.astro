@@ -13,7 +13,7 @@ interface Props {
 const { title, slug, categoryTitle, imageUrl, imageAlt = title } = Astro.props;
 ---
 
-<a href={`/${slug}`} class="WideSupportCard" aria-label={title}>
+<a href={`/articulo/${slug}`} class="WideSupportCard" aria-label={title}>
   <div class="WideSupportCard__image-zone">
     {imageUrl
       ? <Image src={imageUrl} alt={imageAlt} width={560} height={360} loading="lazy" decoding="async" class="WideSupportCard__image" />

@@ -30,7 +30,7 @@ test.describe('Página de artículo', () => {
       if (msg.type() === 'error') consoleErrors.push(msg.text());
     });
 
-    await page.goto(`/articles/${slug}`, { waitUntil: 'networkidle' });
+    await page.goto(`/articulo/${slug}`, { waitUntil: 'networkidle' });
 
     // Esperar a que la tarjeta esté visible
     await expect(page.locator('.ArticleCard')).toBeVisible();
@@ -48,7 +48,7 @@ test.describe('Página de artículo', () => {
   });
 
   test('news list: item recortado en reposo y en hover', async ({ page }) => {
-    await page.goto(`/articles/${slug}`, { waitUntil: 'networkidle' });
+    await page.goto(`/articulo/${slug}`, { waitUntil: 'networkidle' });
 
     const firstItem = page.locator('.ArticlePage__related li').first();
     await firstItem.scrollIntoViewIfNeeded();
@@ -92,7 +92,7 @@ test.describe('Página de artículo', () => {
   });
 
   test('estructura básica del artículo', async ({ page }) => {
-    await page.goto(`/articles/${slug}`);
+    await page.goto(`/articulo/${slug}`);
 
     await expect(page.locator('h1.ArticleCard__title')).toBeVisible();
     await expect(page.locator('header[role="banner"], #siteHeader')).toBeVisible();
@@ -100,7 +100,7 @@ test.describe('Página de artículo', () => {
   });
 
   test('mide anchos de tarjeta vs related vs nav', async ({ page }) => {
-    await page.goto(`/articles/${slug}`, { waitUntil: 'networkidle' });
+    await page.goto(`/articulo/${slug}`, { waitUntil: 'networkidle' });
 
     const card = await page.locator('.ArticleCard').boundingBox();
     const related = await page.locator('.ArticlePage__related').boundingBox();

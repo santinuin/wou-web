@@ -35,7 +35,7 @@ const balls: BallData[] = posts.length
   ? posts.map((post) => ({
       id: String(post.id),
       label: post.title.rendered.replace(/&amp;/g, '&').replace(/&#(\d+);/gi, (_, c) => String.fromCharCode(Number(c))).replace(/&[a-z]+;/gi, ''),
-      href: `/articles/${post.slug}`,
+      href: `/articulo/${post.slug}`,
       imageUrl: post._embedded?.['wp:featuredmedia']?.[0]?.source_url ?? null,
       imageAlt: post._embedded?.['wp:featuredmedia']?.[0]?.alt_text || post.title.rendered,
     }))

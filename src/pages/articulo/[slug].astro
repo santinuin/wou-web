@@ -15,6 +15,7 @@ import {
   fetchWpPostsByCategory,
   extractElementorContent,
 } from '@/lib/cms/wordpress';
+import { stripHtml } from '@/lib/utils';
 
 const { slug } = Astro.params;
 
@@ -33,7 +34,7 @@ Astro.response.headers.set(
 
 const title = post.title.rendered;
 const content = extractElementorContent(post.content.rendered);
-const excerpt = post.excerpt.rendered.replace(/<[^>]+>/g, '').trim();
+const excerpt = stripHtml(post.excerpt.rendered);
 const featuredMedia = post._embedded?.['wp:featuredmedia']?.[0] ?? null;
 const featuredImage = featuredMedia?.source_url ?? null;
 const featuredImageAlt = featuredMedia?.alt_text ?? title;
@@ -53,9 +54,9 @@ const relatedArticles = relatedPosts.map((p) => ({
   title: p.title.rendered,
   publishedAt: p.date,
   slug: p.slug,
-  href: `/articles/${p.slug}`,
+  href: `/articulo/${p.slug}`,
   imageUrl: p._embedded?.['wp:featuredmedia']?.[0]?.source_url ?? null,
-  excerpt: p.excerpt?.rendered?.replace(/<[^>]+>/g, '').trim() ?? null,
+  excerpt: p.excerpt?.rendered ? stripHtml(p.excerpt.rendered) : null,
 }));
 ---
 
