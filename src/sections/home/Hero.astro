@@ -66,28 +66,36 @@ const MOCK_EDITORIAL = {
 >
 
   <!-- Ticker mobile/tablet: primer elemento debajo del header (en desktop vive en la col derecha) -->
-  <div class="lg:hidden">
+  <div class="order-1 lg:hidden">
     <NewsTicker items={tickerItems} />
   </div>
 
   <!-- ── Columna izquierda ──────────────────────────────────────────────── -->
-  <div class="flex flex-col bg-brand-dark lg:min-h-0">
+  <!--
+    En mobile/tablet la columna usa `display: contents` para que sus hijos
+    (LiveCard+YT y NewsList) fluyan directamente al flex de la section y
+    se puedan ordenar individualmente con `order-*`. En desktop vuelve a
+    ser un flex-col que ocupa la columna 1 del grid.
+  -->
+  <div class="contents lg:flex lg:flex-col lg:bg-brand-dark lg:min-h-0">
 
-    <!-- LiveCard + YouTube — desktop: primero; mobile/tablet: después de la NewsList -->
-    <div class="order-2 lg:order-1 grid grid-cols-[2fr_4fr] shrink-0 h-52 lg:h-[42%]">
+    <!-- LiveCard + YouTube — desktop: arriba de la col 1; mobile/tablet: último -->
+    <div class="order-4 lg:order-1 grid grid-cols-[2fr_4fr] shrink-0 h-52 lg:h-[42%] bg-brand-dark">
       <LiveCard isLive={true} streamUrl={null} />
       <YoutubeStream station="Cambalache" placeholder={youtubePlaceholder.src} client:load />
     </div>
 
-    <!-- Lista de noticias — mobile/tablet: inmediatamente después del ticker -->
-    <div class="order-1 lg:order-2 min-h-64 lg:flex-1 lg:min-h-0">
+    <!-- Lista de noticias — mobile/tablet: justo después del ticker; desktop: debajo de LiveCard -->
+    <div class="order-2 lg:order-2 min-h-64 lg:flex-1 lg:min-h-0">
       <NewsList articles={newsItems} buildDate={now} />
     </div>
 
   </div>
 
   <!-- ── Columna derecha: ticker + editorial ───────────────────────────── -->
-  <div class="flex flex-col lg:min-h-0 min-h-[60svh]">
+  <!-- Mobile/tablet: va tercero (entre NewsList y LiveCard), con padding alrededor
+       para que se vea el dark del fondo como margen. Desktop: col 2 del grid, sin padding. -->
+  <div class="order-3 lg:order-2 flex flex-col lg:min-h-0 min-h-[60svh] px-4 py-4 bg-brand-dark lg:px-0 lg:py-0 lg:bg-transparent">
 
     <!-- Ticker al tope de la columna (solo desktop — en mobile vive arriba del section) -->
     <div class="hidden lg:block">

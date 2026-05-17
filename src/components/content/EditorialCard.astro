@@ -78,6 +78,14 @@ const titleParts = highlightWord
     overflow: hidden;
     position: relative;
     cursor: none;
+    /* Mobile/tablet: bordes apenas redondeados. Desktop: edge-to-edge sin radio. */
+    border-radius: 0.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    .EditorialCard {
+      border-radius: 0;
+    }
   }
 
   /* ── Cursor personalizado ─────────────────────────────────────────── */
@@ -125,9 +133,17 @@ const titleParts = highlightWord
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.25rem 0.25rem 0.25rem;
+    /* Mobile/tablet: padding horizontal generoso para que el título no
+       toque los bordes del bloque teal. */
+    padding: 0.75rem 1.5rem;
     overflow: hidden;
     position: relative;
+  }
+
+  @media (min-width: 1024px) {
+    .EC__title-wrap {
+      padding: 0.25rem 0.25rem;
+    }
   }
 
   .EC__title {
