@@ -100,22 +100,22 @@
 {#if isOpen}
   <nav
     bind:this={navEl}
-    class="fixed right-0 w-1/2 bg-brand-blue pointer-events-auto z-49 overflow-y-auto"
+    class="fixed right-0 w-full lg:w-1/2 bg-brand-blue pointer-events-auto z-49 overflow-y-auto"
     style="top: {headerHeight}px; height: calc(100vh - {headerHeight}px);"
     aria-label="Menú de secciones"
   >
-    <div class="min-h-full flex flex-col justify-center py-6">
+    <div class="min-h-full flex flex-col justify-center py-2 lg:py-4">
       <ul class="flex flex-col">
         {#each sections as section}
-          <li class="menu-item pt-2">
+          <li class="menu-item">
             <span class="sweep" aria-hidden="true"></span>
             <a
               href={section.slug}
-              class="relative z-10 block w-full pl-10 pt-4 pb-0.5"
+              class="relative z-10 block w-full pl-6 lg:pl-10 pt-2 pb-1"
             >
               <span
                 class="gsap-text font-boldonse font-normal uppercase inline-block leading-none align-bottom"
-                style="font-size: clamp(1.25rem, 2.5vw, 2.5rem); color: var(--color-brand-gray);"
+                style="font-size: clamp(2rem, 4.5vw, 2.75rem); color: var(--color-brand-gray);"
               >
                 {section.title}
               </span>

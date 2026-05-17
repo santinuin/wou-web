@@ -40,50 +40,51 @@ const SECTIONS = [
   class="sticky top-0 left-0 right-0 z-50 bg-brand-dark transition-colors duration-300"
 >
   <div
-    class="w-full px-6 h-[calc(5.5rem*var(--header-scale,1))] grid grid-cols-[1fr_auto_1fr] items-center transition-[height] duration-300"
+    class="w-full px-4 lg:px-6 h-20 lg:h-[calc(5.5rem*var(--header-scale,1))] grid grid-cols-[1fr_auto_1fr] items-center transition-[height] duration-300"
   >
     <!-- ── Col izquierda ───────────────────────────────────────────────── -->
-    <div class="flex items-center gap-2.5">
+    <div class="flex items-center gap-2 lg:gap-2.5">
 
-      <!-- Solo visible en estado scrolled: mute + EN VIVO + estación -->
-      <div class="header-scrolled flex items-center gap-2.5">
+      <!-- Bloque radio: siempre visible en mobile, solo en scroll en desktop -->
+      <div class="header-radio flex items-center gap-2 lg:gap-2.5">
         <!-- Icono mute/speaker -->
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F0EDE8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="transform: translateY(-2px)">
+        <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="#F0EDE8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="transform: translateY(-2px)">
           <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
           <line x1="23" y1="9" x2="17" y2="15"/>
           <line x1="17" y1="9" x2="23" y2="15"/>
         </svg>
         <!-- EN VIVO + estación -->
         <div class="flex items-center gap-2 leading-none">
-          <span class="font-bowlby text-brand-red uppercase tracking-tight whitespace-nowrap" style="font-size: 0.7rem;">
+          <span class="font-bowlby text-brand-red uppercase tracking-tight whitespace-nowrap text-[0.7rem]">
             ⦿ EN VIVO
           </span>
-          <span class="font-bowlby text-brand-white uppercase tracking-tight whitespace-nowrap" style="font-size: 0.7rem;">
+          <!-- Estación: oculta en mobile (no aparece en el diseño) -->
+          <span class="hidden lg:inline font-bowlby text-brand-white uppercase tracking-tight whitespace-nowrap text-[0.7rem]">
             WOU 95.1
           </span>
         </div>
       </div>
 
-      <!-- Ícono de viento (siempre visible) -->
-      <img
-        src="/viento.gif"
-        alt=""
-        aria-hidden="true"
-        class="w-[calc(2.75rem*var(--header-scale,1))] h-[calc(2.75rem*var(--header-scale,1))] transition-[width,height] duration-300 object-contain"
-      />
-
-      <!-- Texto de viento: "Viento | " se oculta al scrollear -->
-      <span
-        class="font-bowlby text-brand-teal tracking-wide text-[calc(1rem*var(--header-scale,1))] transition-[font-size] duration-300 whitespace-nowrap"
-      >
-        <span class="header-normal">Viento |</span><span class="wind-value"><WindWidget client:load /></span>
-      </span>
+      <!-- Bloque viento: solo desktop -->
+      <div class="hidden lg:flex items-center gap-2.5">
+        <img
+          src="/viento.gif"
+          alt=""
+          aria-hidden="true"
+          class="w-[calc(2.75rem*var(--header-scale,1))] h-[calc(2.75rem*var(--header-scale,1))] transition-[width,height] duration-300 object-contain"
+        />
+        <span
+          class="font-bowlby text-brand-teal tracking-wide text-[calc(1rem*var(--header-scale,1))] transition-[font-size] duration-300 whitespace-nowrap"
+        >
+          <span class="header-normal">Viento |</span><span class="wind-value"><WindWidget client:load /></span>
+        </span>
+      </div>
     </div>
 
     <!-- ── Logotipo W•U! (SVG oficial) ────────────────────────────────── -->
-    <a href="/" aria-label="Ir a la portada" class="select-none">
+    <a href="/" aria-label="Ir a la portada" class="select-none block">
       <svg
-        class="w-[calc(180px*var(--header-scale,1))] h-[calc(61px*var(--header-scale,1))] transition-[width,height] duration-300"
+        class="w-[88px] h-[30px] sm:w-[110px] sm:h-[37px] lg:w-[calc(180px*var(--header-scale,1))] lg:h-[calc(61px*var(--header-scale,1))] transition-[width,height] duration-300"
         viewBox="0 0 109 37"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -105,7 +106,7 @@ const SECTIONS = [
     <!-- TODO: reemplazar por <SectionMenu client:load /> cuando el dropdown esté definido -->
     <button
       type="button"
-      class="flex items-center gap-1.5 font-bowlby text-brand-teal uppercase tracking-wide cursor-pointer justify-self-end text-[calc(1.125rem*var(--header-scale,1))] transition-[font-size] duration-300"
+      class="flex items-center gap-1 lg:gap-1.5 font-bowlby text-brand-teal uppercase tracking-wide cursor-pointer justify-self-end text-sm lg:text-[calc(1.125rem*var(--header-scale,1))] transition-[font-size] duration-300"
       aria-haspopup="true"
       aria-expanded="false"
       aria-label="Ver todas las secciones"
@@ -114,7 +115,7 @@ const SECTIONS = [
       <!-- flecha ↓ con tallo -->
       <svg
         aria-hidden="true"
-        class="w-[calc(8px*var(--header-scale,1))] h-[calc(12px*var(--header-scale,1))] transition-[width,height] duration-300"
+        class="w-[7px] h-[10px] lg:w-[calc(8px*var(--header-scale,1))] lg:h-[calc(12px*var(--header-scale,1))] transition-[width,height] duration-300"
         viewBox="0 0 8 12"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -134,27 +135,29 @@ const SECTIONS = [
 <SectionsMenu sections={SECTIONS} client:only="svelte" />
 
 <style>
-  /* --header-scale: 1 cuando está en reposo, 0.72 al scrollear. Un solo
-     toggle de la variable encoge altura, logo, íconos y texto en una sola
-     transición coherente. */
+  /* --header-scale: 1 cuando está en reposo, 0.72 al scrollear.
+     Solo se aplica en desktop — en mobile el header ya tiene tamaño fijo
+     vía utilidades de Tailwind y no encoge al scrollear. */
   #siteHeader {
     --header-scale: 1;
   }
-  #siteHeader.is-scrolled {
-    --header-scale: 0.72;
-  }
 
-  /* Elementos que solo aparecen en estado scrolled */
-  .header-scrolled {
-    display: flex;
-    max-width: 0;
-    overflow: hidden;
-    opacity: 0;
-    transition: max-width 0.3s ease, opacity 0.2s ease;
-  }
-  #siteHeader.is-scrolled .header-scrolled {
-    max-width: 16rem;
-    opacity: 1;
+  @media (min-width: 1024px) {
+    #siteHeader.is-scrolled {
+      --header-scale: 0.72;
+    }
+
+    /* Bloque radio: oculto en reposo, aparece al scrollear (solo desktop) */
+    .header-radio {
+      max-width: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-width 0.3s ease, opacity 0.2s ease;
+    }
+    #siteHeader.is-scrolled .header-radio {
+      max-width: 16rem;
+      opacity: 1;
+    }
   }
 
   /* Espacio entre el pipe y el WindWidget */
@@ -162,19 +165,21 @@ const SECTIONS = [
     margin-left: 0.3em;
   }
 
-  /* "Viento | " se oculta al scrollear */
-  .header-normal {
-    display: inline-block;
-    max-width: 8rem;
-    overflow: hidden;
-    white-space: nowrap;
-    vertical-align: bottom;
-    transition: max-width 0.3s ease, opacity 0.2s ease;
-    opacity: 1;
-  }
-  #siteHeader.is-scrolled .header-normal {
-    max-width: 0;
-    opacity: 0;
+  /* "Viento | " se oculta al scrollear (solo desktop) */
+  @media (min-width: 1024px) {
+    .header-normal {
+      display: inline-block;
+      max-width: 8rem;
+      overflow: hidden;
+      white-space: nowrap;
+      vertical-align: bottom;
+      transition: max-width 0.3s ease, opacity 0.2s ease;
+      opacity: 1;
+    }
+    #siteHeader.is-scrolled .header-normal {
+      max-width: 0;
+      opacity: 0;
+    }
   }
 </style>
 
