@@ -205,11 +205,15 @@ const titleParts = highlightWord
   function fitTitle() {
     if (!wrap || !title) return;
     let lo = 16, hi = 500;
-    // Busca el mayor tamaño donde scrollHeight ≤ clientHeight del wrapper
+    // Busca el mayor tamaño donde el título cabe en alto Y ancho del wrapper.
+    // (Sin el check de scrollWidth, un título de una sola palabra "Sueldos" no
+    // wrapea y desborda horizontalmente sin que scrollHeight lo detecte.)
     while (hi - lo > 0.5) {
       const mid = (lo + hi) / 2;
       title.style.fontSize = `${mid}px`;
-      title.scrollHeight <= wrap.clientHeight ? (lo = mid) : (hi = mid);
+      const fits = title.scrollHeight <= wrap.clientHeight
+                && title.scrollWidth  <= wrap.clientWidth;
+      fits ? (lo = mid) : (hi = mid);
     }
     title.style.fontSize = `${Math.floor(lo)}px`;
   }

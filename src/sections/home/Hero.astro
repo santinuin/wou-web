@@ -79,10 +79,22 @@ const MOCK_EDITORIAL = {
   -->
   <div class="contents lg:flex lg:flex-col lg:bg-brand-dark lg:min-h-0">
 
-    <!-- LiveCard + YouTube — desktop: arriba de la col 1; mobile/tablet: último -->
-    <div class="order-4 lg:order-1 grid grid-cols-[2fr_4fr] shrink-0 h-52 lg:h-[42%] bg-brand-dark">
-      <LiveCard isLive={true} streamUrl={null} />
-      <YoutubeStream station="Cambalache" placeholder={youtubePlaceholder.src} client:load />
+    <!--
+      LiveCard + YouTube
+      Desktop: grid lado a lado (col 1, arriba).
+      Mobile/tablet: el wrapper usa `contents` para que YT y LiveCard fluyan
+      como items individuales del flex de la section. YT va primero (order-4)
+      y LiveCard al final (order-5).
+    -->
+    <div class="contents lg:grid lg:order-1 lg:grid-cols-[2fr_4fr] lg:shrink-0 lg:h-[42%] lg:bg-brand-dark">
+      <!-- LiveCard — desktop: col izq; mobile/tablet: último, con más alto para que las waves respiren -->
+      <div class="order-5 lg:order-1 h-72 lg:h-auto bg-brand-dark">
+        <LiveCard isLive={true} streamUrl={null} />
+      </div>
+      <!-- YoutubeStream — desktop: col der; mobile/tablet: después del editorial -->
+      <div class="order-4 lg:order-2 h-52 lg:h-auto bg-brand-black">
+        <YoutubeStream station="Cambalache" placeholder={youtubePlaceholder.src} client:load />
+      </div>
     </div>
 
     <!-- Lista de noticias — mobile/tablet: justo después del ticker; desktop: debajo de LiveCard -->

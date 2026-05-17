@@ -10,12 +10,24 @@ interface Props {
 const { isLive, streamUrl } = Astro.props;
 ---
 
-<div class="relative flex flex-col h-full bg-brand-dark overflow-hidden">
+<!--
+  container-type: inline-size → permite usar `cqw` (% del ancho de la card)
+  como unidad de tipografía. Así el "EN VIVO" y el ⦿ escalan con la card,
+  ocupando un % constante del ancho disponible en mobile, tablet y desktop.
+-->
+<div class="relative flex flex-col h-full bg-brand-dark overflow-hidden" style="container-type: inline-size;">
 
-  <!-- EN VIVO -->
-  <div class="flex items-center justify-center gap-3 shrink-0">
-    <span class="text-brand-red leading-none" style="font-size: 2.8rem;" aria-hidden="true">⦿</span>
-    <span class="font-bowlby text-brand-red uppercase leading-none tracking-tight" style="font-size: clamp(2.1rem, 3.5vw, 2.8rem);">
+  <!-- EN VIVO — tamaño relativo al ancho de la card -->
+  <div class="flex items-center justify-center gap-3 shrink-0 pt-2 lg:pt-0">
+    <span
+      class="text-brand-red leading-none"
+      style="font-size: clamp(2rem, 22cqw, 4rem);"
+      aria-hidden="true"
+    >⦿</span>
+    <span
+      class="font-bowlby text-brand-red uppercase leading-none tracking-tight"
+      style="font-size: clamp(2rem, 22cqw, 4rem);"
+    >
       {isLive ? 'EN VIVO' : 'EN VIVO'}
     </span>
   </div>
