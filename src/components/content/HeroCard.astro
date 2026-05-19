@@ -149,7 +149,7 @@ if (titleParts.length === 0) {
     transition: transform 0.35s ease;
   }
 
-  .HeroCard:hover .HeroCard__image {
+  .HeroCard:is(:hover, [data-touch-hover]) .HeroCard__image {
     transform: scale(1.03);
   }
 

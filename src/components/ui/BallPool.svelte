@@ -183,16 +183,18 @@
     });
     Composite.add(engine.world, mouseConstraint);
 
-    // Permitir scroll vertical de la página cuando el usuario no está arrastrando.
-    // Matter.js reemplaza los listeners por defecto; los volvemos pasivos.
-    // Solo bloqueamos touchmove cuando hay un drag activo.
-    container.addEventListener(
-      'touchmove',
-      (e) => {
-        if (mouseConstraint.body) e.preventDefault();
-      },
-      { passive: false },
-    );
+    // Matter.js registra touchstart/touchmove/touchend sobre el container y
+    // llama preventDefault() en touchstart, lo que bloquea el scroll de la
+    // página incluso cuando el usuario solo quiere scrollear. Los removemos
+    // y los reemplazamos con nuestra propia lógica de long-press.
+    const mObj = mouse as unknown as {
+      mousedown: EventListener;
+      mousemove: EventListener;
+      mouseup: EventListener;
+    };
+    container.removeEventListener('touchstart', mObj.mousedown);
+    container.removeEventListener('touchmove', mObj.mousemove);
+    container.removeEventListener('touchend', mObj.mouseup);
 
     // Arrancamos el Runner solo cuando la sección entra realmente al viewport.
     // `client:visible` puede hidratar antes de que el usuario vea el contenido
@@ -224,18 +226,90 @@
     io.observe(container);
     intersectionObserver = io;
 
-    // ── Drag vs click ─────────────────────────────────────────────────────
+    // ── Long-press touch: drag solo tras mantener ~400 ms ─────────────────
+    // En pantallas táctiles, un toque simple debe scrollear la página con
+    // normalidad. El drag de bolas se activa solo cuando el usuario mantiene
+    // el dedo quieto durante LONG_PRESS_MS. Cuando se activa, despachamos
+    // MouseEvents sintéticos para que Matter.js los maneje como si fuera
+    // un mouse (ya desregistramos sus listeners táctiles nativos arriba).
+    const LONG_PRESS_MS  = 420;
+    const MOVE_CANCEL_PX = 12;
+
+    let touchDragActive = false;
+    let lpTimer: ReturnType<typeof setTimeout> | null = null;
+    let lpX = 0, lpY = 0;
+
+    function mouseAt(type: string, x: number, y: number) {
+      container.dispatchEvent(
+        new MouseEvent(type, {
+          bubbles: true, cancelable: true,
+          clientX: x, clientY: y,
+          button: 0, buttons: type !== 'mouseup' ? 1 : 0,
+        }),
+      );
+    }
+
+    function cancelLongPress() {
+      if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; }
+    }
+
+    function endTouchDrag(changedTouches: TouchList) {
+      cancelLongPress();
+      if (touchDragActive) {
+        const t = changedTouches[0];
+        if (t) mouseAt('mouseup', t.clientX, t.clientY);
+        touchDragActive = false;
+        container.style.touchAction = 'pan-y';
+      }
+    }
+
+    // ── Drag vs click (mouse/pointer — desktop) ────────────────────────────
     // Si el usuario arrastra una bola y suelta el click, NO debe navegar al
     // link. Solo un click "limpio" (sin movimiento significativo) dispara
-    // la navegación. Usamos pointer events y cancelamos el click en fase
-    // de captura cuando detectamos arrastre.
+    // la navegación.
     dragListenersCtrl = new AbortController();
     const { signal } = dragListenersCtrl;
+
+    // Touch: long-press activa el drag
+    container.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      if (!t) return;
+      lpX = t.clientX; lpY = t.clientY;
+      touchDragActive = false;
+      lpTimer = setTimeout(() => {
+        touchDragActive = true;
+        container.style.touchAction = 'none';
+        mouseAt('mousedown', lpX, lpY);
+      }, LONG_PRESS_MS);
+    }, { signal, passive: true });
+
+    container.addEventListener('touchmove', (e) => {
+      const t = e.touches[0];
+      if (!t) return;
+      if (!touchDragActive) {
+        // Scroll normal: cancela el long-press si el dedo se movió
+        if (Math.hypot(t.clientX - lpX, t.clientY - lpY) > MOVE_CANCEL_PX) {
+          cancelLongPress();
+        }
+        return;
+      }
+      // Drag activo: bloquea el scroll y mueve la bola
+      e.preventDefault();
+      mouseAt('mousemove', t.clientX, t.clientY);
+    }, { signal, passive: false });
+
+    container.addEventListener('touchend',    (e) => endTouchDrag(e.changedTouches), { signal, passive: true });
+    container.addEventListener('touchcancel', (e) => endTouchDrag(e.changedTouches), { signal, passive: true });
+    // Bloquea el menú contextual del SO (long-press en iOS/Android)
+    container.addEventListener('contextmenu', (e) => e.preventDefault(), { signal });
+
+    // Mouse (desktop): drag vs click
     let pointerStart: { x: number; y: number } | null = null;
     let wasDragged = false;
     container.addEventListener(
       'pointerdown',
       (e) => {
+        if (e.pointerType === 'touch') return; // touch lo maneja el bloque anterior
         pointerStart = { x: e.clientX, y: e.clientY };
         wasDragged = false;
       },
@@ -261,22 +335,8 @@
       },
       { signal, capture: true },
     );
-    container.addEventListener(
-      'pointerup',
-      () => {
-        pointerStart = null;
-      },
-      { signal },
-    );
-    // Cancelar drag nativo: si el pointer se cancela fuera, reseteamos.
-    container.addEventListener(
-      'pointercancel',
-      () => {
-        pointerStart = null;
-        wasDragged = false;
-      },
-      { signal },
-    );
+    container.addEventListener('pointerup',     () => { pointerStart = null; }, { signal });
+    container.addEventListener('pointercancel', () => { pointerStart = null; wasDragged = false; }, { signal });
 
     const tick = () => {
       frameId = requestAnimationFrame(tick);

@@ -148,29 +148,50 @@ const heroCategory = hero.data.categories?.[0]?.title ?? null;
   .NewsBand--hero-right .NewsBand__s2   { grid-column: 2; grid-row: 1; }
   .NewsBand--hero-right .NewsBand__s3   { grid-column: 1 / span 2; grid-row: 2; }
 
-  /* ── Mobile: stack vertical ─────────────────────────────────────── */
+  /* ── Tablet: reducir altura fija ─────────────────────────────────── */
+  @media (max-width: 1024px) and (min-width: 641px) {
+    .NewsBand {
+      height: 70vh;
+    }
+  }
+
+  /* ── Mobile: grilla 2 columnas con hero y wide a ancho completo ──── */
   @media (max-width: 640px) {
-    .NewsBand,
-    .NewsBand--hero-left,
-    .NewsBand--hero-right {
-      grid-template-columns: 1fr;
-      grid-template-rows: auto;
+    .NewsBand {
       height: auto;
       min-height: unset;
     }
 
-    .NewsBand--hero-left .NewsBand__hero,
-    .NewsBand--hero-right .NewsBand__hero,
-    .NewsBand--hero-left .NewsBand__s1,
-    .NewsBand--hero-right .NewsBand__s1,
-    .NewsBand--hero-left .NewsBand__s2,
-    .NewsBand--hero-right .NewsBand__s2,
-    .NewsBand--hero-left .NewsBand__s3,
-    .NewsBand--hero-right .NewsBand__s3 {
-      grid-column: 1;
-      grid-row: auto;
+    /*
+      hero-left mobile:
+        Fila 1: Hero (100% ancho)
+        Fila 2: WideSupportCard s1 (100% ancho)
+        Fila 3: SupportCard s2 (50%) | SupportCard s3 (50%)
+    */
+    .NewsBand--hero-left {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto auto;
     }
 
-    .NewsBand__hero { min-height: 280px; }
+    .NewsBand--hero-left .NewsBand__hero { grid-column: 1 / span 2; grid-row: 1; height: 420px; }
+    .NewsBand--hero-left .NewsBand__s1   { grid-column: 1 / span 2; grid-row: 2; height: 220px; }
+    .NewsBand--hero-left .NewsBand__s2   { grid-column: 1;           grid-row: 3; height: 240px; }
+    .NewsBand--hero-left .NewsBand__s3   { grid-column: 2;           grid-row: 3; height: 240px; }
+
+    /*
+      hero-right mobile:
+        Fila 1: Hero (100% ancho)
+        Fila 2: SupportCard s1 (50%) | SupportCard s2 (50%)
+        Fila 3: WideSupportCard s3 (100% ancho)
+    */
+    .NewsBand--hero-right {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto auto;
+    }
+
+    .NewsBand--hero-right .NewsBand__hero { grid-column: 1 / span 2; grid-row: 1; height: 420px; }
+    .NewsBand--hero-right .NewsBand__s1   { grid-column: 1;           grid-row: 2; height: 240px; }
+    .NewsBand--hero-right .NewsBand__s2   { grid-column: 2;           grid-row: 2; height: 240px; }
+    .NewsBand--hero-right .NewsBand__s3   { grid-column: 1 / span 2; grid-row: 3; height: 220px; }
   }
 </style>

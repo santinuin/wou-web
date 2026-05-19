@@ -42,7 +42,7 @@ const { title, slug, categoryTitle, imageUrl, imageAlt = title } = Astro.props;
     transition: filter 0.2s ease;
   }
 
-  .SupportCard:hover {
+  .SupportCard:is(:hover, [data-touch-hover]) {
     filter: brightness(0.95);
   }
 
@@ -61,7 +61,7 @@ const { title, slug, categoryTitle, imageUrl, imageAlt = title } = Astro.props;
     transition: transform 0.35s ease;
   }
 
-  .SupportCard:hover .SupportCard__image {
+  .SupportCard:is(:hover, [data-touch-hover]) .SupportCard__image {
     transform: scale(1.03);
   }
 

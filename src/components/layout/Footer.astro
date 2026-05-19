@@ -204,7 +204,7 @@ const EMAIL = 'mail@radiowou.com.ar';
     transition: opacity 0.25s ease;
   }
 
-  .FooterWOU__top-right a:hover,
+  .FooterWOU__top-right a:is(:hover, [data-touch-hover]),
   .FooterWOU__top-right a:focus-visible {
     opacity: 0.7;
   }
@@ -284,7 +284,7 @@ const EMAIL = 'mail@radiowou.com.ar';
     transition-delay: calc(var(--i) * 0.08s);
   }
 
-  .FooterWOU__cta:hover .FooterWOU__ring,
+  .FooterWOU__cta:is(:hover, [data-touch-hover]) .FooterWOU__ring,
   .FooterWOU__cta:focus-visible .FooterWOU__ring {
     opacity: 0.15;
     transform: scale(calc(1 + var(--i) * 0.13));
@@ -327,7 +327,7 @@ const EMAIL = 'mail@radiowou.com.ar';
   /* Al hacer hover, el círculo oscuro cubre al teal; pausamos la
      respiración para que no compita con la expansión. */
   .FooterWOU__cta:hover ~ * .FooterWOU__circle-teal, /* fallback */
-  .FooterWOU__cta:hover .FooterWOU__circle-teal,
+  .FooterWOU__cta:is(:hover, [data-touch-hover]) .FooterWOU__circle-teal,
   .FooterWOU__cta:focus-visible .FooterWOU__circle-teal {
     animation-play-state: paused;
   }
@@ -349,7 +349,7 @@ const EMAIL = 'mail@radiowou.com.ar';
     will-change: transform;
   }
 
-  .FooterWOU__cta:hover .FooterWOU__circle-dark,
+  .FooterWOU__cta:is(:hover, [data-touch-hover]) .FooterWOU__circle-dark,
   .FooterWOU__cta:focus-visible .FooterWOU__circle-dark {
     transform: scale(var(--scale-hover));
   }
@@ -378,7 +378,7 @@ const EMAIL = 'mail@radiowou.com.ar';
     will-change: transform;
   }
 
-  .FooterWOU__cta:hover .FooterWOU__logo,
+  .FooterWOU__cta:is(:hover, [data-touch-hover]) .FooterWOU__logo,
   .FooterWOU__cta:focus-visible .FooterWOU__logo {
     transform: translate(-50%, -50%) scale(var(--logo-scale-hover));
   }
@@ -398,12 +398,12 @@ const EMAIL = 'mail@radiowou.com.ar';
     100% { opacity: 1; fill: var(--color-teal); }
   }
 
-  .FooterWOU__cta:hover .FooterWOU__logo-letter,
+  .FooterWOU__cta:is(:hover, [data-touch-hover]) .FooterWOU__logo-letter,
   .FooterWOU__cta:focus-visible .FooterWOU__logo-letter {
     fill: var(--color-cream);
   }
 
-  .FooterWOU__cta:hover .FooterWOU__logo-dot,
+  .FooterWOU__cta:is(:hover, [data-touch-hover]) .FooterWOU__logo-dot,
   .FooterWOU__cta:focus-visible .FooterWOU__logo-dot {
     animation: FooterWOU-dot-reveal 0.4s var(--ease-expand) 0.25s both;
   }
@@ -428,7 +428,7 @@ const EMAIL = 'mail@radiowou.com.ar';
     transition: opacity 0.3s ease;
   }
 
-  .FooterWOU__cta:hover .FooterWOU__email--below,
+  .FooterWOU__cta:is(:hover, [data-touch-hover]) .FooterWOU__email--below,
   .FooterWOU__cta:focus-visible .FooterWOU__email--below {
     opacity: 0;
   }
@@ -451,7 +451,7 @@ const EMAIL = 'mail@radiowou.com.ar';
     transition-delay: 0s;
   }
 
-  .FooterWOU__cta:hover .FooterWOU__email--inside,
+  .FooterWOU__cta:is(:hover, [data-touch-hover]) .FooterWOU__email--inside,
   .FooterWOU__cta:focus-visible .FooterWOU__email--inside {
     opacity: 1;
     transform: translate(-50%, 0);

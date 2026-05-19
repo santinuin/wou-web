@@ -43,7 +43,7 @@ const { title, slug, categoryTitle, imageUrl, imageAlt = title } = Astro.props;
     transition: filter 0.2s ease;
   }
 
-  .WideSupportCard:hover {
+  .WideSupportCard:is(:hover, [data-touch-hover]) {
     filter: brightness(0.95);
   }
 
@@ -62,7 +62,7 @@ const { title, slug, categoryTitle, imageUrl, imageAlt = title } = Astro.props;
     transition: transform 0.35s ease;
   }
 
-  .WideSupportCard:hover .WideSupportCard__image {
+  .WideSupportCard:is(:hover, [data-touch-hover]) .WideSupportCard__image {
     transform: scale(1.03);
   }
 
@@ -105,5 +105,15 @@ const { title, slug, categoryTitle, imageUrl, imageAlt = title } = Astro.props;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  @media (max-width: 640px) {
+    .WideSupportCard__title {
+      font-size: clamp(1.8rem, 6vw, 3rem);
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+    }
   }
 </style>

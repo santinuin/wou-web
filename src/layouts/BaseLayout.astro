@@ -54,6 +54,80 @@ const fullTitle = title === SITE_NAME ? title : `${title} | ${SITE_NAME}`;
       if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
       window.scrollTo(0, 0);
     </script>
+    <script>
+      // ── Touch-hover global ────────────────────────────────────────────────
+      // Simula :hover en pantallas táctiles: un toque sostenido (~200 ms sin
+      // moverse) agrega `data-touch-hover` al elemento interactivo más cercano.
+      // Los componentes con efectos hover usan :is(:hover, [data-touch-hover])
+      // para responder a ambos estados.
+      // También previene el menú contextual del SO en toda la página touch.
+      (function () {
+        if (!('ontouchstart' in window)) return; // solo dispositivos táctiles
+
+        const HOLD_MS       = 200;  // ms antes de activar el hover visual
+        const MOVE_CANCEL   = 10;   // px de movimiento que cancela el hold
+
+        // Selectores de los elementos que tienen efectos hover relevantes.
+        // BallPool maneja su propio estado; se excluye aquí.
+        const CANDIDATES = [
+          'a', 'button',
+          '.SupportCard', '.WideSupportCard', '.HeroCard',
+          '.FooterWOU__cta', '.FooterWOU__top-right a',
+        ].join(', ');
+
+        let hoverEl  = null;
+        let holdTimer = null;
+        let sx = 0, sy = 0;
+
+        function clearHover() {
+          clearTimeout(holdTimer);
+          holdTimer = null;
+          if (hoverEl) {
+            hoverEl.removeAttribute('data-touch-hover');
+            hoverEl = null;
+          }
+        }
+
+        document.addEventListener('touchstart', function (e) {
+          clearHover();
+          const touch = e.touches[0];
+          if (!touch) return;
+          sx = touch.clientX;
+          sy = touch.clientY;
+
+          const target = e.target instanceof Element ? e.target : null;
+          if (!target) return;
+
+          // Ignorar el BallPool: tiene su propia lógica
+          if (target.closest('.BallPool')) return;
+
+          const candidate = target.closest(CANDIDATES);
+          if (!candidate) return;
+
+          holdTimer = setTimeout(function () {
+            hoverEl = candidate;
+            candidate.setAttribute('data-touch-hover', '');
+          }, HOLD_MS);
+        }, { passive: true });
+
+        document.addEventListener('touchmove', function (e) {
+          if (!holdTimer && !hoverEl) return;
+          const t = e.touches[0];
+          if (!t) return;
+          if (Math.hypot(t.clientX - sx, t.clientY - sy) > MOVE_CANCEL) {
+            clearHover();
+          }
+        }, { passive: true });
+
+        document.addEventListener('touchend',    clearHover, { passive: true });
+        document.addEventListener('touchcancel', clearHover, { passive: true });
+
+        // Previene el menú contextual del SO en toda la página touch
+        document.addEventListener('contextmenu', function (e) {
+          e.preventDefault();
+        });
+      })();
+    </script>
     <slot name="header" />
     <main id="main-content">
       <slot />
