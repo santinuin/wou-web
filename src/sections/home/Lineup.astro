@@ -254,7 +254,13 @@ const shows: ShowItem[] = entries.length
     transition: background 0.2s ease, color 0.2s ease;
   }
 
-  .LineupSection__cta:hover,
+  @media (hover: hover) {
+    .LineupSection__cta:hover {
+      background: var(--color-brand-teal);
+      color: var(--color-brand-dark);
+    }
+  }
+  .LineupSection__cta[data-touch-hover],
   .LineupSection__cta:focus-visible {
     background: var(--color-brand-teal);
     color: var(--color-brand-dark);

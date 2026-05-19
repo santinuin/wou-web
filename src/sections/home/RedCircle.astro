@@ -190,6 +190,21 @@ const balls: BallData[] = posts.length
     }
   }
 
+  /* Hover visual en touch (long-press) — espejo del :hover de desktop */
+  .BallPool--ball.is-touch-hover .BallPool--category {
+    transform: rotate(-4deg) scale(1.02);
+  }
+  .BallPool--ball.is-touch-hover .BallPool--category::before {
+    opacity: 1;
+    transform: none;
+  }
+  .BallPool--ball.is-touch-hover .BallPool--image {
+    opacity: 1;
+  }
+  .BallPool--ball.is-touch-hover .BallPool--label {
+    opacity: 0;
+  }
+
   .BallPool--category--body {
     position: absolute;
     inset: 0;

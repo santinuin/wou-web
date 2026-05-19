@@ -238,6 +238,7 @@
     let touchDragActive = false;
     let lpTimer: ReturnType<typeof setTimeout> | null = null;
     let lpX = 0, lpY = 0;
+    let lpBall: HTMLElement | null = null;
 
     function mouseAt(type: string, x: number, y: number) {
       container.dispatchEvent(
@@ -253,8 +254,13 @@
       if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; }
     }
 
+    function clearBallHover() {
+      if (lpBall) { lpBall.classList.remove('is-touch-hover'); lpBall = null; }
+    }
+
     function endTouchDrag(changedTouches: TouchList) {
       cancelLongPress();
+      clearBallHover();
       if (touchDragActive) {
         const t = changedTouches[0];
         if (t) mouseAt('mouseup', t.clientX, t.clientY);
@@ -270,16 +276,20 @@
     dragListenersCtrl = new AbortController();
     const { signal } = dragListenersCtrl;
 
-    // Touch: long-press activa el drag
+    // Touch: long-press activa el drag y el hover visual de la bola
     container.addEventListener('touchstart', (e) => {
       const t = e.touches[0];
       if (!t) return;
       lpX = t.clientX; lpY = t.clientY;
       touchDragActive = false;
+      clearBallHover();
+      const target = e.target instanceof Element ? e.target : null;
+      lpBall = target?.closest<HTMLElement>('.BallPool--ball') ?? null;
       lpTimer = setTimeout(() => {
         touchDragActive = true;
         container.style.touchAction = 'none';
         mouseAt('mousedown', lpX, lpY);
+        if (lpBall) lpBall.classList.add('is-touch-hover');
       }, LONG_PRESS_MS);
     }, { signal, passive: true });
 
@@ -290,6 +300,7 @@
         // Scroll normal: cancela el long-press si el dedo se movió
         if (Math.hypot(t.clientX - lpX, t.clientY - lpY) > MOVE_CANCEL_PX) {
           cancelLongPress();
+          clearBallHover();
         }
         return;
       }

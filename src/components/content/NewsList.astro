@@ -99,6 +99,7 @@ const timeClasses = expandedPreview
           */}
           <span
             aria-hidden="true"
+            data-sweep
             class="absolute inset-0 bg-brand-blue origin-top scale-y-0 transition-transform duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] group-hover:scale-y-100 group-[.is-pressed]:scale-y-100"
           ></span>
 
@@ -111,7 +112,8 @@ const timeClasses = expandedPreview
             <span class:list={[
               'relative flex items-center gap-3 lg:gap-4 max-w-0 opacity-0 overflow-hidden transition-all duration-500 ease-out group-hover:opacity-100 group-hover:mr-6 group-[.is-pressed]:opacity-100 group-[.is-pressed]:mr-4',
               previewWrapClasses,
-            ]}>
+            ]}
+            data-preview>
               {article.imageUrl && (
                 <Image
                   src={article.imageUrl}
@@ -235,14 +237,8 @@ const timeClasses = expandedPreview
     const finish = (e: PointerEvent) => {
       if (e.pointerType !== 'touch') return;
       clearTimer();
-      if (pressed) {
-        // Mantenemos el preview visible un toque después del release
-        if (lingerTimer) clearTimeout(lingerTimer);
-        lingerTimer = setTimeout(() => {
-          closePreview();
-          lingerTimer = null;
-        }, PREVIEW_LINGER_MS);
-      }
+      if (lingerTimer) { clearTimeout(lingerTimer); lingerTimer = null; }
+      if (pressed) closePreview();
     };
 
     item.addEventListener('pointerup', finish);
@@ -269,13 +265,18 @@ const timeClasses = expandedPreview
   }
 
   /* En touch :hover queda "pegado" hasta tocar otra cosa.
-     Desactivamos hover en dispositivos sin puntero fino — el long-press
-     vía .is-pressed cubre la interacción. */
-  @media (hover: none) {
-    .NL .group:hover .group-hover\:opacity-100 { opacity: 0; }
-    .NL .group:hover [class*="group-hover:max-w"] { max-width: 0; }
-    .NL .group:hover .group-hover\:scale-y-100 { transform: scaleY(0); }
-    .NL .group:hover .group-hover\:mr-6 { margin-right: 0; }
+     Desactivamos hover en dispositivos táctiles — el long-press
+     vía .is-pressed cubre la interacción.
+     Nota: Tailwind v4 usa la propiedad `scale` (CSS Transforms Level 2),
+     no `transform`. Se usa :global(html.touch-device) para escapar el
+     scoping de Astro y anular ambas propiedades correctamente. */
+  :global(html.touch-device) .NL .group:not(.is-pressed):hover [data-sweep] {
+    scale: 100% 0% !important;
+  }
+  :global(html.touch-device) .NL .group:not(.is-pressed):hover [data-preview] {
+    opacity: 0 !important;
+    max-width: 0 !important;
+    margin-right: 0 !important;
   }
 </style>
 

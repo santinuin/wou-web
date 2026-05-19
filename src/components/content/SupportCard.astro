@@ -42,9 +42,10 @@ const { title, slug, categoryTitle, imageUrl, imageAlt = title } = Astro.props;
     transition: filter 0.2s ease;
   }
 
-  .SupportCard:is(:hover, [data-touch-hover]) {
-    filter: brightness(0.95);
+  @media (hover: hover) {
+    .SupportCard:hover { filter: brightness(0.95); }
   }
+  .SupportCard[data-touch-hover] { filter: brightness(0.95); }
 
   /* Image takes exactly half the card height */
   .SupportCard__image-zone {
@@ -61,9 +62,10 @@ const { title, slug, categoryTitle, imageUrl, imageAlt = title } = Astro.props;
     transition: transform 0.35s ease;
   }
 
-  .SupportCard:is(:hover, [data-touch-hover]) .SupportCard__image {
-    transform: scale(1.03);
+  @media (hover: hover) {
+    .SupportCard:hover .SupportCard__image { transform: scale(1.03); }
   }
+  .SupportCard[data-touch-hover] .SupportCard__image { transform: scale(1.03); }
 
   /* White text area — badge sobre línea + title */
   .SupportCard__body {

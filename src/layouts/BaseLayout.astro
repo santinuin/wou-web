@@ -63,6 +63,7 @@ const fullTitle = title === SITE_NAME ? title : `${title} | ${SITE_NAME}`;
       // También previene el menú contextual del SO en toda la página touch.
       (function () {
         if (!('ontouchstart' in window)) return; // solo dispositivos táctiles
+        document.documentElement.classList.add('touch-device');
 
         const HOLD_MS       = 200;  // ms antes de activar el hover visual
         const MOVE_CANCEL   = 10;   // px de movimiento que cancela el hold
@@ -72,6 +73,7 @@ const fullTitle = title === SITE_NAME ? title : `${title} | ${SITE_NAME}`;
         const CANDIDATES = [
           'a', 'button',
           '.SupportCard', '.WideSupportCard', '.HeroCard',
+          '.ReelCard', '.LineupSection__cta',
           '.FooterWOU__cta', '.FooterWOU__top-right a',
         ].join(', ');
 

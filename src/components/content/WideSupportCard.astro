@@ -43,9 +43,10 @@ const { title, slug, categoryTitle, imageUrl, imageAlt = title } = Astro.props;
     transition: filter 0.2s ease;
   }
 
-  .WideSupportCard:is(:hover, [data-touch-hover]) {
-    filter: brightness(0.95);
+  @media (hover: hover) {
+    .WideSupportCard:hover { filter: brightness(0.95); }
   }
+  .WideSupportCard[data-touch-hover] { filter: brightness(0.95); }
 
   .WideSupportCard__image-zone {
     flex: 0 0 60%;
@@ -62,9 +63,10 @@ const { title, slug, categoryTitle, imageUrl, imageAlt = title } = Astro.props;
     transition: transform 0.35s ease;
   }
 
-  .WideSupportCard:is(:hover, [data-touch-hover]) .WideSupportCard__image {
-    transform: scale(1.03);
+  @media (hover: hover) {
+    .WideSupportCard:hover .WideSupportCard__image { transform: scale(1.03); }
   }
+  .WideSupportCard[data-touch-hover] .WideSupportCard__image { transform: scale(1.03); }
 
   .WideSupportCard__body {
     flex: 0 0 40%;

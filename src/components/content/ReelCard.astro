@@ -57,9 +57,10 @@ const watchUrl = getYouTubeShortsUrl(videoId);
     transition: transform 0.3s ease;
   }
 
-  .ReelCard:hover .ReelCard__thumb {
-    transform: scale(1.04);
+  @media (hover: hover) {
+    .ReelCard:hover .ReelCard__thumb { transform: scale(1.04); }
   }
+  .ReelCard[data-touch-hover] .ReelCard__thumb { transform: scale(1.04); }
 
   /* Play icon overlay */
   .ReelCard__play {
@@ -80,9 +81,10 @@ const watchUrl = getYouTubeShortsUrl(videoId);
     clip-path: polygon(28% 18%, 28% 82%, 82% 50%);
   }
 
-  .ReelCard:hover .ReelCard__play {
-    background: rgba(0, 0, 0, 0.1);
+  @media (hover: hover) {
+    .ReelCard:hover .ReelCard__play { background: rgba(0, 0, 0, 0.1); }
   }
+  .ReelCard[data-touch-hover] .ReelCard__play { background: rgba(0, 0, 0, 0.1); }
 
   .ReelCard__title {
     font-family: var(--font-franklin);

@@ -149,9 +149,10 @@ if (titleParts.length === 0) {
     transition: transform 0.35s ease;
   }
 
-  .HeroCard:is(:hover, [data-touch-hover]) .HeroCard__image {
-    transform: scale(1.03);
+  @media (hover: hover) {
+    .HeroCard:hover .HeroCard__image { transform: scale(1.03); }
   }
+  .HeroCard[data-touch-hover] .HeroCard__image { transform: scale(1.03); }
 
   /* ── Mitad inferior: fondo teal — badge sobre línea + título centrado ─ */
   .HeroCard__body {
