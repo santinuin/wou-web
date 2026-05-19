@@ -43,6 +43,7 @@
   let frameId = 0;
   let resizeTimer: ReturnType<typeof setTimeout> | null = null;
   let ceilingTimer: ReturnType<typeof setTimeout> | null = null;
+  let lastWidth = 0;
   let intersectionObserver: IntersectionObserver | null = null;
   let dragListenersCtrl: AbortController | null = null;
   let ready = $state(false);
@@ -66,6 +67,7 @@
     items = Array.from(container.querySelectorAll<HTMLElement>('.BallPool--ball'));
     if (!items.length) return;
 
+    lastWidth = window.innerWidth;
     const rect = container.getBoundingClientRect();
     const width = rect.width;
     const height = rect.height;
@@ -388,6 +390,8 @@
   }
 
   function handleResize() {
+    // Ignorar resize que solo cambian la altura (barra URL del navegador mobile)
+    if (window.innerWidth === lastWidth) return;
     if (resizeTimer) clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
       destroy();
