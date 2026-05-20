@@ -22,9 +22,24 @@ const chars = TEXT.split("");
   const wrapper = document.getElementById("tsep-wrapper")!;
   const charEls = wrapper.querySelectorAll<HTMLElement>(".tsep-char");
 
-  const AMPLITUDE  = 130;
-  const WAVELENGTH = 2200;
-  const LERP       = 0.08;
+  let AMPLITUDE  = 130;
+  let WAVELENGTH = 2200;
+  const LERP     = 0.08;
+
+  function updateParams() {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    if (w < 640) {
+      AMPLITUDE  = h * 0.12;
+      WAVELENGTH = w * 3;
+    } else if (w < 1024) {
+      AMPLITUDE  = h * 0.10;
+      WAVELENGTH = w * 3.5;
+    } else {
+      AMPLITUDE  = 130;
+      WAVELENGTH = 2200;
+    }
+  }
   // padding entre letras (px). Más grande = más holgura entre caracteres.
   const PAD        = 2;
   // padding extra para los espacios entre palabras
@@ -93,6 +108,7 @@ const chars = TEXT.split("");
 
   /* ── Arranque: esperar webfonts para medir correctamente ── */
   document.fonts.ready.then(() => {
+    updateParams();
     measure();
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
@@ -101,6 +117,17 @@ const chars = TEXT.split("");
     cancelAnimationFrame(rafId);
     rafId = requestAnimationFrame(render);
   });
+
+  /* Re-medir al cambiar tamaño de pantalla (font-size cambia con vw) */
+  let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+  window.addEventListener("resize", () => {
+    if (resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      updateParams();
+      measure();
+      onScroll();
+    }, 150);
+  }, { passive: true });
 </script>
 
 <style>
@@ -109,7 +136,15 @@ const chars = TEXT.split("");
     top: 0;
     left: 50%;
     display: inline-block;
-    font-size: clamp(4rem, 9vw, 10rem);
+    font-size: clamp(4.5rem, 22vw, 8rem);
+
+    @media (min-width: 640px) {
+      font-size: clamp(4rem, 13vw, 8rem);
+    }
+
+    @media (min-width: 1024px) {
+      font-size: clamp(4rem, 9vw, 10rem);
+    }
     font-family: var(--font-boldonse);
     font-weight: 700;
     color: var(--color-brand-green);
