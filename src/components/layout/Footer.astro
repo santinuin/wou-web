@@ -111,7 +111,7 @@ const EMAIL = 'mail@radiowou.com.ar';
 
   <!-- ── Esquina inferior izquierda ───────────────────────────────────── -->
   <p class="FooterWOU__bottom-left">
-    © {currentYear} WOU · Todos los derechos reservados
+    © {currentYear} WOU<span class="FooterWOU__legal-full"> · Todos los derechos reservados</span>
   </p>
 
   <!-- ── Esquina inferior derecha ─────────────────────────────────────── -->
@@ -222,7 +222,7 @@ const EMAIL = 'mail@radiowou.com.ar';
 
   .FooterWOU__bottom-left {
     left: var(--pad-x);
-    color: var(--color-teal-55);
+    color: var(--color-white-35);
   }
 
   .FooterWOU__bottom-right {
@@ -492,61 +492,44 @@ const EMAIL = 'mail@radiowou.com.ar';
   }
 
   /* ───────────────────────────────────────────────────────────────────
-     Responsive — apilado en mobile
+     Responsive — mobile / tablet: full-viewport, layout de esquinas
      ─────────────────────────────────────────────────────────────────── */
-  @media (max-width: 640px) {
+  @media (max-width: 1023px) {
     .FooterWOU {
-      --circle-size: 220px;
-      --scale-hover: 1.55;
-      --logo-size: 86px;
-      --logo-scale-hover: 2.3;
+      height: 100vh;
+      height: 100dvh;
       min-height: 560px;
       max-height: none;
-      height: auto;
-      padding: 2rem 0 1.5rem;
     }
 
+    /* El header sticky (h-20 = 5rem en mobile, ~5.5rem en tablet) tapa
+       las esquinas superiores — las bajamos para que queden visibles. */
     .FooterWOU__top-left,
-    .FooterWOU__top-right,
-    .FooterWOU__bottom-left,
-    .FooterWOU__bottom-right {
-      position: static;
-      display: block;
-      text-align: center;
-    }
-
-    .FooterWOU__top-left {
-      padding: 0 var(--pad-x) 0.5rem;
+    .FooterWOU__top-right {
+      top: calc(var(--pad-y) + 5rem);
     }
 
     .FooterWOU__location {
-      margin-top: 0.5rem;
+      margin-top: 1.75rem;
     }
 
-    .FooterWOU__top-right {
-      padding: 0.5rem var(--pad-x) 1rem;
-      text-align: center;
-    }
-
-    .FooterWOU__top-right li {
-      display: inline-block;
-    }
-    .FooterWOU__top-right li + li {
-      margin: 0 0 0 1rem;
-    }
-
-    .FooterWOU__cta {
-      position: relative;
-      top: auto;
-      left: auto;
-      transform: none;
-      margin: 2rem auto;
-    }
-
+    /* Safe-area inset iOS */
     .FooterWOU__bottom-left,
     .FooterWOU__bottom-right {
-      padding: 0 var(--pad-x);
-      margin-top: 0.5rem;
+      bottom: calc(var(--pad-y) + env(safe-area-inset-bottom, 0px));
+    }
+
+    .FooterWOU__legal-full {
+      display: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .FooterWOU {
+      --circle-size: clamp(200px, 60vw, 280px);
+      --logo-size: calc(var(--circle-size) * 0.38);
+      --scale-hover: 1.55;
+      --logo-scale-hover: 2.3;
     }
   }
 
