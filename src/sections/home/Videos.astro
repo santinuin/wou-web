@@ -130,6 +130,14 @@ function captionKey(id: string, i: number): string {
       <div class="VideosSection__ruler" data-ruler aria-hidden="true"></div>
     </div>
   </ScrollCarousel>
+
+  <!-- Franjas oscuras que cruzan los límites con las secciones vecinas
+       (Lineup arriba, Footer abajo). position:absolute con top/bottom
+       negativo → quedan a caballo del borde entre secciones; z-index alto
+       → pintan por encima del contenido verde. Tapan la mella sub-píxel
+       del límite entre secciones apiladas. -->
+  <div class="VideosSection__seam VideosSection__seam--top" aria-hidden="true"></div>
+  <div class="VideosSection__seam VideosSection__seam--bottom" aria-hidden="true"></div>
 </section>
 
 <style>
@@ -180,6 +188,25 @@ function captionKey(id: string, i: number): string {
   }
   .VideosSection__mask-path-lines {
     display: none;
+  }
+
+  /* Franjas que cruzan los límites con las secciones vecinas — tapan la
+     mella sub-píxel del borde entre secciones apiladas. z-index alto para
+     pintar por encima del contenido (incluida la máscara y las letras). */
+  .VideosSection__seam {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 16px;
+    background: var(--color-brand-dark);
+    z-index: 10;
+    pointer-events: none;
+  }
+  .VideosSection__seam--top {
+    top: -8px;
+  }
+  .VideosSection__seam--bottom {
+    bottom: -8px;
   }
 
   /* ── Outer / Inner ─────────────────────────────────────────────────── */
