@@ -466,6 +466,12 @@
 
       gsap.ticker.add(tick);
       tick();
+
+      // Re-ancla start/end tras estabilizarse el layout: web fonts e
+      // imágenes lazy reflowean las secciones de arriba, y la altura de
+      // Lineup la fija JS (--lineup-h) — sin esto, las posiciones que
+      // ScrollTrigger cacheó quedan obsoletas y el scrub arranca antes.
+      document.fonts?.ready.then(() => ScrollTrigger?.refresh());
     });
 
     window.addEventListener('resize', handleResize, { passive: true });
