@@ -150,7 +150,7 @@ const shows: ShowItem[] = entries.length
   /* ── Columna de programas ────────────────────────────────────────────────── */
   .LineupSection__column {
     position: absolute;
-    top: 3rem;
+    top: var(--col-top, 8rem);
     left: 50%;
     z-index: 1;
     width: min(40%, 491px);
@@ -282,10 +282,14 @@ const shows: ShowItem[] = entries.length
     let colTravel = 0;
 
     function init() {
-      const vpH = window.innerHeight;
-      const gap = col!.offsetTop; // margen CSS 'top', se aplica también abajo
-      // La columna sube hasta que el 50% queda fuera del viewport
-      colTravel = col!.offsetHeight * 0.8;
+      const vpH  = window.innerHeight;
+      const colH = col!.offsetHeight;
+      const extraPad = 180; // espacio extra simétrico arriba y abajo
+      colTravel  = colH * 0.8 + extraPad * 2;
+      // Espacio arriba al inicio = espacio abajo al final del scroll
+      // extraPad eleva ambos lados por igual sin romper simetría
+      const topOffset = Math.max(48, (vpH - colH + colTravel) / 2);
+      section!.style.setProperty('--col-top', `${topOffset}px`);
       section!.style.setProperty('--lineup-h', `${vpH + colTravel}px`);
     }
 

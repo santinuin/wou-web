@@ -102,9 +102,9 @@
   function movePoints(t: number) {
     lines.forEach((pts) => {
       pts.forEach((p) => {
-        const n = noise.noise((p.x + t * 0.012) * 0.0018, (p.y + t * 0.004) * 0.0014) * 14;
-        p.wave.y = Math.sin(n) * 18;
-        p.wave.x = Math.cos(n) * 3;
+        const n = noise.noise((p.x + t * 0.032) * 0.0018, (p.y + t * 0.012) * 0.0014) * 14;
+        p.wave.y = Math.sin(n) * 26;
+        p.wave.x = Math.cos(n) * 5;
 
         const dx = p.x - mouse.sx;
         const dy = p.y - mouse.sy;
@@ -114,16 +114,16 @@
         if (d < l) {
           const s = 1 - d / l;
           const f = Math.cos(d * 0.001) * s;
-          p.cursor.vx += Math.cos(mouse.a) * f * l * mouse.vs * 0.00065;
-          p.cursor.vy += Math.sin(mouse.a) * f * l * mouse.vs * 0.00065;
+          p.cursor.vx += Math.cos(mouse.a) * f * l * mouse.vs * 0.0011;
+          p.cursor.vy += Math.sin(mouse.a) * f * l * mouse.vs * 0.0011;
         }
 
-        p.cursor.vx += (0 - p.cursor.x) * 0.005;
-        p.cursor.vy += (0 - p.cursor.y) * 0.005;
-        p.cursor.vx *= 0.925;
-        p.cursor.vy *= 0.925;
-        p.cursor.x  = Math.min(100, Math.max(-100, p.cursor.x + p.cursor.vx * 2));
-        p.cursor.y  = Math.min(100, Math.max(-100, p.cursor.y + p.cursor.vy * 2));
+        p.cursor.vx += (0 - p.cursor.x) * 0.007;
+        p.cursor.vy += (0 - p.cursor.y) * 0.007;
+        p.cursor.vx *= 0.905;
+        p.cursor.vy *= 0.905;
+        p.cursor.x  = Math.min(130, Math.max(-130, p.cursor.x + p.cursor.vx * 2));
+        p.cursor.y  = Math.min(130, Math.max(-130, p.cursor.y + p.cursor.vy * 2));
       });
     });
   }
