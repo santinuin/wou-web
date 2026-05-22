@@ -1,20 +1,17 @@
 ---
 import { getImageUrl } from '@/lib/cms';
 import AdCard from './AdCard.astro';
-import type { CollectionEntry } from 'astro:content';
+import type { AdLike } from '@/sections/home/mocks/newsGridMock';
 
 interface Props {
-  ads: CollectionEntry<'advertisements'>[];
+  ads: AdLike[];
 }
 
 const { ads } = Astro.props;
 
-// Orden ya viene resuelto desde NewsGrid (order asc)
-const large  = ads[0];
-const small1 = ads[1];
-const small2 = ads[2];
+const [ad1, ad2, ad3] = ads;
 
-function imgUrl(ad: CollectionEntry<'advertisements'> | undefined, width: number): string | null {
+function imgUrl(ad: AdLike | undefined, width: number): string | null {
   if (!ad?.data.image) return null;
   try {
     return getImageUrl(ad.data.image as Parameters<typeof getImageUrl>[0], { width });
@@ -24,81 +21,83 @@ function imgUrl(ad: CollectionEntry<'advertisements'> | undefined, width: number
 }
 ---
 
-{(large || small1 || small2) && (
-  <section class="AdsBand1" aria-label="Publicidades">
-    {large && (
-      <div class="AdsBand1__large">
+{(ad1 || ad2 || ad3) && (
+  <section class="AdsBand1" aria-label="Espacios publicitarios">
+    {ad1 && (
+      <div class="AdsBand1__item AdsBand1__item--wide">
         <AdCard
-          title={large.data.title}
-          brand={large.data.brand ?? null}
-          imageUrl={imgUrl(large, 560)}
-          imageAlt={large.data.image?.alt ?? large.data.brand ?? large.data.title}
-          url={large.data.url ?? null}
+          title={ad1.data.title}
+          brand={ad1.data.brand ?? null}
+          imageUrl={imgUrl(ad1, 680)}
+          imageAlt={ad1.data.image?.alt ?? ad1.data.brand ?? ad1.data.title}
+          url={ad1.data.url ?? null}
           size="large"
         />
       </div>
     )}
-    <div class="AdsBand1__smalls">
-      {small1 && (
+    {ad2 && (
+      <div class="AdsBand1__item">
         <AdCard
-          title={small1.data.title}
-          brand={small1.data.brand ?? null}
-          imageUrl={imgUrl(small1, 280)}
-          imageAlt={small1.data.image?.alt ?? small1.data.brand ?? small1.data.title}
-          url={small1.data.url ?? null}
-          size="small"
+          title={ad2.data.title}
+          brand={ad2.data.brand ?? null}
+          imageUrl={imgUrl(ad2, 340)}
+          imageAlt={ad2.data.image?.alt ?? ad2.data.brand ?? ad2.data.title}
+          url={ad2.data.url ?? null}
+          size="equal"
         />
-      )}
-      {small2 && (
+      </div>
+    )}
+    {ad3 && (
+      <div class="AdsBand1__item">
         <AdCard
-          title={small2.data.title}
-          brand={small2.data.brand ?? null}
-          imageUrl={imgUrl(small2, 280)}
-          imageAlt={small2.data.image?.alt ?? small2.data.brand ?? small2.data.title}
-          url={small2.data.url ?? null}
-          size="small"
+          title={ad3.data.title}
+          brand={ad3.data.brand ?? null}
+          imageUrl={imgUrl(ad3, 340)}
+          imageAlt={ad3.data.image?.alt ?? ad3.data.brand ?? ad3.data.title}
+          url={ad3.data.url ?? null}
+          size="equal"
         />
-      )}
-    </div>
+      </div>
+    )}
   </section>
 )}
 
 <style>
   .AdsBand1 {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    background: var(--color-brand-dark);
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 6px;
+    height: 230px;
     border-radius: 10px;
     overflow: hidden;
-    min-height: 300px;
   }
 
-  .AdsBand1__large {
+  .AdsBand1__item {
     border-radius: 8px;
     overflow: hidden;
+    height: 100%;
   }
 
-  .AdsBand1__smalls {
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-    gap: 8px;
+  /* ── Tablet ── */
+  @media (max-width: 1024px) and (min-width: 641px) {
+    .AdsBand1 { height: 130px; }
   }
 
-  .AdsBand1__smalls > * {
-    border-radius: 8px;
-    overflow: hidden;
-  }
-
+  /* ── Mobile: columna única, altura más corta ── */
   @media (max-width: 640px) {
     .AdsBand1 {
-      grid-template-columns: 1fr;
-      min-height: unset;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      height: auto;
     }
 
-    .AdsBand1__smalls {
-      grid-template-rows: auto;
-      grid-template-columns: 1fr 1fr;
+    .AdsBand1__item--wide {
+      grid-column: 1 / span 2;
+      height: 120px;
+    }
+
+    .AdsBand1__item:not(.AdsBand1__item--wide) {
+      height: 100px;
     }
   }
 </style>

@@ -4,16 +4,23 @@ import NewsBand from '@/components/content/NewsBand.astro';
 import AdsBand1 from '@/components/content/AdsBand1.astro';
 import AdsBand2 from '@/components/content/AdsBand2.astro';
 import ReelsBand from '@/components/content/ReelsBand.astro';
-import { MOCK_ARTICLES, type ArticleLike } from './mocks/newsGridMock';
-import type { CollectionEntry } from 'astro:content';
+import { MOCK_ARTICLES, MOCK_ADS1, MOCK_ADS2, type ArticleLike, type AdLike } from './mocks/newsGridMock';
 
 const rawArticles = await getCollection('articles');
-const allAds      = await getCollection('advertisements');
+const rawAds      = await getCollection('advertisements');
 
-// Fallback a mocks cuando Sanity no está configurado o no hay artículos aún
+// Fallback a mocks cuando Sanity no está configurado o no hay datos aún
 const allArticles: ArticleLike[] = rawArticles.length > 0
   ? (rawArticles as unknown as ArticleLike[])
   : MOCK_ARTICLES;
+
+const sortByOrder = (a: AdLike, b: AdLike) => (a.data.order ?? 99) - (b.data.order ?? 99);
+
+const rawAds1 = (rawAds as unknown as AdLike[]).filter((a) => a.data.placement === 'ads1').sort(sortByOrder);
+const rawAds2 = (rawAds as unknown as AdLike[]).filter((a) => a.data.placement === 'ads2').sort(sortByOrder);
+
+const ads1: AdLike[] = rawAds1.length > 0 ? rawAds1 : MOCK_ADS1;
+const ads2: AdLike[] = rawAds2.length > 0 ? rawAds2 : MOCK_ADS2;
 
 function getBand(categoryTitle: string): { hero: ArticleLike | null; support: ArticleLike[] } {
   const sorted = allArticles
@@ -33,12 +40,6 @@ const politica   = getBand('Política');
 const locales    = getBand('Locales');
 const policiales = getBand('Policiales');
 const opinion    = getBand('Opinión');
-
-const sortByOrder = (a: CollectionEntry<'advertisements'>, b: CollectionEntry<'advertisements'>) =>
-  (a.data.order ?? 99) - (b.data.order ?? 99);
-
-const ads1 = allAds.filter((a) => a.data.placement === 'ads1').sort(sortByOrder);
-const ads2 = allAds.filter((a) => a.data.placement === 'ads2').sort(sortByOrder);
 ---
 
 <div class="NewsGrid">
@@ -69,7 +70,7 @@ const ads2 = allAds.filter((a) => a.data.placement === 'ads2').sort(sortByOrder)
   .NewsGrid {
     display: flex;
     flex-direction: column;
-    gap: 3rem;
+    gap: 2rem;
     padding: 1.5rem 13.5rem;
     background: var(--color-brand-dark);
   }

@@ -1,15 +1,15 @@
 ---
 import { getImageUrl } from '@/lib/cms';
 import AdCard from './AdCard.astro';
-import type { CollectionEntry } from 'astro:content';
+import type { AdLike } from '@/sections/home/mocks/newsGridMock';
 
 interface Props {
-  ads: CollectionEntry<'advertisements'>[];
+  ads: AdLike[];
 }
 
 const { ads } = Astro.props;
 
-function imgUrl(ad: CollectionEntry<'advertisements'>, width: number): string | null {
+function imgUrl(ad: AdLike, width: number): string | null {
   if (!ad.data.image) return null;
   try {
     return getImageUrl(ad.data.image as Parameters<typeof getImageUrl>[0], { width });
@@ -20,16 +20,18 @@ function imgUrl(ad: CollectionEntry<'advertisements'>, width: number): string | 
 ---
 
 {ads.length > 0 && (
-  <section class="AdsBand2" aria-label="Publicidades" style={`--count: ${Math.min(ads.length, 4)}`}>
+  <section class="AdsBand2" aria-label="Espacios publicitarios" style={`--count: ${Math.min(ads.length, 4)}`}>
     {ads.slice(0, 4).map((ad) => (
-      <AdCard
-        title={ad.data.title}
-        brand={ad.data.brand ?? null}
-        imageUrl={imgUrl(ad, 280)}
-        imageAlt={ad.data.image?.alt ?? ad.data.brand ?? ad.data.title}
-        url={ad.data.url ?? null}
-        size="equal"
-      />
+      <div class="AdsBand2__item">
+        <AdCard
+          title={ad.data.title}
+          brand={ad.data.brand ?? null}
+          imageUrl={imgUrl(ad, 320)}
+          imageAlt={ad.data.image?.alt ?? ad.data.brand ?? ad.data.title}
+          url={ad.data.url ?? null}
+          size="equal"
+        />
+      </div>
     ))}
   </section>
 )}
@@ -38,22 +40,30 @@ function imgUrl(ad: CollectionEntry<'advertisements'>, width: number): string | 
   .AdsBand2 {
     display: grid;
     grid-template-columns: repeat(var(--count, 4), 1fr);
-    gap: 8px;
-    background: var(--color-brand-dark);
+    gap: 6px;
     border-radius: 10px;
     overflow: hidden;
-    min-height: 280px;
+    height: 240px;
   }
 
-  .AdsBand2 > * {
+  .AdsBand2__item {
     border-radius: 8px;
     overflow: hidden;
+    height: 100%;
   }
 
+  /* ── Tablet ── */
+  @media (max-width: 1024px) and (min-width: 641px) {
+    .AdsBand2 { height: 200px; }
+  }
+
+  /* ── Mobile: 2 columnas, 2 filas ── */
   @media (max-width: 640px) {
     .AdsBand2 {
       grid-template-columns: 1fr 1fr;
-      min-height: unset;
+      height: auto;
     }
+
+    .AdsBand2__item { height: 160px; }
   }
 </style>
