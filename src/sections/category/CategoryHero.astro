@@ -45,6 +45,10 @@ const tickerText = article.data.excerpt ?? article.data.title;
     background: var(--color-brand-white);
   }
 
+  .CategoryHero :global(.HeroCard__title) {
+    font-size: clamp(3rem, 17cqi, 12rem);
+  }
+
   .CategoryHero :global(.HeroCard__ticker) {
     background: var(--color-brand-teal);
   }
