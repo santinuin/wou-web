@@ -144,7 +144,7 @@ while (cursor < articles.length) {
   .LoadMore__rows .CategoryGrid__row--d > .SupportCard:nth-child(2) .SupportCard__title,
   .LoadMore__rows .CategoryGrid__row--f > .SupportCard:nth-child(2) .SupportCard__title,
   .LoadMore__rows .CategoryGrid__row--c .SupportCard__title {
-    font-size: clamp(2.6rem, 26cqi, 5rem);
+    font-size: clamp(2.6rem, 24cqi, 5rem);
   }
 
   /* ── Banda A: 2 cols asimétrica, izquierda más ancha ───────────── */
@@ -237,8 +237,9 @@ while (cursor < articles.length) {
 
     .CategoryGrid .SupportCard__title,
     .LoadMore__rows .SupportCard__title {
-      font-size: clamp(2rem, 18cqi, 3.2rem);
+      font-size: clamp(1rem, 18cqi, 3.2rem);
       line-height: 0.68;
+      hyphens: none;
     }
   }
 
@@ -248,13 +249,27 @@ while (cursor < articles.length) {
     .CategoryGrid__row--g { height: 170px; }
     .CategoryGrid__row--c { height: 280px; }
     .CategoryGrid__row--d { height: 200px; }
-    .CategoryGrid__row--e { height: 150px; }
-    .CategoryGrid__row--f { height: 190px; }
+    .CategoryGrid__row--e { height: 160px; }
+    .CategoryGrid__row--f { height: 220px; }
 
+    /* Clamp mínimo bajo para que cqi controle en cards angostas */
     .CategoryGrid .SupportCard__title,
     .LoadMore__rows .SupportCard__title {
-      font-size: clamp(2.5rem, 18cqi, 3.2rem);
-      line-height: 0.65;
+      font-size: clamp(1rem, 25cqi, 3.2rem);
+      line-height: 0.7;
+      hyphens: none;
+    }
+
+    /* Banda E: menos padding, fuente más grande, sin hyphens */
+    .CategoryGrid__row--e .WideSupportCard__body,
+    .LoadMore__rows .CategoryGrid__row--e .WideSupportCard__body {
+      padding: 0.75rem 1rem;
+    }
+
+    .CategoryGrid__row--e .WideSupportCard__title,
+    .LoadMore__rows .CategoryGrid__row--e .WideSupportCard__title {
+      font-size: clamp(1.8rem, 22cqi, 5rem);
+      hyphens: none;
     }
   }
 </style>
