@@ -226,30 +226,14 @@ while (cursor < articles.length) {
     height: 340px;
   }
 
-  @media (max-width: 768px) {
-    .CategoryGrid__row--a,
-    .CategoryGrid__row--d,
-    .CategoryGrid__row--f {
-      grid-template-columns: 1fr 1fr;
-      height: auto;
-      min-height: 320px;
-    }
-
+  @media (max-width: 1024px) {
+    .CategoryGrid__row--a { height: 320px; }
     .CategoryGrid__row--b,
-    .CategoryGrid__row--g {
-      grid-template-columns: 1fr 1fr;
-      height: auto;
-      min-height: 280px;
-    }
-
-    .CategoryGrid__row--c {
-      height: auto;
-      min-height: 400px;
-    }
-
-    .CategoryGrid__row--e {
-      height: auto;
-    }
+    .CategoryGrid__row--g { height: 260px; }
+    .CategoryGrid__row--c { height: 420px; }
+    .CategoryGrid__row--d { height: 320px; }
+    .CategoryGrid__row--e { height: 200px; }
+    .CategoryGrid__row--f { height: 300px; }
 
     .CategoryGrid .SupportCard__title,
     .LoadMore__rows .SupportCard__title {
@@ -259,46 +243,13 @@ while (cursor < articles.length) {
   }
 
   @media (max-width: 640px) {
-    /* Banda E: horizontal → vertical en mobile */
-    .CategoryGrid__row--e .WideSupportCard,
-    .LoadMore__rows .CategoryGrid__row--e .WideSupportCard {
-      flex-direction: column;
-    }
-
-    .CategoryGrid__row--e .WideSupportCard__image-zone,
-    .LoadMore__rows .CategoryGrid__row--e .WideSupportCard__image-zone {
-      flex: 0 0 220px;
-      border-radius: 6px 6px 0 0;
-    }
-
-    .CategoryGrid__row--e .WideSupportCard__body,
-    .LoadMore__rows .CategoryGrid__row--e .WideSupportCard__body {
-      flex: 1;
-      padding: 1.5rem 1rem 1rem;
-    }
-
-    .CategoryGrid__row--e .WideSupportCard__category,
-    .LoadMore__rows .CategoryGrid__row--e .WideSupportCard__category {
-      position: absolute;
-      top: 0;
-      left: 1.25rem;
-      transform: translateY(-50%);
-      align-self: auto;
-      margin-bottom: 0;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .CategoryGrid__row--a,
+    .CategoryGrid__row--a { height: 200px; }
     .CategoryGrid__row--b,
-    .CategoryGrid__row--c,
-    .CategoryGrid__row--d,
-    .CategoryGrid__row--f,
-    .CategoryGrid__row--g {
-      grid-template-columns: 1fr;
-      height: auto;
-      min-height: 280px;
-    }
+    .CategoryGrid__row--g { height: 170px; }
+    .CategoryGrid__row--c { height: 280px; }
+    .CategoryGrid__row--d { height: 200px; }
+    .CategoryGrid__row--e { height: 150px; }
+    .CategoryGrid__row--f { height: 190px; }
 
     .CategoryGrid .SupportCard__title,
     .LoadMore__rows .SupportCard__title {
