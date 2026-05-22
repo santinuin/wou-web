@@ -74,7 +74,7 @@ const { title, slug, categoryTitle, imageUrl, imageAlt = title } = Astro.props;
     flex-direction: column;
     justify-content: center;
     gap: 0.35rem;
-    padding: 1.8rem 1rem 0.75rem;
+    padding: 0.8rem 1rem 0.75rem;
     overflow: visible;
     position: relative;
   }
@@ -103,7 +103,7 @@ const { title, slug, categoryTitle, imageUrl, imageAlt = title } = Astro.props;
     font-family: var(--font-alumni);
     font-weight: 900;
     font-size: clamp(2.2rem, 4vw, 4rem);
-    line-height: 0.75;
+    line-height: 0.7;
     margin: 0;
     color: var(--color-brand-dark);
     display: -webkit-box;
@@ -112,5 +112,15 @@ const { title, slug, categoryTitle, imageUrl, imageAlt = title } = Astro.props;
     overflow: hidden;
     hyphens: auto;
     overflow-wrap: break-word;
+  }
+
+  @media (max-width: 1024px) {
+    .SupportCard__body  { padding: 0.8rem 0.75rem 0.5rem; }
+    .SupportCard__title { font-size: clamp(2.6rem, 4vw, 4rem); line-height: 0.70; }
+  }
+
+  @media (max-width: 640px) {
+    .SupportCard__body  { padding: 0.8rem 0.6rem 0.4rem; }
+    .SupportCard__title { font-size: clamp(3rem, 4vw, 4rem); line-height: 0.68; }
   }
 </style>

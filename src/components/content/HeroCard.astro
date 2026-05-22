@@ -191,7 +191,7 @@ if (titleParts.length === 0) {
     font-family: var(--font-alumni);
     font-weight: 900;
     font-size: clamp(3.5rem, 22cqi, 16rem);
-    line-height: 0.72;
+    line-height: 0.7;
     color: var(--color-brand-dark);
     margin: 0;
     text-align: left;
@@ -208,6 +208,16 @@ if (titleParts.length === 0) {
   .HeroCard__title--highlight {
     font-size: 1.35em;
     line-height: 0.78;
+  }
+
+  @media (max-width: 1024px) {
+    .HeroCard__body  { padding: 1rem 1.5rem; }
+    .HeroCard__title { font-size: clamp(4rem, 22cqi, 16rem); line-height: 0.68; }
+  }
+
+  @media (max-width: 640px) {
+    .HeroCard__body  { padding: 0.75rem 0.75rem; }
+    .HeroCard__title { font-size: clamp(4.5rem, 22cqi, 16rem); line-height: 0.65; }
   }
 
 </style>
