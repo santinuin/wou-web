@@ -135,6 +135,15 @@
         }, 1);
         if (label) tl.to(label, { opacity: 0, ease: 'power1.in', duration: 0.35 }, 1);
 
+        // SVG: se inclina gradualmente y crece en sincronía con el overlay
+        tl.to(svg!, {
+          rotation: -38,
+          scale: 14,
+          transformOrigin: `${(DOT_X_PCT * 100).toFixed(1)}% ${(DOT_Y_PCT * 100).toFixed(1)}%`,
+          ease: 'power2.in',
+          duration: 0.55,
+        }, 1);
+
         if (bg) tl.to(bg, { opacity: 0, ease: 'none', duration: 0.20 }, 1.55);
         tl.to(group!, { opacity: 0, ease: 'none', duration: 0.15 }, 1.60);
 
