@@ -495,8 +495,9 @@ const EMAIL = 'mail@radiowou.com.ar';
      ─────────────────────────────────────────────────────────────────── */
   @media (max-width: 1023px) {
     .FooterWOU {
-      height: 100vh;
-      height: 100dvh;
+      height: 100vh;      /* fallback navegadores sin svh/dvh */
+      height: 100svh;     /* viewport pequeño (chrome visible) — nunca supera el área scrolleable */
+      height: 100dvh;     /* dinámico si está disponible */
       min-height: 560px;
       max-height: none;
     }
