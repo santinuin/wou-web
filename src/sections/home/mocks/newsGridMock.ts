@@ -98,19 +98,19 @@ export const MOCK_ADS1: AdLike[] = [
   {
     id: 'mock-ad1-wide',
     data: { _id: 'mock-ad1-wide',  title: 'Tu marca aquí', brand: 'Anuncio principal',
-      image: { url: svgUrl('Anuncio principal · 2fr', '#1c3f8f'), alt: 'Anuncio' },
+      image: { url: svgUrl('ANUNCIO  2fr', '#c0392b'), alt: 'Anuncio' },
       url: null, placement: 'ads1', order: 1 },
   },
   {
     id: 'mock-ad1-2',
     data: { _id: 'mock-ad1-2', title: 'Tu marca aquí', brand: 'Anuncio',
-      image: { url: svgUrl('Anuncio · 1fr', '#2a5a9e'), alt: 'Anuncio' },
+      image: { url: svgUrl('ANUNCIO  1fr', '#1a6e3f'), alt: 'Anuncio' },
       url: null, placement: 'ads1', order: 2 },
   },
   {
     id: 'mock-ad1-3',
     data: { _id: 'mock-ad1-3', title: 'Tu marca aquí', brand: 'Anuncio',
-      image: { url: svgUrl('Anuncio · 1fr', '#2a5a9e'), alt: 'Anuncio' },
+      image: { url: svgUrl('ANUNCIO  1fr', '#7b3fa0'), alt: 'Anuncio' },
       url: null, placement: 'ads1', order: 3 },
   },
 ];

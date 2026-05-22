@@ -1,31 +1,25 @@
 ---
 interface Props {
-  title: string;
-  brand?: string | null;
   imageUrl?: string | null;
   imageAlt?: string;
   url?: string | null;
-  size?: 'large' | 'small' | 'equal';
+  title: string; // para aria-label y alt fallback
 }
 
-const { title, brand, imageUrl, imageAlt = brand ?? title, url, size = 'equal' } = Astro.props;
-
-const displayName = brand ?? title;
+const { imageUrl, imageAlt = 'Publicidad', url, title } = Astro.props;
 ---
 
 <a
   href={url ?? '#'}
-  class:list={['AdCard', `AdCard--${size}`]}
+  class="AdCard"
   target={url ? '_blank' : undefined}
   rel={url ? 'noopener noreferrer sponsored' : undefined}
-  aria-label={`Publicidad: ${displayName}`}
+  aria-label={`Publicidad${title ? ': ' + title : ''}`}
 >
   {imageUrl
     ? <img
         src={imageUrl}
         alt={imageAlt}
-        width={size === 'large' ? 600 : 300}
-        height={size === 'large' ? 340 : 200}
         loading="lazy"
         decoding="async"
         class="AdCard__image"
@@ -33,34 +27,24 @@ const displayName = brand ?? title;
     : <div class="AdCard__placeholder" aria-hidden="true"></div>
   }
 
-  <!-- Badge "PUBLICIDAD" top-left -->
   <span class="AdCard__badge">Publicidad</span>
-
-  <!-- Nombre de marca con gradiente en la parte inferior -->
-  {displayName && (
-    <div class="AdCard__footer">
-      <span class="AdCard__brand">{displayName}</span>
-    </div>
-  )}
 </a>
 
 <style>
   .AdCard {
     position: relative;
     display: block;
+    width: 100%;
     height: 100%;
     overflow: hidden;
     text-decoration: none;
-    color: var(--color-brand-white);
     background: color-mix(in oklab, var(--color-brand-dark) 80%, var(--color-brand-blue));
   }
 
   @media (hover: hover) {
     .AdCard:hover .AdCard__image { transform: scale(1.03); }
-    .AdCard:hover .AdCard__footer { opacity: 1; }
   }
 
-  /* ── Imagen ── */
   .AdCard__image {
     width: 100%;
     height: 100%;
@@ -70,7 +54,7 @@ const displayName = brand ?? title;
     transition: transform 0.4s ease;
   }
 
-  /* ── Placeholder cuando no hay imagen ── */
+  /* Placeholder cuando no hay imagen */
   .AdCard__placeholder {
     width: 100%;
     height: 100%;
@@ -83,55 +67,22 @@ const displayName = brand ?? title;
     );
   }
 
-  /* ── Badge "PUBLICIDAD" ── */
+  /* Badge pequeño "PUBLICIDAD" */
   .AdCard__badge {
     position: absolute;
-    top: 0.6rem;
-    left: 0.6rem;
-    display: inline-block;
+    top: 0.5rem;
+    left: 0.5rem;
     font-family: var(--font-barlow);
-    font-size: 0.6rem;
+    font-size: 0.55rem;
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--color-brand-dark);
-    background: color-mix(in oklab, var(--color-brand-white) 85%, transparent);
-    padding: 0.2em 0.55em;
+    background: rgba(240, 244, 248, 0.82);
+    padding: 0.15em 0.5em;
     border-radius: 9999px;
     backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    line-height: 1.5;
     pointer-events: none;
-  }
-
-  /* ── Footer con gradiente + nombre de marca ── */
-  .AdCard__footer {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 2.5rem 0.85rem 0.75rem;
-    background: linear-gradient(
-      to top,
-      rgba(8, 15, 26, 0.82) 0%,
-      rgba(8, 15, 26, 0) 100%
-    );
-    opacity: 0.9;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-  }
-
-  .AdCard__brand {
-    display: block;
-    font-family: var(--font-alumni);
-    font-weight: 900;
-    font-size: clamp(1.1rem, 1.8vw, 1.8rem);
-    line-height: 1;
-    color: var(--color-brand-white);
-    letter-spacing: 0.01em;
-  }
-
-  .AdCard--large .AdCard__brand {
-    font-size: clamp(1.4rem, 2.2vw, 2.4rem);
+    line-height: 1.6;
   }
 </style>

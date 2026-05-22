@@ -25,11 +25,9 @@ function imgUrl(ad: AdLike, width: number): string | null {
       <div class="AdsBand2__item">
         <AdCard
           title={ad.data.title}
-          brand={ad.data.brand ?? null}
           imageUrl={imgUrl(ad, 320)}
           imageAlt={ad.data.image?.alt ?? ad.data.brand ?? ad.data.title}
           url={ad.data.url ?? null}
-          size="equal"
         />
       </div>
     ))}

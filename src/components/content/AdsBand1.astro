@@ -27,11 +27,9 @@ function imgUrl(ad: AdLike | undefined, width: number): string | null {
       <div class="AdsBand1__item AdsBand1__item--wide">
         <AdCard
           title={ad1.data.title}
-          brand={ad1.data.brand ?? null}
           imageUrl={imgUrl(ad1, 680)}
           imageAlt={ad1.data.image?.alt ?? ad1.data.brand ?? ad1.data.title}
           url={ad1.data.url ?? null}
-          size="large"
         />
       </div>
     )}
@@ -39,11 +37,9 @@ function imgUrl(ad: AdLike | undefined, width: number): string | null {
       <div class="AdsBand1__item">
         <AdCard
           title={ad2.data.title}
-          brand={ad2.data.brand ?? null}
           imageUrl={imgUrl(ad2, 340)}
           imageAlt={ad2.data.image?.alt ?? ad2.data.brand ?? ad2.data.title}
           url={ad2.data.url ?? null}
-          size="equal"
         />
       </div>
     )}
@@ -51,11 +47,9 @@ function imgUrl(ad: AdLike | undefined, width: number): string | null {
       <div class="AdsBand1__item">
         <AdCard
           title={ad3.data.title}
-          brand={ad3.data.brand ?? null}
           imageUrl={imgUrl(ad3, 340)}
           imageAlt={ad3.data.image?.alt ?? ad3.data.brand ?? ad3.data.title}
           url={ad3.data.url ?? null}
-          size="equal"
         />
       </div>
     )}
