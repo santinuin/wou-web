@@ -47,6 +47,8 @@ const tickerText = article.data.excerpt ?? article.data.title;
 
   .CategoryHero :global(.HeroCard__title) {
     font-size: clamp(3rem, 17cqi, 12rem);
+    -webkit-line-clamp: 2;
+    hyphens: none;
   }
 
   .CategoryHero :global(.HeroCard__ticker) {

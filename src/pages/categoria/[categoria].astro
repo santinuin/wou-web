@@ -157,31 +157,28 @@ while (cursor < gridArticles.length) {
   .CategoryPage__watermark {
     position: absolute;
     top: 0;
-    bottom: 0;
     font-family: var(--font-alumni);
-    font-weight: 900;
-    font-size: clamp(4rem, 8vw, 9rem);
+    font-weight: 700;
+    font-size: clamp(6rem, 13vw, 15rem);
     text-transform: uppercase;
     color: var(--color-brand-blue);
     opacity: 0.35;
     writing-mode: vertical-rl;
     text-orientation: mixed;
-    line-height: 1;
+    line-height: 0.59;
     pointer-events: none;
     user-select: none;
     z-index: 0;
-    display: flex;
-    align-items: center;
     letter-spacing: -0.02em;
-  }
-
-  .CategoryPage__watermark--left {
-    left: 1.5rem;
     transform: rotate(180deg);
   }
 
+  .CategoryPage__watermark--left {
+    left: 0;
+  }
+
   .CategoryPage__watermark--right {
-    right: 1.5rem;
+    right: 0;
   }
 
   .CategoryPage__empty {
@@ -201,9 +198,7 @@ while (cursor < gridArticles.length) {
 
   @media (max-width: 1024px) {
     .CategoryPage__container { padding: 1.25rem 3rem; }
-    .CategoryPage__watermark {
-      font-size: 4rem;
-    }
+    .CategoryPage__watermark { font-size: 7rem; }
   }
 
   @media (max-width: 640px) {
