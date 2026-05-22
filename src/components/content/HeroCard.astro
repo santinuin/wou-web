@@ -191,7 +191,7 @@ if (titleParts.length === 0) {
     font-family: var(--font-alumni);
     font-weight: 900;
     font-size: clamp(3.5rem, 22cqi, 16rem);
-    line-height: 0.85;
+    line-height: 0.72;
     color: var(--color-brand-dark);
     margin: 0;
     text-align: left;
@@ -200,6 +200,8 @@ if (titleParts.length === 0) {
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    hyphens: auto;
+    overflow-wrap: break-word;
   }
 
   /* Palabra destacada: más grande que el resto */
