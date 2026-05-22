@@ -3,12 +3,12 @@ import TransitionAnimation from './TransitionAnimation.svelte';
 ---
 
 <!--
-  El wrapper de 200vh da espacio de scroll extra.
-  La sección es sticky: se queda pegada mientras el wrapper pasa.
-  Al terminar el wrapper (scroll == wrapper-bottom), el NewsGrid queda
-  exactamente en el top del viewport y el scroll sigue con normalidad.
+  El wrapper de 300vh da el scroll para las dos fases de la transición.
+  La sección es sticky: queda pegada mientras el wrapper pasa.
+  Fase A: el grupo (texto + SVG) se desplaza de derecha a izquierda.
+  Fase B: con el SVG centrado, el punto "O" crece y revela el NewsGrid.
 -->
-<div class="TSec-wrapper" style="height: 200vh; position: relative; z-index: 2;">
+<div class="TSec-wrapper">
   <section class="TSec" aria-label="Transición — Abrí la ventana, esto es WOU">
     <div class="TSec__bg" aria-hidden="true"></div>
 
@@ -33,22 +33,18 @@ import TransitionAnimation from './TransitionAnimation.svelte';
 <TransitionAnimation client:load />
 
 <style>
-  /* El wrapper da el espacio de scroll para la animación (100vh extra). */
+  /* El wrapper da el scroll para las dos fases (texto R→L + dot). */
   .TSec-wrapper {
-    height: 200vh;
+    height: 400vh;
     position: relative;
     z-index: 2;
   }
 
-  /* Sticky: se queda en el top mientras el wrapper se scrollea. */
+  /* Sticky: queda en el top mientras el wrapper se scrollea. */
   .TSec {
     position: sticky;
     top: 0;
     height: 100vh;
-    background: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     overflow: hidden;
   }
 
@@ -59,38 +55,46 @@ import TransitionAnimation from './TransitionAnimation.svelte';
     z-index: 0;
   }
 
+  /* Fila horizontal [texto + SVG]. GSAP la traslada en X atada al scroll;
+     yPercent:-50 (vía GSAP) la centra en vertical respecto a top:50%. */
   .TSec__group {
-    position: relative;
+    position: absolute;
+    top: 50%;
+    left: 0;
     z-index: 1;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 4rem;
-    width: 100%;
+    gap: 0.5em;
+    width: max-content;
+    font-size: clamp(1.5rem, 6vw, 7rem);
+    white-space: nowrap;
+    pointer-events: none;
+    will-change: transform;
+    /* Estado pre-JS: fuera de pantalla a la derecha; GSAP toma el control. */
+    transform: translate(105vw, -50%);
   }
 
   .TSec__label {
-    text-align: center;
+    margin: 0;
     color: var(--color-brand-teal);
     font-weight: 400;
-    font-size: clamp(1.5rem, 6vw, 7rem);
     line-height: 1;
     text-transform: uppercase;
     letter-spacing: -0.01em;
-    white-space: nowrap;
-    pointer-events: none;
   }
 
+  /* El SVG se comporta como una palabra más: su alto sigue al del texto. */
   .TSec__logo {
     display: flex;
-    justify-content: center;
-    width: 100%;
+    align-items: center;
+    flex: none;
   }
 
   .TSec__logo svg {
-    width: 85vw;
-    max-width: 1800px;
-    height: auto;
+    display: block;
+    height: 2.5em;
+    width: auto;
   }
 
   .TSec__sr {
