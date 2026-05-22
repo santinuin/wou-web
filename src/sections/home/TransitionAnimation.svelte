@@ -93,28 +93,33 @@
       const secRect = section!.getBoundingClientRect();
       const vw = secRect.width;
 
-      const svgRect = svg!.getBoundingClientRect();
+      const svgRect  = svg!.getBoundingClientRect();
+      const groupRect = group!.getBoundingClientRect();
       const svgW = svgRect.width;
       const svgH = svgRect.height;
-      const labelW = label ? label.getBoundingClientRect().width : 0;
-      const gapPx = parseFloat(getComputedStyle(group!).columnGap) || 0;
 
-      // ── Fase A: traslación horizontal ────────────────────────────────
-      // xStart: grupo corrido a la derecha → solo asoma PEEK del texto.
-      // xEnd:   el centro del SVG cae en el centro del viewport.
-      const svgCenterInGroup = labelW + gapPx + svgW / 2;
+      // Medir la distancia real SVG→grupo desde el DOM (no calcularla con labelW
+      // + gap, que es frágil ante race conditions de carga de fuentes).
+      const svgLeftInGroup  = svgRect.left - groupRect.left;
+      const svgCenterInGroup = svgLeftInGroup + svgW / 2;
+
+      // ── Fase A ────────────────────────────────────────────────────────
       const xStart = vw * (1 - PEEK);
       const xEnd   = vw / 2 - svgCenterInGroup;
 
-      // ── Fase B: dot "O" con el SVG ya centrado ───────────────────────
-      const dotX = vw / 2 + (DOT_X_PCT - 0.5) * svgW;
-      const dotY = secRect.height / 2 + (DOT_Y_PCT - 0.5) * svgH;
-      const dotR = svgW * DOT_R_PCT;
+      // ── Fase B: medir posición exacta del "O" posicionando el grupo
+      //    temporalmente en xEnd, para que el overlay siga al punto real
+      //    aunque xEnd tenga drift por fuente no cargada al medir.
+      gsap.set(group!, { yPercent: -50, x: xEnd });
+      const svgAtEnd = svg!.getBoundingClientRect();
+      const secAtEnd = section!.getBoundingClientRect();
+      const dotX = svgAtEnd.left - secAtEnd.left + DOT_X_PCT * svgAtEnd.width;
+      const dotY = svgAtEnd.top  - secAtEnd.top  + DOT_Y_PCT * svgAtEnd.height;
+      const dotR = svgAtEnd.width * DOT_R_PCT;
+      gsap.set(group!, { x: xStart }); // restaurar posición de inicio
 
       const endScale = Math.ceil(Math.hypot(secRect.width, secRect.height) / dotR) + 1;
       const svgScale = endScale * 0.35;
-
-      gsap.set(group!, { yPercent: -50, x: xStart });
       gsap.set(overlay, {
         width:   dotR * 2,
         height:  dotR * 2,
@@ -148,7 +153,7 @@
           trigger:   wrapper,
           start:     'top top',
           end:       '+=300%',
-          scrub:     1.2,
+          scrub:     0.3,
           animation: tl,
         });
 
@@ -172,11 +177,16 @@
       });
     }
 
-    // Esperar fonts: el ancho del texto define las distancias de la Fase A.
+    // Esperar fonts + un RAF para que el reflow con las métricas reales de la
+    // fuente ya esté aplicado antes de medir labelW/svgLeftInGroup.
     const run = () => {
-      if (document.fonts) document.fonts.ready.then(init);
-      else init();
+      if (document.fonts) document.fonts.ready.then(() => requestAnimationFrame(init));
+      else requestAnimationFrame(init);
     };
+
+    // Si una fuente carga tarde (font-display: swap), reinicializar.
+    const onFontsLoaded = () => { ctx?.revert(); ctx = null; requestAnimationFrame(init); };
+    document.fonts.addEventListener('loadingdone', onFontsLoaded);
 
     if (document.readyState === 'complete') {
       run();
@@ -198,6 +208,7 @@
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      document.fonts.removeEventListener('loadingdone', onFontsLoaded);
       clearTimeout(resizeTimer);
     };
   });
