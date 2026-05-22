@@ -155,6 +155,11 @@
           end:       '+=300%',
           scrub:     0.3,
           animation: tl,
+          onUpdate: () => {
+            if (!stallWrap) return;
+            const op = parseFloat(stallWrap.style.opacity) || 0;
+            stallWrap.style.pointerEvents = op > 0.1 ? 'auto' : 'none';
+          },
         });
 
         // Toggle fixed ↔ static al cruzar el fin del wrapper.
