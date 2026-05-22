@@ -42,10 +42,10 @@ const { isLive, streamUrl } = Astro.props;
     {streamUrl ? (
       <RadioPlayer streamUrl={streamUrl} client:idle />
     ) : (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F0EDE8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Sin stream configurado">
-        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-        <line x1="23" y1="9" x2="17" y2="15"/>
-        <line x1="17" y1="9" x2="23" y2="15"/>
+      <svg width="24" height="17" viewBox="0 0 24 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Sin stream configurado">
+        <path d="M10.8413 0.54834L5.29782 4.83703H1.08028C0.485387 4.83703 0 5.32215 0 5.92334V11.0721C0 11.6704 0.482427 12.1585 1.08028 12.1585H5.29782L10.8413 16.4471C11.5516 16.9948 12.5786 16.4888 12.5786 15.587V1.40846C12.5786 0.50965 11.5516 -0.00225502 10.8413 0.54834Z" fill="#F0EDE8"/>
+        <rect x="18.1" y="3.5" width="1.8" height="10" rx="0.9" transform="rotate(45 19 8.5)" fill="#F0EDE8"/>
+        <rect x="18.1" y="3.5" width="1.8" height="10" rx="0.9" transform="rotate(-45 19 8.5)" fill="#F0EDE8"/>
       </svg>
     )}
   </div>
