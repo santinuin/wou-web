@@ -73,17 +73,13 @@
       stallWrap.before(placeholder);
     }
 
-    // El SVG escala desde el centro del "O".
-    gsap.set(svg, {
-      transformOrigin: `${(DOT_X_PCT * 100).toFixed(2)}% ${(DOT_Y_PCT * 100).toFixed(2)}%`,
-    });
-
-    // Overlay oscuro: nace como el dot y se expande hasta cubrir el viewport.
+    // Overlay oscuro: ocupa todo el section, crece vía clip-path circle()
+    // (evita escalar una textura GPU enorme que pixela elementos vecinos).
     const overlay = document.createElement('div');
     Object.assign(overlay.style, {
       position:      'absolute',
+      inset:         '0',
       background:    'var(--color-brand-dark)',
-      borderRadius:  '50%',
       pointerEvents: 'none',
       zIndex:        '20',
     });
@@ -118,15 +114,11 @@
       const dotR = svgAtEnd.width * DOT_R_PCT;
       gsap.set(group!, { x: xStart }); // restaurar posición de inicio
 
-      const endScale = Math.ceil(Math.hypot(secRect.width, secRect.height) / dotR) + 1;
-      const svgScale = endScale * 0.35;
+      // Radio que cubre la diagonal del viewport desde el punto del dot.
+      const coverR = Math.ceil(Math.hypot(secRect.width, secRect.height));
       gsap.set(overlay, {
-        width:   dotR * 2,
-        height:  dotR * 2,
-        left:    dotX - dotR,
-        top:     dotY - dotR,
-        scale:   1,
-        opacity: 0,
+        clipPath: `circle(${dotR}px at ${dotX}px ${dotY}px)`,
+        opacity:  0,
       });
 
       ctx = gsap.context(() => {
@@ -137,8 +129,10 @@
 
         // ── Fase B (1 → 2): crece el dot y transiciona al NewsGrid ─────
         tl.to(overlay, { opacity: 1, ease: 'none', duration: 0.05 }, 1);
-        tl.to(overlay, { scale: endScale, ease: 'power2.in', duration: 0.55 }, 1);
-        tl.to(svg!,    { scale: svgScale, ease: 'power2.in', duration: 0.55 }, 1);
+        tl.to(overlay, {
+          clipPath: `circle(${coverR}px at ${dotX}px ${dotY}px)`,
+          ease: 'power2.in', duration: 0.55,
+        }, 1);
         if (label) tl.to(label, { opacity: 0, ease: 'power1.in', duration: 0.35 }, 1);
 
         if (bg) tl.to(bg, { opacity: 0, ease: 'none', duration: 0.20 }, 1.55);

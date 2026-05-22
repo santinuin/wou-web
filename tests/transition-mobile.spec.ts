@@ -21,7 +21,7 @@ test('TransitionSection mobile — overlay alineado con O', async ({ page }) => 
 
   const svgBox  = await page.locator('.TSec__logo svg').boundingBox();
   const overlay = await page.evaluate(() => {
-    const el = document.querySelector<HTMLElement>('.TSec > div[style*="border-radius"]');
+    const el = document.querySelector<HTMLElement>('.TSec > div[style*="clip-path"]');
     if (!el) return null;
     const r = el.getBoundingClientRect();
     return { x: r.x, y: r.y, w: r.width, h: r.height, cx: r.x + r.width/2, cy: r.y + r.height/2 };
