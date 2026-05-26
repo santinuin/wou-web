@@ -30,7 +30,7 @@ while (cursor < articles.length) {
   {rows.map(({ cols, type, items }) => (
     <div class={`CategoryGrid__row CategoryGrid__row--${type}`}>
       {items.map((article) => {
-        const imageUrl = getImageUrl(article.data.mainImage);
+        const imageUrl = getImageUrl(article.data.mainImage as any);
         const slug = article.data.slug.current;
         const title = article.data.title;
         const categoryTitle = article.data.categories?.[0]?.title ?? null;

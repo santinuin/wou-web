@@ -1,0 +1,70 @@
+---
+/**
+ * R2ImageBlock — renderer de bloques custom `r2Image` en Portable Text.
+ *
+ * Usado por ArticleCard.astro a través de astro-portabletext.
+ * Recibe el nodo con { url, alt, caption, width, height }.
+ *
+ * Por qué no usamos <Image> de astro:assets aquí:
+ *   - Las imágenes viven en Cloudflare R2 (CDN propio).
+ *   - imageService: 'passthrough' en astro.config.mjs — no se optimizan en build.
+ *   - El CDN de Cloudflare ya optimiza y cachea las imágenes.
+ *   - Usar <img> nativo es correcto en este contexto.
+ */
+
+interface Props {
+  node: {
+    _type: 'r2Image';
+    url?: string;
+    alt?: string;
+    caption?: string;
+    width?: number;
+    height?: number;
+  };
+}
+
+const { node } = Astro.props;
+const { url, alt, caption, width, height } = node;
+---
+
+{url && (
+  <figure class="R2ImageBlock">
+    <img
+      src={url}
+      alt={alt ?? ''}
+      width={width ?? undefined}
+      height={height ?? undefined}
+      loading="lazy"
+      decoding="async"
+      class="R2ImageBlock__img"
+    />
+    {caption && (
+      <figcaption class="R2ImageBlock__caption">{caption}</figcaption>
+    )}
+  </figure>
+)}
+
+<style>
+  .R2ImageBlock {
+    margin: 1.75rem auto;
+    max-width: 900px;
+  }
+
+  .R2ImageBlock__img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    max-height: 520px;
+    object-fit: cover;
+  }
+
+  .R2ImageBlock__caption {
+    margin-top: 0.5rem;
+    font-family: var(--font-franklin);
+    font-size: 0.85em;
+    color: color-mix(in srgb, var(--color-brand-dark) 60%, transparent);
+    text-align: center;
+    font-style: italic;
+  }
+</style>

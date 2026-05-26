@@ -17,7 +17,7 @@
  */
 import { Image } from 'astro:assets';
 import BallPool from '@/components/ui/BallPool.svelte';
-import { fetchWpPostsByCategory } from '@/lib/cms';
+import { fetchSanityPostsByCategory } from '@/lib/cms';
 import { getPlaceholder } from '@/lib/placeholders';
 import { MOCK_RED_CIRCLES } from './mocks/redCircleMock';
 
@@ -29,15 +29,15 @@ type BallData = {
   imageAlt: string;
 };
 
-const posts = await fetchWpPostsByCategory('circulo-rojo', 8);
+const posts = await fetchSanityPostsByCategory('circulo-rojo', 0, 8);
 
 const balls: BallData[] = posts.length
-  ? posts.map((post) => ({
-      id: String(post.id),
-      label: post.title.rendered.replace(/&amp;/g, '&').replace(/&#(\d+);/gi, (_, c) => String.fromCharCode(Number(c))).replace(/&[a-z]+;/gi, ''),
-      href: `/articulo/${post.slug}`,
-      imageUrl: post._embedded?.['wp:featuredmedia']?.[0]?.source_url ?? null,
-      imageAlt: post._embedded?.['wp:featuredmedia']?.[0]?.alt_text || post.title.rendered,
+  ? posts.map((p) => ({
+      id: p.id,
+      label: p.data.title,
+      href: `/articulo/${p.data.slug.current}`,
+      imageUrl: p.data.mainImage?.url ?? null,
+      imageAlt: p.data.mainImage?.alt || p.data.title,
     }))
   : MOCK_RED_CIRCLES.map((m) => ({ ...m, imageUrl: m.imageUrl as string | null }));
 ---

@@ -1,19 +1,18 @@
 ---
 /**
- * Tarjeta principal de la página de artículo.
+ * ArticleCard — tarjeta principal de la página de artículo.
  *
- * Contenedor blanco redondeado centrado sobre el fondo dark. Contiene:
- *   · Header: categoría (izquierda) + fecha (derecha)
- *   · Título grande (Bowlby One)
- *   · Bajada (Franklin bold)
- *   · Imagen destacada (full-width interno)
- *   · Cuerpo HTML proveniente de WordPress/Elementor
+ * Cuerpo renderizado con astro-portabletext (Sanity Portable Text).
+ * El bloque custom `r2Image` usa R2ImageBlock.astro.
  *
- * El cuerpo se inyecta con `set:html` — los estilos del contenido viven en
- * `.ArticleCard__content :global(...)` para alcanzar el HTML inyectado.
+ * Estilos del contenido en `.ArticleCard__content :global(...)`:
+ * alcanza tanto los elementos de Portable Text como los bloques custom.
  */
 import { Image } from 'astro:assets';
+import { PortableText } from 'astro-portabletext';
+import type { PortableTextComponents } from 'astro-portabletext/types';
 import { formatDateLong } from '@/lib/utils';
+import R2ImageBlock from '@/components/content/R2ImageBlock.astro';
 
 interface Category {
   name: string;
@@ -23,38 +22,49 @@ interface Category {
 interface Props {
   title: string;
   excerpt?: string | null;
-  content: string;
+  /** Portable Text (Sanity). null → no se renderiza el cuerpo. */
+  body?: unknown[] | null;
   publishedAt: string;
   featuredImage?: string | null;
   featuredImageAlt?: string | null;
   featuredImageWidth?: number;
   featuredImageHeight?: number;
   categories?: Category[];
+  /** true → muestra un aviso de revisión editorial (posts migrados con HTML sucio) */
+  needsReview?: boolean;
 }
 
 const {
   title,
   excerpt,
-  content,
+  body,
   publishedAt,
   featuredImage,
   featuredImageAlt,
   featuredImageWidth = 1200,
   featuredImageHeight = 675,
   categories = [],
+  needsReview = false,
 } = Astro.props;
 
 const primaryCategory = categories[0] ?? null;
 const dateLabel = formatDateLong(publishedAt);
+
+// Componentes custom para el renderer de Portable Text.
+// Cast a PortableTextComponents porque la librería exige todos los campos
+// pero en la práctica solo se necesita registrar los tipos custom.
+const portableTextComponents = {
+  type: {
+    // Bloque de imagen inline (R2) — ver src/components/content/R2ImageBlock.astro
+    r2Image: R2ImageBlock,
+  },
+} as unknown as PortableTextComponents;
 ---
 
 <article class="ArticleCard">
   <header class="ArticleCard__header">
     {primaryCategory && (
-      <a
-        class="ArticleCard__category"
-        href={`/categoria/${primaryCategory.slug}`}
-      >
+      <a class="ArticleCard__category" href={`/categoria/${primaryCategory.slug}`}>
         {primaryCategory.name}
       </a>
     )}
@@ -80,7 +90,17 @@ const dateLabel = formatDateLong(publishedAt);
     </figure>
   )}
 
-  <div class="ArticleCard__content" set:html={content} />
+  {needsReview && (
+    <aside class="ArticleCard__review-notice" role="note">
+      ⚠️ Este artículo fue migrado automáticamente y puede requerir revisión editorial.
+    </aside>
+  )}
+
+  {body && (body as unknown[]).length > 0 && (
+    <div class="ArticleCard__content">
+      <PortableText value={body as any} components={portableTextComponents} />
+    </div>
+  )}
 </article>
 
 <style>
@@ -95,7 +115,7 @@ const dateLabel = formatDateLong(publishedAt);
     box-sizing: border-box;
   }
 
-  /* ── Header: categoría + fecha ───────────────────────────────────── */
+  /* ── Header ─────────────────────────────────────────────────────── */
   .ArticleCard__header {
     display: flex;
     align-items: center;
@@ -108,7 +128,6 @@ const dateLabel = formatDateLong(publishedAt);
     font-family: var(--font-franklin);
     font-weight: 900;
     font-size: 0.95rem;
-    text-transform: none;
     color: var(--color-brand-dark);
     text-decoration: none;
     letter-spacing: 0;
@@ -163,7 +182,19 @@ const dateLabel = formatDateLong(publishedAt);
     object-fit: cover;
   }
 
-  /* ── Cuerpo del artículo (HTML inyectado de WordPress) ──────────── */
+  /* ── Aviso de revisión (posts migrados con HTML problemático) ───── */
+  .ArticleCard__review-notice {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    font-family: var(--font-franklin);
+    font-size: 0.875rem;
+    color: #92400e;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ── Cuerpo (Portable Text) ─────────────────────────────────────── */
   .ArticleCard__content {
     font-family: var(--font-franklin);
     font-weight: 400;
@@ -173,6 +204,8 @@ const dateLabel = formatDateLong(publishedAt);
     max-width: 1100px;
     margin: 0 auto;
   }
+
+  /* Portable Text genera <p>, <h2>, <h3>, <ul>, <ol>, <blockquote> directamente. */
 
   .ArticleCard__content :global(h2),
   .ArticleCard__content :global(h3),
@@ -200,6 +233,18 @@ const dateLabel = formatDateLong(publishedAt);
     font-weight: 700;
   }
 
+  .ArticleCard__content :global(em) {
+    font-style: italic;
+  }
+
+  .ArticleCard__content :global(code) {
+    font-family: monospace;
+    background: #f1f5f9;
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+    font-size: 0.9em;
+  }
+
   .ArticleCard__content :global(a) {
     color: var(--color-brand-blue);
     text-decoration: underline;
@@ -220,12 +265,9 @@ const dateLabel = formatDateLong(publishedAt);
     margin-bottom: 0.35rem;
   }
 
-  .ArticleCard__content :global(img) {
+  /* Imágenes inline (del componente R2ImageBlock) */
+  .ArticleCard__content :global(.R2ImageBlock) {
     max-width: 100%;
-    height: auto;
-    border-radius: 4px;
-    margin: 1.25rem auto;
-    display: block;
   }
 
   .ArticleCard__content :global(blockquote) {
@@ -234,14 +276,6 @@ const dateLabel = formatDateLong(publishedAt);
     margin: 1.25rem 0;
     color: color-mix(in srgb, var(--color-brand-dark) 75%, transparent);
     font-style: italic;
-  }
-
-  /* Aplanar wrappers de Elementor que puedan haber sobrevivido a la
-     extracción para que no inyecten márgenes inesperados. */
-  .ArticleCard__content :global(.elementor-section),
-  .ArticleCard__content :global(.elementor-container),
-  .ArticleCard__content :global(.elementor-widget-container) {
-    display: contents;
   }
 
   @media (max-width: 640px) {

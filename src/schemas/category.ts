@@ -1,3 +1,9 @@
+/**
+ * category — sección/categoría editorial.
+ *
+ * Migrado de WordPress headless → Sanity.
+ * Se agregó wpId para trazabilidad y parent para jerarquías opcionales.
+ */
 import { defineField, defineType } from 'sanity';
 
 export const categoryType = defineType({
@@ -5,11 +11,19 @@ export const categoryType = defineType({
   title: 'Categoría',
   type: 'document',
 
-  // ── Núcleo invariante ────────────────────────────────────────────────────
   fields: [
+    // ── Trazabilidad WordPress ────────────────────────────────────────────
+    defineField({
+      name: 'wpId',
+      title: 'WordPress ID',
+      type: 'number',
+      readOnly: true,
+    }),
+
+    // ── Núcleo ────────────────────────────────────────────────────────────
     defineField({
       name: 'title',
-      title: 'Título',
+      title: 'Nombre',
       type: 'string',
       validation: (Rule) => Rule.required(),
     }),
@@ -20,32 +34,52 @@ export const categoryType = defineType({
       options: { source: 'title', maxLength: 96 },
       validation: (Rule) => Rule.required(),
     }),
-
-    // ── Experimental ─────────────────────────────────────────────────────
-    // [EXP] ¿Descripción en texto plano o rich text?
     defineField({
       name: 'description',
-      title: 'Descripción [EXP]',
+      title: 'Descripción',
       type: 'text',
       rows: 3,
     }),
-    // [EXP] ¿Color hex, variable CSS o referencia a un tema de diseño?
+
+    // ── Jerarquía (opcional) ──────────────────────────────────────────────
+    defineField({
+      name: 'parent',
+      title: 'Categoría padre',
+      type: 'reference',
+      to: [{ type: 'category' }],
+      description: 'Para subcategorías. Dejar vacío para categorías de primer nivel.',
+    }),
+
+    // ── UI ────────────────────────────────────────────────────────────────
     defineField({
       name: 'color',
-      title: 'Color de acento [EXP]',
+      title: 'Color de acento',
       type: 'string',
       description: 'Hex color para badges (ej: #3b82f6)',
     }),
-    // [EXP] Orden de aparición en el menú de secciones
     defineField({
       name: 'order',
-      title: 'Orden en el menú [EXP]',
+      title: 'Orden en el menú',
       type: 'number',
-      description: 'Número menor = aparece primero en el menú de secciones',
+      description: 'Número menor = aparece primero.',
     }),
   ],
 
   preview: {
-    select: { title: 'title' },
+    select: { title: 'title', order: 'order' },
+    prepare({ title, order }) {
+      return {
+        title: title ?? '(sin nombre)',
+        subtitle: order != null ? `Posición ${order}` : undefined,
+      };
+    },
   },
+
+  orderings: [
+    {
+      title: 'Orden en el menú',
+      name: 'orderAsc',
+      by: [{ field: 'order', direction: 'asc' }],
+    },
+  ],
 });

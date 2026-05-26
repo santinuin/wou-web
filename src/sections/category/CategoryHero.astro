@@ -11,7 +11,7 @@ interface Props {
 
 const { article, categoryDisplay } = Astro.props;
 
-const imageUrl = getImageUrl(article.data.mainImage);
+const imageUrl = getImageUrl(article.data.mainImage as any);
 const categoryTitle = article.data.categories?.[0]?.title ?? categoryDisplay;
 const tickerText = decodeHtmlEntities(article.data.excerpt ?? article.data.title);
 ---

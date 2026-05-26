@@ -1,28 +1,28 @@
 <script lang="ts">
+  /**
+   * LoadMore — paginación infinita para páginas de categoría.
+   *
+   * Migrado de WordPress API directo → endpoint interno /api/category-posts
+   * que a su vez consulta Sanity. Sin acceso directo al CMS desde el browser.
+   *
+   * Props:
+   *   categorySlug       slug de la categoría (reemplaza el categoryId numérico de WP)
+   *   initialOffset      cuántos artículos ya muestra el SSG (= articles.length)
+   *   initialPatternOffset   en qué punto del patrón de banda arranca este componente
+   */
   import { BAND_PATTERN, type BandType } from '@/sections/category/bandPattern';
 
-  export let categoryId: number;
-  export let initialPage: number = 2;
+  export let categorySlug: string;
+  export let initialOffset: number = 16;
   export let initialPatternOffset: number = 0;
 
-  const WP_BASE = 'https://wou.com.ar/wp-json/wp/v2';
   const PER_PAGE = 12;
 
-  let page = initialPage;
+  let loadCount = 0;
   let loading = false;
   let hasMore = true;
   let container: HTMLDivElement;
   let patternOffset = initialPatternOffset;
-
-  interface WpArticle {
-    id: number;
-    slug: string;
-    title: { rendered: string };
-    _embedded?: {
-      'wp:featuredmedia'?: Array<{ source_url?: string; alt_text?: string }>;
-      'wp:term'?: Array<Array<{ id: number; name: string; slug: string }>>;
-    };
-  }
 
   interface NormalizedArticle {
     title: string;
@@ -30,16 +30,6 @@
     categoryTitle: string | null;
     imageUrl: string | null;
     imageAlt: string | null;
-  }
-
-  function normalize(post: WpArticle): NormalizedArticle {
-    return {
-      title: post.title.rendered,
-      slug: post.slug,
-      categoryTitle: post._embedded?.['wp:term']?.[0]?.[0]?.name ?? null,
-      imageUrl: post._embedded?.['wp:featuredmedia']?.[0]?.source_url ?? null,
-      imageAlt: post._embedded?.['wp:featuredmedia']?.[0]?.alt_text ?? null,
-    };
   }
 
   function escapeHtml(s: string): string {
@@ -58,7 +48,7 @@
     const badge = a.categoryTitle
       ? `<span class="SupportCard__category">${escapeHtml(a.categoryTitle)}</span>`
       : '';
-    return `<a href="/${a.slug}" class="SupportCard" aria-label="${escapeHtml(a.title)}">
+    return `<a href="/articulo/${escapeHtml(a.slug)}" class="SupportCard" aria-label="${escapeHtml(a.title)}">
       <div class="SupportCard__image-zone">${img}</div>
       <div class="SupportCard__body">${badge}<h3 class="SupportCard__title">${a.title}</h3></div>
     </a>`;
@@ -72,7 +62,7 @@
     const badge = a.categoryTitle
       ? `<span class="WideSupportCard__category">${escapeHtml(a.categoryTitle)}</span>`
       : '';
-    return `<a href="/${a.slug}" class="WideSupportCard" aria-label="${escapeHtml(a.title)}">
+    return `<a href="/articulo/${escapeHtml(a.slug)}" class="WideSupportCard" aria-label="${escapeHtml(a.title)}">
       <div class="WideSupportCard__image-zone">${img}</div>
       <div class="WideSupportCard__body">${badge}<h3 class="WideSupportCard__title">${a.title}</h3></div>
     </a>`;
@@ -89,19 +79,23 @@
     if (loading || !hasMore) return;
     loading = true;
 
+    // Offset acumulativo: SSG ya mostró `initialOffset` artículos,
+    // cada click de LoadMore suma PER_PAGE más.
+    const offset = initialOffset + loadCount * PER_PAGE;
+    const params = new URLSearchParams({
+      category: categorySlug,
+      offset: String(offset),
+      limit: String(PER_PAGE),
+    });
+
     try {
-      const res = await fetch(
-        `${WP_BASE}/posts?categories=${categoryId}&page=${page}&per_page=${PER_PAGE}&status=publish&_embed`
-      );
+      const res = await fetch(`/api/category-posts?${params}`);
       if (!res.ok) { hasMore = false; return; }
-      const text = await res.text();
-      if (!text.trim()) { hasMore = false; return; }
-      const posts: WpArticle[] = JSON.parse(text);
-      if (!Array.isArray(posts) || posts.length === 0) { hasMore = false; return; }
 
-      const articles = posts.map(normalize);
+      const articles: NormalizedArticle[] = await res.json();
+      if (!Array.isArray(articles) || articles.length === 0) { hasMore = false; return; }
+
       let cursor = 0;
-
       while (cursor < articles.length) {
         const slot = BAND_PATTERN[patternOffset % BAND_PATTERN.length];
         const chunk = articles.slice(cursor, cursor + slot.cols);
@@ -111,8 +105,8 @@
         patternOffset++;
       }
 
-      page++;
-      if (posts.length < PER_PAGE) hasMore = false;
+      loadCount++;
+      if (articles.length < PER_PAGE) hasMore = false;
     } catch {
       hasMore = false;
     } finally {

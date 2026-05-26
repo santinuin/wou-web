@@ -12,5 +12,5 @@
     }
   },
   "include": [".astro/types.d.ts", "**/*.ts", "**/*.svelte", "**/*.astro"],
-  "exclude": ["node_modules", "dist", ".sanity"]
+  "exclude": ["node_modules", "dist", ".sanity", "scripts", "studio"]
 }

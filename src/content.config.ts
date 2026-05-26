@@ -8,25 +8,21 @@ import {
   ALL_RADIO_SHOWS_QUERY,
   ALL_RED_CIRCLES_QUERY,
 } from './lib/cms/queries';
-import { fetchWpPostsForCategories, fetchRecentWpPosts, extractElementorContent } from './lib/cms/wordpress';
+import { fetchRecentSanityPosts } from './lib/cms/sanity-posts';
 
 /**
- * Gotchas críticos de Sanity + Zod codificados aquí:
+ * Gotchas críticos de Sanity + Zod:
  *
  * 1. Sanity retorna null (no undefined) para campos opcionales vacíos.
- *    typeof null === "object" → z.optional() falla silenciosamente.
- *    Usar .nullish() en todos los campos escalares opcionales (acepta undefined Y null).
+ *    Usar .nullish() en todos los escalares opcionales.
  *
- * 2. Objetos complejos (imágenes, rich text) → z.any().
- *    La validación estructural ocurre en los componentes via urlForImage()
- *    y PortableText, no en Zod. Esto también permite que los schemas de Sanity
- *    evolucionen sin romper el build de Astro.
+ * 2. body (Portable Text) → z.any(). Validación estructural ocurre en
+ *    el componente vía <PortableText>, no aquí.
  *
- * 3. El campo id de cada ítem debe ser único y estable → slug.current.
- *    Fallback a _id para documentos sin slug (borradores, nuevos).
+ * 3. mainImage es un objeto { url, alt } de R2, no un sanity.imageAsset.
+ *    getImageUrl() lo detecta y devuelve url directo.
  *
  * 4. Los loaders corren UNA VEZ en astro build / astro dev.
- *    Cero llamadas a Sanity en runtime.
  */
 
 const SanitySlugSchema = z.object({
@@ -34,61 +30,37 @@ const SanitySlugSchema = z.object({
   current: z.string(),
 });
 
-// ─── Articles (WordPress headless) ────────────────────────────────────────────
+// ─── Articles (Sanity) ────────────────────────────────────────────────────────
 
 const articles = defineCollection({
   loader: async () => {
-    const posts = await fetchWpPostsForCategories(
-      ['Política', 'Locales', 'Policiales', 'Opinión'],
-      4
-    );
-    return posts.map((post) => ({
-      // id requerido por Astro Content Collections
-      id: String(post.id),
-      wpId: post.id,
-      title: post.title.rendered,
-      // Normalizado a la misma forma que Sanity para que los componentes no cambien
-      slug: { current: post.slug },
-      publishedAt: post.date,
-      modifiedAt: post.modified,
-      content: extractElementorContent(post.content.rendered),
-      excerpt: post.excerpt.rendered.replace(/<[^>]+>/g, '').trim(),
-      // mainImage como { url, alt } — getImageUrl() lo detecta y devuelve url directo
-      // Verificar source_url específicamente: algunos media no lo tienen (videos, embeds)
-      mainImage: post._embedded?.['wp:featuredmedia']?.[0]?.source_url
-        ? {
-            url: post._embedded['wp:featuredmedia'][0].source_url,
-            alt: post._embedded['wp:featuredmedia'][0].alt_text || null,
-          }
-        : null,
-      // Categorías normalizadas al shape { _id, title } que usan los componentes
-      categories:
-        post._embedded?.['wp:term']?.[0]?.map((c) => ({
-          _id: String(c.id),
-          title: c.name,
-          slug: { current: c.slug },
-        })) ?? [],
-      tags:
-        post._embedded?.['wp:term']?.[1]?.map((t) => ({
-          _id: String(t.id),
-          name: t.name,
-          slug: t.slug,
-        })) ?? [],
-      author: post._embedded?.author?.[0]?.name ?? null,
-      originalUrl: post.link,
-    }));
+    if (!isSanityConfigured) return [];
+
+    // 50 artículos recientes para la home y el build inicial.
+    // Las páginas on-demand (articulo/[slug]) fetchen directamente desde Sanity.
+    const posts = await fetchRecentSanityPosts(50);
+
+    // El loader espera un array de objetos con `id` en la raíz.
+    // fetchRecentSanityPosts ya devuelve { id, data: {...} } — aplanamos para el loader.
+    return posts.map(({ id, data }) => ({ id, ...data }));
   },
 
   schema: z.object({
-    wpId: z.number(),
+    wpId: z.number().nullish(),
     title: z.string(),
     slug: z.object({ current: z.string() }),
     publishedAt: z.string().nullish(),
     modifiedAt: z.string().nullish(),
-    content: z.string().nullish(),
+    // body solo existe en el articulo individual (on-demand), no en el loader de build
+    body: z.any().nullish(),
     excerpt: z.string().nullish(),
     mainImage: z
-      .object({ url: z.string(), alt: z.string().nullish() })
+      .object({
+        url: z.string(),
+        alt: z.string().nullish(),
+        width: z.number().nullish(),
+        height: z.number().nullish(),
+      })
       .nullish(),
     categories: z
       .array(
@@ -99,9 +71,14 @@ const articles = defineCollection({
         })
       )
       .nullish(),
-    tags: z.any(),
+    tags: z.array(z.string()).nullish(),
     author: z.string().nullish(),
+    featured: z.boolean().nullish(),
+    format: z.string().nullish(),
+    highlightWord: z.string().nullish(),
     originalUrl: z.string().nullish(),
+    seo: z.any().nullish(),
+    needsReview: z.boolean().nullish(),
   }),
 });
 
@@ -123,12 +100,14 @@ const authors = defineCollection({
     _id: z.string(),
     name: z.string(),
     slug: SanitySlugSchema.nullish(),
-    image: z.any(),
+    // avatar ahora es un objeto { url, alt } — no sanity.imageAsset
+    avatar: z.object({ url: z.string().nullish(), alt: z.string().nullish() }).nullish(),
     bio: z.array(z.any()).nullish(),
     email: z.string().nullish(),
     socialLinks: z
       .object({
         twitter: z.string().nullish(),
+        instagram: z.string().nullish(),
         linkedin: z.string().nullish(),
       })
       .nullish(),
@@ -190,12 +169,8 @@ const redCircles = defineCollection({
 const programs = defineCollection({
   loader: async () => {
     if (!isSanityConfigured) return [];
-    type RawProgram = {
-      _id: string;
-      [key: string]: unknown;
-    };
+    type RawProgram = { _id: string; [key: string]: unknown };
     const data = await sanityClient.fetch<RawProgram[]>(ALL_PROGRAMS_QUERY);
-    // No hay slug en program: el id de la collection = _id
     return data.map((p) => ({ id: p._id, ...p }));
   },
 
@@ -203,7 +178,6 @@ const programs = defineCollection({
     _id: z.string(),
     title: z.string(),
     youtubeUrl: z.string(),
-    // [EXP]: todos nullish hasta que se estabilice
     guest: z.string().nullish(),
     order: z.number().nullish(),
     publishedAt: z.string().nullish(),
@@ -254,4 +228,12 @@ const advertisements = defineCollection({
   }),
 });
 
-export const collections = { articles, authors, categories, programs, radioShows, redCircles, advertisements };
+export const collections = {
+  articles,
+  authors,
+  categories,
+  programs,
+  radioShows,
+  redCircles,
+  advertisements,
+};

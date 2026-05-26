@@ -1,4 +1,10 @@
 ---
+/**
+ * Página de categoría — prerendizado en build-time.
+ *
+ * Fetch inicial: Sanity → fetchSanityPostsByCategory (16 artículos por categoría).
+ * LoadMore: fetch al endpoint /api/category-posts (Cloudflare Worker) desde el browser.
+ */
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Header from '@/components/layout/Header.astro';
 import Footer from '@/components/layout/Footer.astro';
@@ -7,65 +13,53 @@ import CategoryGrid from '@/sections/category/CategoryGrid.astro';
 import CategoryNav from '@/sections/category/CategoryNav.astro';
 import LoadMore from '@/components/ui/LoadMore.svelte';
 import { BAND_PATTERN } from '@/sections/category/bandPattern';
-import { fetchWpPostsByCategory, resolveCategoryId } from '@/lib/cms';
+import { fetchSanityPostsByCategory } from '@/lib/cms';
 import type { ArticleLike } from '@/sections/home/mocks/newsGridMock';
 
 export const prerender = true;
 
+// Categorías del portal — slug para la ruta y para la query de Sanity.
+const CATEGORIES = [
+  { slug: 'circulo-rojo',  display: 'Círculo Rojo' },
+  { slug: 'politica',      display: 'Política'     },
+  { slug: 'locales',       display: 'Locales'      },
+  { slug: 'policiales',    display: 'Policiales'   },
+  { slug: 'opinion',       display: 'Opinión'      },
+  { slug: 'deportes',      display: 'Deportes'     },
+  { slug: 'sociedad',      display: 'Sociedad'     },
+  { slug: 'cultura',       display: 'Cultura'      },
+  { slug: 'economia',      display: 'Economía'     },
+  { slug: 'turismo',       display: 'Turismo'      },
+  { slug: 'ambiente',      display: 'Ambiente'     },
+  { slug: 'nacionales',    display: 'Nacionales'   },
+] as const;
+
 export async function getStaticPaths() {
-  const CATEGORIES: Array<{ slug: string; wpSlug: string; display: string }> = [
-    { slug: 'circulo-rojo',  wpSlug: 'circulo-rojo', display: 'Círculo Rojo' },
-    { slug: 'politica',      wpSlug: 'politica',     display: 'Política'     },
-    { slug: 'locales',       wpSlug: 'locales',      display: 'Locales'      },
-    { slug: 'policiales',    wpSlug: 'policiales',   display: 'Policiales'   },
-    { slug: 'opinion',       wpSlug: 'opinion',      display: 'Opinión'      },
-    { slug: 'deportes',      wpSlug: 'deportes',     display: 'Deportes'     },
-    { slug: 'sociedad',      wpSlug: 'sociedad',     display: 'Sociedad'     },
-    { slug: 'cultura',       wpSlug: 'cultura',      display: 'Cultura'      },
-    { slug: 'economia',      wpSlug: 'economia',     display: 'Economía'     },
-    { slug: 'turismo',       wpSlug: 'turismo',      display: 'Turismo'      },
-    { slug: 'ambiente',      wpSlug: 'ambiente',     display: 'Ambiente'     },
-    { slug: 'nacionales',    wpSlug: 'nacionales',   display: 'Nacionales'   },
-  ];
-
   const paths = await Promise.all(
-    CATEGORIES.map(async ({ slug, wpSlug, display }) => {
-      const [posts, categoryId] = await Promise.all([
-        fetchWpPostsByCategory(wpSlug, 16),
-        resolveCategoryId(wpSlug),
-      ]);
+    CATEGORIES.map(async ({ slug, display }) => {
+      const posts = await fetchSanityPostsByCategory(slug, 0, 16);
 
-      const articles: ArticleLike[] = posts.map((post) => ({
-        id: String(post.id),
+      // Normalizar al shape ArticleLike que consumen CategoryHero y CategoryGrid.
+      // Cast necesario: ArticleLike es un tipo mínimo que no incluye
+      // todos los campos del shape de Sanity (modifiedAt, tags, etc.).
+      const articles: ArticleLike[] = posts.map((p) => ({
+        id: p.id,
         data: {
-          wpId: post.id,
-          title: post.title.rendered,
-          slug: { current: post.slug },
-          publishedAt: post.date,
-          modifiedAt: post.modified,
-          content: null,
-          excerpt: post.excerpt?.rendered?.replace(/<[^>]+>/g, '').trim() ?? null,
-          mainImage: post._embedded?.['wp:featuredmedia']?.[0]?.source_url
-            ? {
-                url: post._embedded['wp:featuredmedia'][0].source_url,
-                alt: post._embedded['wp:featuredmedia'][0].alt_text ?? null,
-              }
-            : null,
-          categories:
-            post._embedded?.['wp:term']?.[0]?.map((c) => ({
-              _id: String(c.id),
-              title: c.name,
-              slug: { current: c.slug },
-            })) ?? [],
-          tags: [],
-          author: post._embedded?.author?.[0]?.name ?? null,
-          originalUrl: post.link,
+          wpId: p.data.wpId ?? undefined,
+          title: p.data.title,
+          slug: p.data.slug,
+          publishedAt: p.data.publishedAt ?? null,
+          excerpt: p.data.excerpt ?? null,
+          mainImage: p.data.mainImage ?? null,
+          categories: p.data.categories ?? [],
+          featured: p.data.featured ?? null,
+          highlightWord: p.data.highlightWord ?? null,
         },
-      }));
+      })) as ArticleLike[];
 
       return {
         params: { categoria: slug },
-        props: { display, categoryId, articles },
+        props: { display, categorySlug: slug, articles },
       };
     })
   );
@@ -75,17 +69,17 @@ export async function getStaticPaths() {
 
 interface Props {
   display: string;
-  categoryId: number | null;
+  categorySlug: string;
   articles: ArticleLike[];
 }
 
-const { display, categoryId, articles } = Astro.props;
+const { display, categorySlug, articles } = Astro.props;
 
 const heroArticle = articles[0] ?? null;
 const gridArticles = articles.slice(1);
 
-// Cuenta cuántas filas consume el grid inicial para que LoadMore
-// continúe el patrón de banda desde el offset correcto.
+// Calcular el offset de patrón inicial para que LoadMore continúe
+// el ritmo de banda donde lo dejó el grid SSG.
 let initialPatternOffset = 0;
 let cursor = 0;
 while (cursor < gridArticles.length) {
@@ -93,6 +87,9 @@ while (cursor < gridArticles.length) {
   cursor += cols;
   initialPatternOffset++;
 }
+
+// LoadMore arranca desde donde termina el SSG
+const initialOffset = articles.length;
 ---
 
 <BaseLayout title={display}>
@@ -115,10 +112,10 @@ while (cursor < gridArticles.length) {
         <CategoryGrid articles={gridArticles} />
       )}
 
-      {categoryId && articles.length > 0 && (
+      {articles.length > 0 && (
         <LoadMore
-          categoryId={categoryId}
-          initialPage={2}
+          categorySlug={categorySlug}
+          initialOffset={initialOffset}
           initialPatternOffset={initialPatternOffset}
           client:visible
         />
@@ -153,7 +150,6 @@ while (cursor < gridArticles.length) {
     z-index: 1;
   }
 
-  /* Watermarks laterales — texto rotado vertical en los márgenes */
   .CategoryPage__watermark {
     position: absolute;
     top: 0;
@@ -173,13 +169,8 @@ while (cursor < gridArticles.length) {
     transform: rotate(180deg);
   }
 
-  .CategoryPage__watermark--left {
-    left: 0;
-  }
-
-  .CategoryPage__watermark--right {
-    right: 0;
-  }
+  .CategoryPage__watermark--left { left: 0; }
+  .CategoryPage__watermark--right { right: 0; }
 
   .CategoryPage__empty {
     display: flex;
@@ -195,16 +186,12 @@ while (cursor < gridArticles.length) {
   @media (max-width: 1280px) {
     .CategoryPage__container { padding: 1.5rem 6rem; }
   }
-
   @media (max-width: 1024px) {
     .CategoryPage__container { padding: 1.25rem 3rem; }
     .CategoryPage__watermark { font-size: 7rem; }
   }
-
   @media (max-width: 640px) {
     .CategoryPage__container { padding: 0.75rem 1rem; }
-    .CategoryPage__watermark {
-      display: none;
-    }
+    .CategoryPage__watermark { display: none; }
   }
 </style>

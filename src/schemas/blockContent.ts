@@ -1,3 +1,10 @@
+/**
+ * blockContent — tipo reutilizable de Portable Text para el cuerpo de artículos.
+ *
+ * Cambio respecto a la versión anterior:
+ *   - Se eliminó el bloque nativo `image` (crearía sanity.imageAsset → consume documentos).
+ *   - Se agregó el bloque custom `r2Image` → almacena URL de R2, cero documentos extra.
+ */
 import { defineArrayMember, defineType } from 'sanity';
 
 export const blockContentType = defineType({
@@ -46,19 +53,7 @@ export const blockContentType = defineType({
         ],
       },
     }),
-    defineArrayMember({
-      type: 'image',
-      options: { hotspot: true },
-      fields: [
-        {
-          name: 'alt',
-          type: 'string',
-          title: 'Texto alternativo',
-          description: 'Requerido para accesibilidad.',
-          validation: (Rule) => Rule.required(),
-        },
-        { name: 'caption', type: 'string', title: 'Epígrafe' },
-      ],
-    }),
+    // ⚠️ r2Image en lugar del nativo `image` — ver src/schemas/r2Image.ts
+    defineArrayMember({ type: 'r2Image' }),
   ],
 });

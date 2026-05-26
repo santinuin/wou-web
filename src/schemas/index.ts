@@ -5,11 +5,26 @@ import { blockContentType } from './blockContent';
 import { categoryType } from './category';
 import { editorialType } from './editorial';
 import { programType } from './program';
+import { r2ImageType } from './r2Image';
 import { radioShowType } from './radioShow';
 import { radioStreamType } from './radioStream';
 import { redCircleType } from './redCircle';
 import { advertisementType } from './advertisement';
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [articleType, authorType, blockContentType, categoryType, editorialType, programType, radioShowType, radioStreamType, redCircleType, advertisementType],
+  // r2ImageType debe registrarse ANTES de blockContentType
+  // porque blockContent lo referencia como miembro de array.
+  types: [
+    r2ImageType,
+    articleType,
+    authorType,
+    blockContentType,
+    categoryType,
+    editorialType,
+    programType,
+    radioShowType,
+    radioStreamType,
+    redCircleType,
+    advertisementType,
+  ],
 };

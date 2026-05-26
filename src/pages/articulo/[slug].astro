@@ -1,7 +1,11 @@
 ---
-// On-demand rendering: se renderiza cuando el usuario visita el artículo.
-// Cloudflare cachea el resultado en el edge durante 30 días.
-// Cuando WordPress actualiza un post, el webhook purga solo esa URL.
+/**
+ * Página de artículo — on-demand (Cloudflare Worker).
+ *
+ * Fetch: Sanity GROQ → fetchSanityPostBySlug(slug)
+ * Cache: s-maxage=2592000 (30 días) en el edge de Cloudflare.
+ * Invalidación: webhook de Sanity → Cloudflare Pages Deploy Hook.
+ */
 export const prerender = false;
 
 import BaseLayout from '@/layouts/BaseLayout.astro';
@@ -10,61 +14,54 @@ import Footer from '@/components/layout/Footer.astro';
 import ArticleCard from '@/sections/article/ArticleCard.astro';
 import NewsList from '@/components/content/NewsList.astro';
 import CategoryNav from '@/sections/category/CategoryNav.astro';
-import {
-  fetchWpPostBySlug,
-  fetchWpPostsByCategory,
-  extractElementorContent,
-} from '@/lib/cms/wordpress';
-import { stripHtml } from '@/lib/utils';
+import { fetchSanityPostBySlug, fetchSanityPostsByCategory } from '@/lib/cms';
 
 const { slug } = Astro.params;
 
 if (!slug) return Astro.redirect('/404');
 
-const post = await fetchWpPostBySlug(slug);
+const post = await fetchSanityPostBySlug(slug);
 
 if (!post) return Astro.redirect('/404');
 
-// Cache en Cloudflare Edge: 30 días (s-maxage).
-// El browser no cachea (no-store) para que el purge del webhook sea efectivo.
+// Cache en Cloudflare Edge: 30 días.
+// El webhook de Sanity dispara un nuevo deploy para invalidar.
 Astro.response.headers.set(
   'Cache-Control',
   'public, no-store, s-maxage=2592000, stale-while-revalidate=86400'
 );
 
-const title = post.title.rendered;
-const content = extractElementorContent(post.content.rendered);
-const excerpt = stripHtml(post.excerpt.rendered);
-const featuredMedia = post._embedded?.['wp:featuredmedia']?.[0] ?? null;
-const featuredImage = featuredMedia?.source_url ?? null;
-const featuredImageAlt = featuredMedia?.alt_text ?? title;
-const featuredImageWidth = featuredMedia?.media_details?.width ?? 1200;
-const featuredImageHeight = featuredMedia?.media_details?.height ?? 675;
-const categories = post._embedded?.['wp:term']?.[0] ?? [];
-
-// Relacionados: hasta 4 artículos de la primera categoría, excluyendo este post.
+const { data } = post;
+const title = data.title;
+const excerpt = data.excerpt ?? '';
+const featuredImage = data.mainImage?.url ?? null;
+const featuredImageAlt = data.mainImage?.alt ?? title;
+const featuredImageWidth = data.mainImage?.width ?? 1200;
+const featuredImageHeight = data.mainImage?.height ?? 675;
+const categories = data.categories ?? [];
 const primaryCategory = categories[0] ?? null;
-const relatedPosts = primaryCategory
-  ? (await fetchWpPostsByCategory(primaryCategory.slug, 5))
-      .filter((p) => p.slug !== post.slug)
-      .slice(0, 4)
-  : [];
 
-const relatedArticles = relatedPosts.map((p) => ({
-  title: p.title.rendered,
-  publishedAt: p.date,
-  slug: p.slug,
-  href: `/articulo/${p.slug}`,
-  imageUrl: p._embedded?.['wp:featuredmedia']?.[0]?.source_url ?? null,
-  excerpt: p.excerpt?.rendered ? stripHtml(p.excerpt.rendered) : null,
-}));
+// Artículos relacionados: hasta 4 de la misma categoría (excluye este artículo).
+const relatedArticles = primaryCategory
+  ? (await fetchSanityPostsByCategory(primaryCategory.slug.current, 0, 5))
+      .filter((p) => p.data.slug.current !== slug)
+      .slice(0, 4)
+      .map((p) => ({
+        title: p.data.title,
+        publishedAt: p.data.publishedAt ?? '',
+        slug: p.data.slug.current,
+        href: `/articulo/${p.data.slug.current}`,
+        imageUrl: p.data.mainImage?.url ?? null,
+        excerpt: p.data.excerpt ?? null,
+      }))
+  : [];
 ---
 
 <BaseLayout
   title={title}
   description={excerpt}
   ogImage={featuredImage ?? undefined}
-  canonicalUrl={post.link}
+  canonicalUrl={data.seo?.canonicalUrl ?? data.originalUrl ?? undefined}
 >
   <Header slot="header" />
 
@@ -73,13 +70,14 @@ const relatedArticles = relatedPosts.map((p) => ({
       <ArticleCard
         title={title}
         excerpt={excerpt}
-        content={content}
-        publishedAt={post.date}
+        body={data.body}
+        publishedAt={data.publishedAt ?? ''}
         featuredImage={featuredImage}
         featuredImageAlt={featuredImageAlt}
         featuredImageWidth={featuredImageWidth}
         featuredImageHeight={featuredImageHeight}
-        categories={categories.map((c) => ({ name: c.name, slug: c.slug }))}
+        categories={categories.map((c) => ({ name: c.title, slug: c.slug.current }))}
+        needsReview={data.needsReview ?? false}
       />
     </div>
 
@@ -116,7 +114,6 @@ const relatedArticles = relatedPosts.map((p) => ({
     padding: 0 clamp(1rem, 4vw, 3rem);
   }
 
-  /* Separador blanco fino entre el artículo y la lista de relacionados. */
   .ArticlePage__separator {
     border: 0;
     height: 4px;
@@ -125,15 +122,11 @@ const relatedArticles = relatedPosts.map((p) => ({
     width: 100%;
   }
 
-  /* Lista de relacionados: ocupa casi todo el ancho del viewport,
-     alineada con el mismo padding lateral que el CategoryNav (1rem). */
   .ArticlePage__related {
     margin-top: 0;
     padding: 0 1rem;
   }
 
-  /* En la página de artículo el CategoryNav se distribuye con
-     space-between para ocupar todo el ancho con botones más grandes.    */
   .ArticlePage__nav :global(.CategoryNav) {
     gap: 0.5rem;
     padding: 3rem 1rem 2rem;
@@ -157,7 +150,6 @@ const relatedArticles = relatedPosts.map((p) => ({
     .ArticlePage {
       padding-top: 1rem;
     }
-
     .ArticlePage__separator {
       margin-top: 2rem;
     }

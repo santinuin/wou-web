@@ -1,3 +1,9 @@
+/**
+ * author — perfil de redactor/colaborador.
+ *
+ * Migrado de WordPress headless → Sanity.
+ * El campo `image` (antes sanity.imageAsset) ahora es un objeto { url } apuntando a R2.
+ */
 import { defineField, defineType } from 'sanity';
 
 export const authorType = defineType({
@@ -5,11 +11,25 @@ export const authorType = defineType({
   title: 'Autor',
   type: 'document',
 
-  // ── Núcleo invariante ────────────────────────────────────────────────────
   fields: [
+    // ── Trazabilidad WordPress ────────────────────────────────────────────
+    defineField({
+      name: 'wpId',
+      title: 'WordPress ID',
+      type: 'number',
+      readOnly: true,
+    }),
+    defineField({
+      name: 'wpLogin',
+      title: 'Usuario WordPress',
+      type: 'string',
+      readOnly: true,
+    }),
+
+    // ── Datos del autor ───────────────────────────────────────────────────
     defineField({
       name: 'name',
-      title: 'Nombre',
+      title: 'Nombre completo',
       type: 'string',
       validation: (Rule) => Rule.required(),
     }),
@@ -21,26 +41,30 @@ export const authorType = defineType({
       validation: (Rule) => Rule.required(),
     }),
 
-    // ── Experimental — confirmar con el equipo ────────────────────────────
-    // [EXP] ¿Foto de perfil o avatar generado?
+    // ── Avatar — URL de R2, nunca sanity.imageAsset ───────────────────────
     defineField({
-      name: 'image',
-      title: 'Foto de perfil [EXP]',
-      type: 'image',
-      options: { hotspot: true },
+      name: 'avatar',
+      title: 'Foto de perfil',
+      type: 'object',
+      description: 'URL pública en Cloudflare R2 o Gravatar.',
       fields: [
+        {
+          name: 'url',
+          type: 'url',
+          title: 'URL de la imagen',
+        },
         {
           name: 'alt',
           type: 'string',
           title: 'Texto alternativo',
-          description: 'Requerido para accesibilidad.',
         },
       ],
     }),
-    // [EXP] ¿Bio en rich text o texto plano?
+
+    // ── Biografía ─────────────────────────────────────────────────────────
     defineField({
       name: 'bio',
-      title: 'Biografía [EXP]',
+      title: 'Biografía',
       type: 'array',
       of: [
         {
@@ -57,25 +81,29 @@ export const authorType = defineType({
         },
       ],
     }),
-    // [EXP] ¿Email público o solo interno?
+
+    // ── Contacto ──────────────────────────────────────────────────────────
     defineField({
       name: 'email',
-      title: 'Email [EXP]',
+      title: 'Email',
       type: 'email',
     }),
-    // [EXP] ¿Qué redes sociales? ¿Array de objetos o campos fijos?
     defineField({
       name: 'socialLinks',
-      title: 'Redes sociales [EXP]',
+      title: 'Redes sociales',
       type: 'object',
       fields: [
         { name: 'twitter', type: 'url', title: 'Twitter / X' },
+        { name: 'instagram', type: 'url', title: 'Instagram' },
         { name: 'linkedin', type: 'url', title: 'LinkedIn' },
       ],
     }),
   ],
 
   preview: {
-    select: { title: 'name', media: 'image' },
+    select: { title: 'name', avatarUrl: 'avatar.url' },
+    prepare({ title }) {
+      return { title: title ?? '(sin nombre)' };
+    },
   },
 });
