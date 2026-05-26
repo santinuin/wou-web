@@ -1,14 +1,20 @@
 name: Deploy to Cloudflare Workers
 
 on:
+  # Deploy automático al mergear a main
   push:
     branches:
       - main
-      - feature/cms-wordpress-headless
+
+  # Deploy manual desde Sanity Studio (botón "🚀 Publicar sitio")
+  # El Studio hace POST a la GitHub API con event_type: "deploy-from-sanity"
+  repository_dispatch:
+    types: [deploy-from-sanity]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -25,6 +31,12 @@ jobs:
 
       - name: Build
         run: bun run build
+        env:
+          # Sanity — necesarios para que el build-time loader pueda fetchear artículos
+          # Configurar en: GitHub → Settings → Secrets and variables → Actions → New secret
+          PUBLIC_SANITY_PROJECT_ID: ${{ secrets.PUBLIC_SANITY_PROJECT_ID }}
+          PUBLIC_SANITY_DATASET: ${{ secrets.PUBLIC_SANITY_DATASET }}
+          SANITY_API_READ_TOKEN: ${{ secrets.SANITY_API_READ_TOKEN }}
 
       - name: Deploy to Cloudflare Workers
         run: cd dist/server && npx wrangler deploy
