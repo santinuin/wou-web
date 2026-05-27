@@ -1,10 +1,11 @@
 name: Deploy to Cloudflare Workers
 
 on:
-  # Deploy automático al mergear a main
+  # Deploy automático al mergear a main (o a la rama de testing temporal)
   push:
     branches:
       - main
+      - feature/cms-sanity-cloudflare  # TODO: remover cuando se mergee a main
 
   # Deploy manual desde Sanity Studio (botón "🚀 Publicar sitio")
   # El Studio hace POST a la GitHub API con event_type: "deploy-from-sanity"

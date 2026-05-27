@@ -18,23 +18,24 @@ import type { ArticleLike } from '@/sections/home/mocks/newsGridMock';
 
 export const prerender = true;
 
-// Categorías del portal — slug para la ruta y para la query de Sanity.
-const CATEGORIES = [
-  { slug: 'circulo-rojo',  display: 'Círculo Rojo' },
-  { slug: 'politica',      display: 'Política'     },
-  { slug: 'locales',       display: 'Locales'      },
-  { slug: 'policiales',    display: 'Policiales'   },
-  { slug: 'opinion',       display: 'Opinión'      },
-  { slug: 'deportes',      display: 'Deportes'     },
-  { slug: 'sociedad',      display: 'Sociedad'     },
-  { slug: 'cultura',       display: 'Cultura'      },
-  { slug: 'economia',      display: 'Economía'     },
-  { slug: 'turismo',       display: 'Turismo'      },
-  { slug: 'ambiente',      display: 'Ambiente'     },
-  { slug: 'nacionales',    display: 'Nacionales'   },
-] as const;
-
 export async function getStaticPaths() {
+  // Definida dentro de getStaticPaths para que el Cloudflare prerender worker
+  // la tenga disponible en su contexto de ejecución (evita ReferenceError en miniflare).
+  const CATEGORIES = [
+    { slug: 'circulo-rojo',  display: 'Círculo Rojo' },
+    { slug: 'politica',      display: 'Política'     },
+    { slug: 'locales',       display: 'Locales'      },
+    { slug: 'policiales',    display: 'Policiales'   },
+    { slug: 'opinion',       display: 'Opinión'      },
+    { slug: 'deportes',      display: 'Deportes'     },
+    { slug: 'sociedad',      display: 'Sociedad'     },
+    { slug: 'cultura',       display: 'Cultura'      },
+    { slug: 'economia',      display: 'Economía'     },
+    { slug: 'turismo',       display: 'Turismo'      },
+    { slug: 'ambiente',      display: 'Ambiente'     },
+    { slug: 'nacionales',    display: 'Nacionales'   },
+  ] as const;
+
   const paths = await Promise.all(
     CATEGORIES.map(async ({ slug, display }) => {
       const posts = await fetchSanityPostsByCategory(slug, 0, 16);
