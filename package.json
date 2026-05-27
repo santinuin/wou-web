@@ -17,9 +17,13 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.8",
     "@playwright/test": "^1.59.1",
+    "@sanity/block-tools": "^3.70.0",
+    "@sanity/schema": "^5.27.0",
     "@tailwindcss/vite": "^4.2.2",
     "@types/bun": "latest",
+    "@types/jsdom": "^28.0.3",
     "@types/matter-js": "^0.20.2",
+    "jsdom": "^29.1.1",
     "svelte-check": "^4.4.6",
     "tailwindcss": "^4.2.2"
   },
