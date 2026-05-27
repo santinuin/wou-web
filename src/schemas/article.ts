@@ -62,9 +62,10 @@ export const articleType = defineType({
         {
           name: 'url',
           type: 'url',
-          title: 'URL en Cloudflare R2',
-          description: 'https://media.wou.com.ar/uploads/...',
+          title: 'Imagen principal',
+          description: 'Arrastrá una imagen (el Studio la sube automáticamente a R2) o pegá la URL.',
           validation: (Rule) => Rule.required().uri({ scheme: ['https'] }),
+          // El input custom R2UrlInput se inyecta en studio/sanity.config.ts
         },
         {
           name: 'alt',

@@ -3,6 +3,64 @@ import { structureTool } from 'sanity/structure';
 import { visionTool } from '@sanity/vision';
 import { schema } from '../src/schemas';
 import { deployPlugin } from './plugins/deploy';
+import { R2UrlInput } from './components/R2UrlInput';
+
+/**
+ * sanity.config.ts — Studio configuration.
+ *
+ * R2UrlInput se inyecta aquí (en el Studio) y no en src/schemas/
+ * para evitar contaminar el build de Astro con imports de React.
+ *
+ * Inyección: se clona el tipo `r2Image` y `article.mainImage.url`
+ * añadiendo `components: { input: R2UrlInput }` al campo `url`.
+ */
+
+// ── Parchear el schema con el input custom ────────────────────────────────────
+//
+// Sanity permite registrar tipos modificados. Clonamos los tipos que necesitan
+// el input custom y reemplazamos el campo `url` en cada uno.
+//
+function patchUrlField(types: typeof schema.types) {
+  return types.map((type) => {
+    // r2Image: parchear el campo `url` con R2UrlInput
+    if (type.name === 'r2Image') {
+      return {
+        ...type,
+        fields: (type as any).fields?.map((f: any) =>
+          f.name === 'url'
+            ? { ...f, components: { input: R2UrlInput } }
+            : f
+        ),
+      };
+    }
+
+    // article: parchear mainImage.url con R2UrlInput
+    if (type.name === 'article') {
+      return {
+        ...type,
+        fields: (type as any).fields?.map((f: any) => {
+          if (f.name === 'mainImage' && f.fields) {
+            return {
+              ...f,
+              fields: f.fields.map((mf: any) =>
+                mf.name === 'url'
+                  ? { ...mf, components: { input: R2UrlInput } }
+                  : mf
+              ),
+            };
+          }
+          return f;
+        }),
+      };
+    }
+
+    return type;
+  });
+}
+
+const patchedSchema = {
+  types: patchUrlField(schema.types),
+};
 
 export default defineConfig({
   projectId: import.meta.env.SANITY_STUDIO_PROJECT_ID,
@@ -118,5 +176,5 @@ export default defineConfig({
     deployPlugin(),
   ],
 
-  schema,
+  schema: patchedSchema,
 });

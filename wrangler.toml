@@ -4,3 +4,11 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 # Secretos y variables de entorno: configurar en el dashboard de Cloudflare Workers
+# UPLOAD_SECRET  ← token para autorizar uploads desde Sanity Studio
+# R2_PUBLIC_BASE ← URL pública del bucket: https://media.wou.com.ar
+
+# ── Cloudflare R2 ─────────────────────────────────────────────────────────────
+[[r2_buckets]]
+binding    = "WOU_MEDIA"
+bucket_name = "wou-media"
+# preview_bucket_name = "wou-media-dev"   # opcional para entorno local

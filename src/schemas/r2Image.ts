@@ -6,10 +6,12 @@
  *   - Con 22.837+ archivos históricos, eso excedería el límite de 25.000 documentos del plan Growth.
  *   - En cambio, `r2Image` almacena solo la URL pública de Cloudflare R2 — cero documentos extra.
  *
- * Flujo de upload para redactores en el Studio:
- *   1. El redactor sube la imagen al Worker de R2 (o directo al dashboard de R2).
- *   2. Copia la URL pública (https://media.wou.com.ar/uploads/...).
- *   3. Pega la URL en este campo.
+ * El input custom con drag-and-drop se inyecta desde el Studio (studio/sanity.config.ts)
+ * para no contaminar este schema con imports de React (incompatible con el build de Astro).
+ *
+ * Flujo para redactores en el Studio:
+ *   1. Arrastrán una imagen en el campo "URL de la imagen" → se sube automáticamente a R2.
+ *   2. El campo `url` se rellena con la URL pública. Solo resta completar el `alt`.
  *
  * El campo `_type: 'r2Image'` permite que el renderer de Portable Text
  * en el frontend lo identifique y use el componente R2ImageBlock.astro.
@@ -25,9 +27,11 @@ export const r2ImageType = defineType({
       name: 'url',
       title: 'URL de la imagen',
       type: 'url',
-      description: 'URL pública en Cloudflare R2. Ej: https://media.wou.com.ar/uploads/2024/01/foto.jpg',
+      description: 'Arrastrá una imagen (el Studio la sube automáticamente a R2) o pegá una URL.',
       validation: (Rule) =>
         Rule.required().uri({ scheme: ['https'] }),
+      // El input custom R2UrlInput se inyecta en studio/sanity.config.ts
+      // para mantener este schema sin dependencias de React.
     }),
     defineField({
       name: 'alt',
@@ -46,13 +50,13 @@ export const r2ImageType = defineType({
       name: 'width',
       title: 'Ancho (px)',
       type: 'number',
-      description: 'Ancho original en píxeles. Ayuda al navegador a reservar espacio.',
+      description: 'Se completa automáticamente al subir. Ayuda al navegador a reservar espacio.',
     }),
     defineField({
       name: 'height',
       title: 'Alto (px)',
       type: 'number',
-      description: 'Alto original en píxeles.',
+      description: 'Se completa automáticamente al subir.',
     }),
   ],
   preview: {
@@ -61,7 +65,6 @@ export const r2ImageType = defineType({
       return {
         title: alt ?? 'Sin descripción',
         subtitle: url ?? 'Sin URL',
-        // No hay media preview porque no es un sanity.imageAsset
       };
     },
   },
