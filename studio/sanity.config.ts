@@ -84,6 +84,23 @@ export default defineConfig({
                   .filter('_type == "article"')
               ),
 
+            // Vista dinámica por categoría
+            S.listItem()
+              .title('📂 Por categoría')
+              .child(
+                S.documentTypeList('category')
+                  .title('Categorías')
+                  .defaultOrdering([{ field: 'order', direction: 'asc' }, { field: 'title', direction: 'asc' }])
+                  .child((categoryId) =>
+                    S.documentList()
+                      .title('Artículos')
+                      .schemaType('article')
+                      .defaultOrdering([{ field: 'publishedAt', direction: 'desc' }])
+                      .filter('_type == "article" && $categoryId in categories[]._ref')
+                      .params({ categoryId })
+                  )
+              ),
+
             S.listItem()
               .title('⭐ Destacados')
               .schemaType('article')
