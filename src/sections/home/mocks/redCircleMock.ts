@@ -1,9 +1,6 @@
 /**
- * Datos mock para RedCircle mientras la colección `redCircles` no está
- * poblada en Sanity. Los placeholders son SVG inline (data URI) para que
- * el build funcione sin red.
- *
- * TODO: eliminar este archivo cuando la colección tenga data real.
+ * Fallback para RedCircle cuando la categoría "circulo-rojo" no tiene posts.
+ * Los placeholders son SVG inline (data URI) para que el build funcione sin red.
  */
 
 export type RedCircleMockBall = {

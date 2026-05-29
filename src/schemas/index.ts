@@ -8,7 +8,6 @@ import { programType } from './program';
 import { r2ImageType } from './r2Image';
 import { radioShowType } from './radioShow';
 import { radioStreamType } from './radioStream';
-import { redCircleType } from './redCircle';
 import { advertisementType } from './advertisement';
 
 export const schema: { types: SchemaTypeDefinition[] } = {
@@ -24,7 +23,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     programType,
     radioShowType,
     radioStreamType,
-    redCircleType,
     advertisementType,
   ],
 };

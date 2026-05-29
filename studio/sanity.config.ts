@@ -130,11 +130,6 @@ export default defineConfig({
 
             // ── Secciones del portal ─────────────────────────────────────
             S.listItem()
-              .title('🔴 Círculo Rojo')
-              .schemaType('redCircle')
-              .child(S.documentTypeList('redCircle').title('Círculo Rojo')),
-
-            S.listItem()
               .title('✍️ Editoriales')
               .schemaType('editorial')
               .child(S.documentTypeList('editorial').title('Editoriales')),

@@ -124,7 +124,6 @@ src/pages/api/upload-image.ts     POST → { url } — upload de imágenes a R2
 | `radioShow` | Programas de radio (lineup). |
 | `radioStream` | Singleton — configuración del stream en vivo. |
 | `program` | Videos / Programas TV (YouTube embed). |
-| `redCircle` | Sección "Círculo Rojo". |
 | `editorial` | Editoriales. |
 
 **Registro de tipos en `src/schemas/index.ts`:**
@@ -297,7 +296,7 @@ cd studio && bun run deploy
 - ⚠️ Requieren revisión — filtro `needsReview == true` (posts migrados con HTML sucio)
 - 📂 Categorías
 - 👤 Autores
-- 🔴 Círculo Rojo / ✍️ Editoriales / 📢 Publicidad
+- ✍️ Editoriales / 📢 Publicidad
 - 📻 Programas de radio / 🎙️ Stream (singleton) / ▶️ Videos
 
 **Componentes custom del Studio** (en `studio/components/`):

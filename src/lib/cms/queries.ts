@@ -163,21 +163,6 @@ export const LATEST_EDITORIAL_QUERY = groq`
   }
 `;
 
-// ─── Red Circles ──────────────────────────────────────────────────────────────
-
-export const ALL_RED_CIRCLES_QUERY = groq`
-  *[_type == "redCircle" && defined(slug.current)]
-  | order(order asc, publishedAt desc) {
-    _id,
-    label,
-    slug,
-    href,
-    image,
-    order,
-    publishedAt
-  }
-`;
-
 // ─── Programs ─────────────────────────────────────────────────────────────────
 
 export const ALL_PROGRAMS_QUERY = groq`
