@@ -37,7 +37,7 @@ const SECTIONS = [
 -->
 <header
   id="siteHeader"
-  class="sticky top-0 left-0 right-0 z-50 bg-brand-dark transition-colors duration-300"
+  class="sticky top-0 left-0 right-0 z-50 bg-brand-blue transition-colors duration-300"
 >
   <div
     class="w-full px-4 lg:px-5 h-20 lg:h-[calc(5.5rem*var(--header-scale,1))] grid grid-cols-[1fr_auto_1fr] items-center transition-[height] duration-300"
@@ -49,9 +49,9 @@ const SECTIONS = [
       <div class="header-radio flex items-center gap-2 lg:gap-2.5">
         <!-- Icono mute/speaker -->
         <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="transform: translateY(-2px)">
-          <path d="M10.8413 0.54834L5.29782 4.83703H1.08028C0.485387 4.83703 0 5.32215 0 5.92334V11.0721C0 11.6704 0.482427 12.1585 1.08028 12.1585H5.29782L10.8413 16.4471C11.5516 16.9948 12.5786 16.4888 12.5786 15.587V1.40846C12.5786 0.50965 11.5516 -0.00225502 10.8413 0.54834Z" fill="#F0EDE8"/>
-          <rect x="18.1" y="3.5" width="1.8" height="10" rx="0.9" transform="rotate(45 19 8.5)" fill="#F0EDE8"/>
-          <rect x="18.1" y="3.5" width="1.8" height="10" rx="0.9" transform="rotate(-45 19 8.5)" fill="#F0EDE8"/>
+          <path d="M10.8413 0.54834L5.29782 4.83703H1.08028C0.485387 4.83703 0 5.32215 0 5.92334V11.0721C0 11.6704 0.482427 12.1585 1.08028 12.1585H5.29782L10.8413 16.4471C11.5516 16.9948 12.5786 16.4888 12.5786 15.587V1.40846C12.5786 0.50965 11.5516 -0.00225502 10.8413 0.54834Z" fill="var(--color-brand-white)"/>
+          <rect x="18.1" y="3.5" width="1.8" height="10" rx="0.9" transform="rotate(45 19 8.5)" fill="var(--color-brand-white)"/>
+          <rect x="18.1" y="3.5" width="1.8" height="10" rx="0.9" transform="rotate(-45 19 8.5)" fill="var(--color-brand-white)"/>
         </svg>
         <!-- EN VIVO + estación -->
         <div class="flex items-center gap-2 leading-none">
@@ -74,7 +74,7 @@ const SECTIONS = [
           class="w-[calc(2.75rem*var(--header-scale,1))] h-[calc(2.75rem*var(--header-scale,1))] transition-[width,height] duration-300 object-contain"
         />
         <span
-          class="font-bowlby text-brand-teal tracking-wide text-[calc(1rem*var(--header-scale,1))] transition-[font-size] duration-300 whitespace-nowrap"
+          class="font-bowlby text-brand-white tracking-wide text-[calc(1rem*var(--header-scale,1))] transition-[font-size] duration-300 whitespace-nowrap"
         >
           <span class="header-normal">Viento |</span><span class="wind-value"><WindWidget client:load /></span>
         </span>
@@ -84,7 +84,7 @@ const SECTIONS = [
     <!-- ── Logotipo W•U! (SVG oficial) ────────────────────────────────── -->
     <a href="/" aria-label="Ir a la portada" class="select-none block">
       <svg
-        class="w-[88px] h-[30px] sm:w-[110px] sm:h-[37px] lg:w-[calc(180px*var(--header-scale,1))] lg:h-[calc(61px*var(--header-scale,1))] transition-[width,height] duration-300"
+        class="w-22 h-7.5 sm:w-27.5 sm:h-9.25 lg:w-[calc(180px*var(--header-scale,1))] lg:h-[calc(61px*var(--header-scale,1))] transition-[width,height] duration-300"
         viewBox="0 0 109 37"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -106,7 +106,7 @@ const SECTIONS = [
     <!-- TODO: reemplazar por <SectionMenu client:load /> cuando el dropdown esté definido -->
     <button
       type="button"
-      class="flex items-center gap-1 lg:gap-1.5 font-bowlby text-brand-teal uppercase tracking-wide cursor-pointer justify-self-end text-sm lg:text-[calc(1.125rem*var(--header-scale,1))] transition-[font-size] duration-300"
+      class="flex items-center gap-1 lg:gap-1.5 font-bowlby text-brand-white uppercase tracking-wide cursor-pointer justify-self-end text-sm lg:text-[calc(1.125rem*var(--header-scale,1))] transition-[font-size] duration-300"
       aria-haspopup="true"
       aria-expanded="false"
       aria-label="Ver todas las secciones"
@@ -115,13 +115,13 @@ const SECTIONS = [
       <!-- flecha ↓ con tallo -->
       <svg
         aria-hidden="true"
-        class="w-[7px] h-[10px] lg:w-[calc(8px*var(--header-scale,1))] lg:h-[calc(12px*var(--header-scale,1))] transition-[width,height] duration-300"
+        class="w-1.75 h-2.5 lg:w-[calc(8px*var(--header-scale,1))] lg:h-[calc(12px*var(--header-scale,1))] transition-[width,height] duration-300"
         viewBox="0 0 8 12"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <line x1="4" y1="0" x2="4" y2="8" stroke="#00C9B1" stroke-width="2" stroke-linecap="round"/>
-        <path d="M1 6L4 11L7 6" stroke="#00C9B1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="4" y1="0" x2="4" y2="8" stroke="var(--color-brand-white)" stroke-width="2" stroke-linecap="round"/>
+        <path d="M1 6L4 11L7 6" stroke="var(--color-brand-white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
   </div>
