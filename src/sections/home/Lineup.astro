@@ -59,7 +59,7 @@ const shows: ShowItem[] = entries.length
           <div
             class="LineupSection__card"
             data-card
-            data-theme={i % 2 === 0 ? 'green' : 'blue'}
+            data-theme={i % 2 === 0 ? 'white' : 'blue'}
           >
             <div class="LineupSection__card-meta">
               <span>{show.days ?? ''}</span>
@@ -99,7 +99,7 @@ const shows: ShowItem[] = entries.length
   .LineupSection {
     position: relative;
     height: var(--lineup-h, 100dvh);
-    background: var(--color-brand-dark);
+    background: var(--color-brand-blue);
   }
 
   /* ── Sticky viewport ─────────────────────────────────────────────────────── */
@@ -127,7 +127,7 @@ const shows: ShowItem[] = entries.length
   .LineupSection__header-programas {
     font-family: var(--font-boldonse), sans-serif;
     font-size: clamp(0.65rem, 1.1vw, 0.85rem);
-    color: var(--color-brand-green);
+    color: var(--color-brand-white);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     line-height: 1;
@@ -141,7 +141,7 @@ const shows: ShowItem[] = entries.length
     font-family: var(--font-franklin), sans-serif;
     font-weight: 900;
     font-size: clamp(3rem, 8vw, 5.5rem);
-    color: var(--color-brand-blue);
+    color: var(--color-brand-white);
     text-align: right;
     line-height: 0.9;
     letter-spacing: -0.02em;
@@ -170,7 +170,7 @@ const shows: ShowItem[] = entries.length
 
   /* ── Caps azules (arriba y abajo de la columna, sin contenido) ──────────── */
   .LineupSection__cap {
-    background: var(--color-brand-blue);
+    background: var(--color-brand-white);
     height: 1.5rem;
   }
   .LineupSection__cap--bottom {
@@ -187,14 +187,14 @@ const shows: ShowItem[] = entries.length
     min-height: clamp(13rem, 30vh, 18rem);
   }
 
-  .LineupSection__card[data-theme='green'] {
-    background: var(--color-brand-green);
+  .LineupSection__card[data-theme='white'] {
+    background: var(--color-brand-white);
     color: var(--color-brand-blue);
   }
 
   .LineupSection__card[data-theme='blue'] {
     background: var(--color-brand-blue);
-    color: var(--color-brand-green);
+    color: var(--color-brand-white);
   }
 
   /* ── Logo del programa ───────────────────────────────────────────────────── */
@@ -243,7 +243,7 @@ const shows: ShowItem[] = entries.length
     padding: 0.45rem 1rem;
     border-radius: 0.35rem;
     width: calc(100%);
-    background: var(--color-brand-green);
+    background: var(--color-brand-white);
     color: var(--color-brand-blue);
     font-family: var(--font-franklin), sans-serif;
     font-size: clamp(0.72rem, 1.3vw, 0.88rem);

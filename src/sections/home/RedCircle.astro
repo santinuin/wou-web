@@ -44,7 +44,7 @@ const balls: BallData[] = posts.length
 
 <section
   aria-label="Círculo Rojo"
-  class="RedCircleSection relative overflow-hidden bg-brand-dark"
+  class="RedCircleSection relative overflow-hidden bg-brand-gray"
 >
   <BallPool client:visible floorSelector="#rc-floor">
     {
@@ -88,8 +88,8 @@ const balls: BallData[] = posts.length
     height: 100dvh;
     min-height: 520px;
     --ball-size: 18vw;
-    --ball-color: #e04a3f;
-    --ball-text-color: #ffffff;
+    --ball-color: var(--color-brand-red);
+    --ball-text-color: var(--color-brand-white);
   }
 
   @media (max-width: 1024px) {

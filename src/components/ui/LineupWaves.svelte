@@ -213,8 +213,8 @@
   }
   :global(.lw-line) {
     fill: none;
-    stroke: var(--color-brand-teal);
-    stroke-width: 0.75px;
+    stroke: var(--color-brand-white);
+    stroke-width: 2px;
     opacity: 0.35;
   }
 </style>

@@ -243,7 +243,7 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    color: var(--color-brand-white);
+    color: var(--color-brand-dark);
   }
 
   /* ── Arrow buttons ────────────────────────────────────────────────────── */

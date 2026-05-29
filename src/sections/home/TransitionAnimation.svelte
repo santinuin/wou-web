@@ -64,7 +64,7 @@
         ...FIXED_STYLES,
         opacity:    '0',
         paddingTop: `${getHeaderH()}px`,
-        background: 'var(--color-brand-dark)',
+        background: 'var(--color-brand-gray)',
       });
 
       placeholder = document.createElement('div');
@@ -79,7 +79,7 @@
     Object.assign(overlay.style, {
       position:      'absolute',
       inset:         '0',
-      background:    'var(--color-brand-dark)',
+      background:    'var(--color-brand-blue)',
       pointerEvents: 'none',
       zIndex:        '20',
     });
