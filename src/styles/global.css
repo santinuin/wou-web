@@ -1,20 +1,25 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── Paleta ──────────────────────────────────────────────────────────── */
+  /* ── Primarios ───────────────────────────────────────────────────────── */
   --color-brand-dark: #080F1A;
-  /* fondo header y secciones oscuras */
---color-brand-teal: #00C9B1;
-  /* acento principal */
-  --color-brand-orange: #FB923C;
-  /* badge "ESTÁ PASANDO" */
-  --color-brand-white: #F0F4F8;
-  /* texto sobre fondos oscuros */
+  /* azul dark — fondo base streaming y redes sociales                      */
+  --color-brand-teal: #00C9B1;
+  /* turquesa — acento principal, elementos estructurales del portal        */
   --color-brand-green: #B9FFC1;
-  --color-brand-gray: #FFFFFF8C;
-  --color-brand-blue: #01236A;
-  --color-brand-red: #E24B4A;
-  --color-brand-blue-light: #081830;
+  /* verde lima — acento secundario, dominante en redes                     */
+  --color-brand-blue: #003AB2;
+  /* azul — sección de programas y noticias destacadas                      */
+
+  /* ── Secundarios ─────────────────────────────────────────────────────── */
+  --color-brand-red: #FF0000;
+  /* rojo — Último Momento, etiquetas de contenido urgente                  */
+  --color-brand-yellow: #FFFF00;
+  /* amarillo — acentos secundarios, Último Momento                          */
+  --color-brand-gray: #EBEBEB;
+  /* gris oscuro — variante de fondo para diferenciar sin contraste         */
+  --color-brand-white: #FFFFFF;
+  /* blanco — fondo base, títulos y texto de alto contraste                 */
 
   /* Alias semánticos */
   --color-primary: var(--color-brand-dark);

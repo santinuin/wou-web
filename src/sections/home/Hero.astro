@@ -92,7 +92,7 @@ const MOCK_EDITORIAL = {
         <LiveCard isLive={true} streamUrl={null} />
       </div>
       <!-- YoutubeStream — desktop: col der; mobile/tablet: después del editorial -->
-      <div class="order-4 lg:order-2 h-52 lg:h-auto bg-brand-black">
+      <div class="order-4 lg:order-2 h-52 lg:h-auto bg-brand-dark">
         <YoutubeStream station="Cambalache" placeholder={youtubePlaceholder.src} client:load />
       </div>
     </div>
@@ -107,7 +107,7 @@ const MOCK_EDITORIAL = {
   <!-- ── Columna derecha: ticker + editorial ───────────────────────────── -->
   <!-- Mobile/tablet: va tercero (entre NewsList y LiveCard), con padding alrededor
        para que se vea el dark del fondo como margen. Desktop: col 2 del grid, sin padding. -->
-  <div class="order-3 lg:order-2 flex flex-col lg:min-h-0 min-h-[60svh] px-4 py-4 bg-brand-dark lg:px-0 lg:py-0 lg:bg-transparent">
+  <div class="order-3 lg:order-2 flex flex-col lg:min-h-0 min-h-[60svh] px-4 py-4 bg-brand-gray lg:px-0 lg:py-0 lg:bg-transparent">
 
     <!-- Ticker al tope de la columna (solo desktop — en mobile vive arriba del section) -->
     <div class="hidden lg:block">

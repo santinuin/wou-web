@@ -46,7 +46,7 @@
       })
       .to(spans, {
         x: 0,
-        color: 'var(--color-brand-gray)',
+        color: 'color-mix(in srgb, var(--color-brand-white) 55%, transparent)',
         duration: 0.45,
         stagger: 0.07,
         ease: 'power2.inOut',
@@ -115,7 +115,7 @@
             >
               <span
                 class="gsap-text font-boldonse font-normal uppercase inline-block leading-none align-bottom"
-                style="font-size: clamp(2rem, 4.5vw, 2.75rem); color: var(--color-brand-gray);"
+                style="font-size: clamp(2rem, 4.5vw, 2.75rem); color: color-mix(in srgb, var(--color-brand-white) 55%, transparent);"
               >
                 {section.title}
               </span>

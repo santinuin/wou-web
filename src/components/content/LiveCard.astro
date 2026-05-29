@@ -15,7 +15,7 @@ const { isLive, streamUrl } = Astro.props;
   como unidad de tipografía. Así el "EN VIVO" y el ⦿ escalan con la card,
   ocupando un % constante del ancho disponible en mobile, tablet y desktop.
 -->
-<div class="relative flex flex-col h-full bg-brand-dark overflow-hidden" style="container-type: inline-size;">
+<div class="relative flex flex-col h-full bg-brand-green overflow-hidden" style="container-type: inline-size;">
 
   <!-- EN VIVO — tamaño relativo al ancho de la card -->
   <div class="flex items-center justify-center gap-2 shrink-0 pt-2 lg:pt-0">
@@ -25,7 +25,7 @@ const { isLive, streamUrl } = Astro.props;
       aria-hidden="true"
     >⦿</span>
     <span
-      class="font-bowlby text-brand-red uppercase leading-none tracking-tight whitespace-nowrap"
+      class="font-bowlby text-brand-teal uppercase leading-none tracking-tight whitespace-nowrap"
       style="font-size: clamp(1.5rem, 16cqw, 4rem);"
     >
       {isLive ? 'EN VIVO' : 'EN VIVO'}
@@ -43,11 +43,10 @@ const { isLive, streamUrl } = Astro.props;
       <RadioPlayer streamUrl={streamUrl} client:idle />
     ) : (
       <svg width="24" height="17" viewBox="0 0 24 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Sin stream configurado">
-        <path d="M10.8413 0.54834L5.29782 4.83703H1.08028C0.485387 4.83703 0 5.32215 0 5.92334V11.0721C0 11.6704 0.482427 12.1585 1.08028 12.1585H5.29782L10.8413 16.4471C11.5516 16.9948 12.5786 16.4888 12.5786 15.587V1.40846C12.5786 0.50965 11.5516 -0.00225502 10.8413 0.54834Z" fill="#F0EDE8"/>
-        <rect x="18.1" y="3.5" width="1.8" height="10" rx="0.9" transform="rotate(45 19 8.5)" fill="#F0EDE8"/>
-        <rect x="18.1" y="3.5" width="1.8" height="10" rx="0.9" transform="rotate(-45 19 8.5)" fill="#F0EDE8"/>
+        <path d="M10.8413 0.54834L5.29782 4.83703H1.08028C0.485387 4.83703 0 5.32215 0 5.92334V11.0721C0 11.6704 0.482427 12.1585 1.08028 12.1585H5.29782L10.8413 16.4471C11.5516 16.9948 12.5786 16.4888 12.5786 15.587V1.40846C12.5786 0.50965 11.5516 -0.00225502 10.8413 0.54834Z" fill="var(--color-brand-dark)"/>
+        <rect x="18.1" y="3.5" width="1.8" height="10" rx="0.9" transform="rotate(45 19 8.5)" fill="var(--color-brand-dark)"/>
+        <rect x="18.1" y="3.5" width="1.8" height="10" rx="0.9" transform="rotate(-45 19 8.5)" fill="var(--color-brand-dark)"/>
       </svg>
     )}
   </div>
-
 </div>

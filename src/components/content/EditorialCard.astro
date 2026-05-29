@@ -26,7 +26,7 @@ const titleParts = highlightWord
   <!-- Cursor SVG personalizado -->
   <div class="EC__cursor" aria-hidden="true">
     <svg width="23" height="25" viewBox="0 0 23 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M21.9431 9.77477L1.42821 0.0979468C0.658599 -0.265079 -0.183895 0.437835 0.0353599 1.26004L6.12016 24.078C6.40475 25.1452 7.95452 25.0313 8.07993 23.9339L9.37916 12.5657C9.43688 12.0606 9.86434 11.6792 10.3727 11.6792H21.5165C22.5841 11.6792 22.9087 10.2303 21.9431 9.77477Z" fill="#01236A"/>
+      <path d="M21.9431 9.77477L1.42821 0.0979468C0.658599 -0.265079 -0.183895 0.437835 0.0353599 1.26004L6.12016 24.078C6.40475 25.1452 7.95452 25.0313 8.07993 23.9339L9.37916 12.5657C9.43688 12.0606 9.86434 11.6792 10.3727 11.6792H21.5165C22.5841 11.6792 22.9087 10.2303 21.9431 9.77477Z" fill="var(--color-brand-red)"/>
     </svg>
   </div>
 
@@ -51,7 +51,7 @@ const titleParts = highlightWord
         fetchpriority="high"
       />
     ) : (
-      <div class="w-full h-full bg-brand-teal/40" />
+      <div class="w-full h-full bg-brand-white/10" />
     )}
   </div>
 
@@ -73,7 +73,7 @@ const titleParts = highlightWord
     flex-direction: column;
     flex: 1;
     min-height: 0;
-    background: var(--color-brand-teal);
+    background: var(--color-brand-blue);
     text-decoration: none;
     overflow: hidden;
     position: relative;
@@ -149,7 +149,7 @@ const titleParts = highlightWord
   .EC__title {
     font-size: 2rem; /* JS lo reemplaza; fallback para SSR */
     line-height: 0.70;
-    color: var(--color-brand-dark);
+    color: var(--color-brand-white);
     margin: 0;
     text-align: center;
     width: 100%;

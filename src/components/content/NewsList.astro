@@ -55,20 +55,20 @@ const timeClasses = expandedPreview
   : 'text-[10px] sm:text-xs';
 ---
 
-<div class="NL flex flex-col bg-brand-dark h-full">
+<div class="NL flex flex-col bg-brand-white h-full">
 
   {showHeader && (
     <!-- Encabezado -->
-    <div class="NL__header px-4 pt-4 lg:px-5 lg:pt-10 border-b-2 lg:border-b-10 border-brand-teal" style="container-type: inline-size;">
+    <div class="NL__header px-4 pt-4 lg:px-5 lg:pt-10 border-b-2 lg:border-b-10 border-brand-dark" style="container-type: inline-size;">
       <div class="flex items-end gap-2 lg:gap-3 leading-none pb-0">
         <span
-          class="NL__title font-boldonse text-brand-teal leading-none whitespace-nowrap"
+          class="NL__title font-boldonse text-brand-dark leading-none whitespace-nowrap"
           style="font-size: clamp(1rem, 8.5cqw, 5rem);"
         >
           PONETE AL DÍA
         </span>
         <span
-          class="NL__date font-franklin font-bold text-brand-teal leading-none whitespace-nowrap shrink-0 -mb-0.5 lg:-mb-1.75"
+          class="NL__date font-franklin font-bold text-brand-dark leading-none whitespace-nowrap shrink-0 -mb-0.5 lg:-mb-1.75"
           style="font-size: clamp(0.6rem, 4cqw, 2.5rem);"
         >
           {formatDateDots(buildDate)}
@@ -100,7 +100,7 @@ const timeClasses = expandedPreview
           <span
             aria-hidden="true"
             data-sweep
-            class="absolute inset-0 bg-brand-blue origin-top scale-y-0 transition-transform duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] group-hover:scale-y-100 group-[.is-pressed]:scale-y-100"
+            class="absolute inset-0 bg-brand-teal origin-top scale-y-0 transition-transform duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] group-hover:scale-y-100 group-[.is-pressed]:scale-y-100"
           ></span>
 
           {/*
@@ -129,7 +129,7 @@ const timeClasses = expandedPreview
               )}
               {article.excerpt && (
                 <span class:list={[
-                  'font-franklin text-brand-white text-xs lg:text-sm font-bold leading-none lg:leading-snug line-clamp-3',
+                  'font-franklin text-brand-dark text-xs lg:text-sm font-bold leading-none lg:leading-snug line-clamp-3',
                   previewExcerptClasses,
                 ]}>
                   {article.excerpt}
@@ -139,14 +139,14 @@ const timeClasses = expandedPreview
           )}
 
           <span class:list={[
-            'relative flex-1 min-w-0 font-franklin font-bold text-brand-white uppercase tracking-wide truncate transition-colors',
+            'relative flex-1 min-w-0 font-franklin font-bold text-brand-dark uppercase tracking-wide truncate transition-colors',
             titleClasses,
           ]}>
             {article.title}
           </span>
 
           <span class:list={[
-            'relative ml-auto font-sans text-brand-white/40 shrink-0 pl-4 group-hover:text-brand-white/70 transition-colors',
+            'relative ml-auto font-sans text-brand-dark/40 shrink-0 pl-4 group-hover:text-brand-dark/70 transition-colors',
             timeClasses,
           ]}>
             {timeAgo(article.publishedAt)}
