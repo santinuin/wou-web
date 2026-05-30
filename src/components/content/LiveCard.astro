@@ -17,15 +17,18 @@ const { isLive, streamUrl } = Astro.props;
 -->
 <div class="relative flex flex-col h-full bg-brand-green overflow-hidden" style="container-type: inline-size;">
 
+  <!-- Spacer superior: empuja el EN VIVO hacia las ondas -->
+  <div class="flex-1 min-h-0"></div>
+
   <!-- EN VIVO — tamaño relativo al ancho de la card -->
-  <div class="flex items-center justify-center gap-2 shrink-0 pt-2 lg:pt-0">
+  <div class="flex items-center justify-center gap-2 shrink-0">
     <span
       class="text-brand-red leading-none"
       style="font-size: clamp(1.5rem, 16cqw, 4rem);"
       aria-hidden="true"
     >⦿</span>
     <span
-      class="font-bowlby text-brand-teal uppercase leading-none tracking-tight whitespace-nowrap"
+      class="font-franklin font-black text-brand-teal uppercase leading-none tracking-tight whitespace-nowrap"
       style="font-size: clamp(1.5rem, 16cqw, 4rem);"
     >
       {isLive ? 'EN VIVO' : 'EN VIVO'}
@@ -33,12 +36,12 @@ const { isLive, streamUrl } = Astro.props;
   </div>
 
   <!-- Ondas de radio -->
-  <div class="flex-1 min-h-0 py-3">
+  <div class="flex-[3] min-h-0 pb-3">
     <RadioWaves client:idle />
   </div>
 
   <!-- Mute -->
-  <div class="shrink-0 ml-auto mr-4">
+  <div class="shrink-0 ml-auto mr-4 mb-4">
     {streamUrl ? (
       <RadioPlayer streamUrl={streamUrl} client:idle />
     ) : (

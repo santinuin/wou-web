@@ -136,7 +136,7 @@
   .menu-item .sweep {
     position: absolute;
     inset: 0;
-    background: var(--color-brand-dark);
+    background: var(--color-brand-white);
     transform: scaleY(0);
     transform-origin: top;
     transition: transform 0.4s cubic-bezier(0.65, 0, 0.35, 1);
