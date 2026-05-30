@@ -51,8 +51,6 @@ const shows: ShowItem[] = entries.length
         <div class="LineupSection__header-freq">95.1 FM</div>
       </div>
 
-      <div class="LineupSection__cap" aria-hidden="true"></div>
-
       {shows.map((show, i) => {
         const logo = LOGOS[show.id] ?? null;
         return (
@@ -79,15 +77,6 @@ const shows: ShowItem[] = entries.length
           </div>
         );
       })}
-
-      <a
-        class="LineupSection__cta"
-        data-cta
-        href="/grilla"
-        aria-label="Ver grilla completa de programación"
-      >
-        Ver grilla completa
-      </a>
 
     </div>
 
@@ -140,11 +129,12 @@ const shows: ShowItem[] = entries.length
   .LineupSection__header-freq {
     font-family: var(--font-franklin), sans-serif;
     font-weight: 900;
-    font-size: clamp(3rem, 8vw, 5.5rem);
+    font-size: clamp(2.2rem, 6vw, 4rem);
     color: var(--color-brand-white);
     text-align: right;
-    line-height: 0.9;
+    line-height: 1;
     letter-spacing: -0.02em;
+    white-space: nowrap;
   }
 
   /* ── Columna de programas ────────────────────────────────────────────────── */
@@ -153,7 +143,7 @@ const shows: ShowItem[] = entries.length
     top: var(--col-top, 8rem);
     left: 50%;
     z-index: 1;
-    width: min(40%, 491px);
+    width: min(34%, 420px);
     padding-top: 0;
     padding-bottom: 0;
     /* El script setea --col-ty a medida que scrollea */
@@ -162,19 +152,10 @@ const shows: ShowItem[] = entries.length
   }
 
   @media (max-width: 768px) {
-    .LineupSection__column { width: min(72%, 380px); }
+    .LineupSection__column { width: min(65%, 340px); }
   }
   @media (max-width: 480px) {
-    .LineupSection__column { width: 86%; }
-  }
-
-  /* ── Caps azules (arriba y abajo de la columna, sin contenido) ──────────── */
-  .LineupSection__cap {
-    background: var(--color-brand-white);
-    height: 1.5rem;
-  }
-  .LineupSection__cap--bottom {
-    height: 12rem;
+    .LineupSection__column { width: 80%; }
   }
 
   /* ── Cards ───────────────────────────────────────────────────────────────── */
@@ -183,8 +164,8 @@ const shows: ShowItem[] = entries.length
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 1rem 1rem;
-    min-height: clamp(13rem, 30vh, 18rem);
+    padding: 0.75rem 0.75rem 0.75rem;
+    min-height: clamp(10rem, 24vh, 14rem);
   }
 
   .LineupSection__card[data-theme='white'] {
@@ -200,8 +181,8 @@ const shows: ShowItem[] = entries.length
   /* ── Logo del programa ───────────────────────────────────────────────────── */
   .LineupSection__card-logo {
     display: block;
-    width: 92%;
-    max-height: 13rem;
+    width: 80%;
+    max-height: 9rem;
     object-fit: contain;
     margin: auto;
   }
@@ -233,44 +214,6 @@ const shows: ShowItem[] = entries.length
     line-height: 1.2;
   }
 
-  /* ── CTA ─────────────────────────────────────────────────────────────────── */
-  .LineupSection__cta {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    /* más angosto y sobresale lateralmente de la columna */
-    margin-top: 1.5rem;
-    padding: 0.45rem 1rem;
-    border-radius: 0.35rem;
-    width: calc(100%);
-    background: var(--color-brand-white);
-    color: var(--color-brand-blue);
-    font-family: var(--font-franklin), sans-serif;
-    font-size: clamp(0.72rem, 1.3vw, 0.88rem);
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    text-decoration: none;
-    transition: background 0.2s ease, color 0.2s ease;
-  }
-
-  @media (hover: hover) {
-    .LineupSection__cta:hover {
-      background: var(--color-brand-teal);
-      color: var(--color-brand-dark);
-    }
-  }
-  .LineupSection__cta[data-touch-hover],
-  .LineupSection__cta:focus-visible {
-    background: var(--color-brand-teal);
-    color: var(--color-brand-dark);
-    outline: none;
-  }
-
-  .LineupSection__cta:focus-visible {
-    outline: 2px solid var(--color-brand-teal);
-    outline-offset: 2px;
-  }
 </style>
 
 <script>
