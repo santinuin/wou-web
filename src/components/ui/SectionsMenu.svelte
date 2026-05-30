@@ -39,14 +39,12 @@
     tl = gsap.timeline()
       .to(spans, {
         x: (i, el) => navWidth - PAD - el.offsetLeft - el.offsetWidth,
-        color: 'var(--color-brand-white)',
         duration: 0.45,
         stagger: 0.07,
         ease: 'power2.inOut',
       })
       .to(spans, {
         x: 0,
-        color: 'color-mix(in srgb, var(--color-brand-white) 55%, transparent)',
         duration: 0.45,
         stagger: 0.07,
         ease: 'power2.inOut',
@@ -100,22 +98,22 @@
 {#if isOpen}
   <nav
     bind:this={navEl}
-    class="fixed right-0 w-full lg:w-1/2 bg-brand-blue pointer-events-auto z-49 overflow-y-auto"
+    class="fixed right-0 w-full lg:w-1/2 bg-brand-blue pointer-events-auto z-49 overflow-y-auto lg:overflow-hidden"
     style="top: {headerHeight}px; height: calc(100vh - {headerHeight}px);"
     aria-label="Menú de secciones"
   >
-    <div class="min-h-full flex flex-col justify-center py-2 lg:py-4">
-      <ul class="flex flex-col">
+    <div class="h-full flex flex-col py-1 lg:py-2">
+      <ul class="flex flex-col flex-1">
         {#each sections as section}
-          <li class="menu-item">
+          <li class="menu-item flex-1 flex">
             <span class="sweep" aria-hidden="true"></span>
             <a
               href={section.slug}
-              class="relative z-10 block w-full pl-6 lg:pl-10 pt-2 pb-1"
+              class="relative z-10 flex items-center w-full pl-6 lg:pl-10"
             >
               <span
-                class="gsap-text font-boldonse font-normal uppercase inline-block leading-none align-bottom"
-                style="font-size: clamp(2rem, 4.5vw, 2.75rem); color: color-mix(in srgb, var(--color-brand-white) 55%, transparent);"
+                class="gsap-text font-boldonse font-normal uppercase inline-block leading-none"
+                style="color: var(--color-brand-white); font-size: clamp(1.5rem, min(calc((100svh - {headerHeight}px - 1rem) / {sections.length} * 0.72), 2.75rem), 2.75rem);"
               >
                 {section.title}
               </span>
