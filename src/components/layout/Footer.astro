@@ -546,6 +546,16 @@ const EMAIL = 'mail@radiowou.com.ar';
     }
   }
 
+  /* Pantallas bajas (< 860px de alto): el radio expandido superaría el
+     borde superior del footer. Reducimos la escala para que el círculo
+     siempre quede contenido dentro del footer. */
+  @media (max-height: 860px) and (min-width: 641px) {
+    .FooterWOU {
+      --scale-hover: 1.45;
+      --logo-scale-hover: 2.2;
+    }
+  }
+
   @media (max-width: 640px) {
     .FooterWOU {
       --circle-size: clamp(200px, 60vw, 280px);
