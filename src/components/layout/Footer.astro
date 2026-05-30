@@ -29,7 +29,7 @@ const EMAIL = 'mail@radiowou.com.ar';
 <footer
   id="siteFooter"
   role="contentinfo"
-  class="FooterWOU relative w-full overflow-hidden bg-brand-dark text-brand-teal"
+  class="FooterWOU relative w-full overflow-hidden bg-brand-gray text-brand-blue"
   aria-label="Pie de página"
 >
   <!-- ── Esquina superior izquierda ────────────────────────────────────── -->
@@ -128,6 +128,8 @@ const EMAIL = 'mail@radiowou.com.ar';
     --color-teal-55: color-mix(in srgb, var(--color-brand-teal) 55%, transparent);
     --color-teal-65: color-mix(in srgb, var(--color-brand-teal) 65%, transparent);
     --color-white-35: color-mix(in srgb, var(--color-brand-white) 35%, transparent);
+    --color-ink-55: color-mix(in srgb, var(--color-brand-blue) 55%, transparent);
+    --color-ink-35: color-mix(in srgb, var(--color-brand-blue) 35%, transparent);
     --color-ink:    var(--color-brand-blue);
     --color-cream:  var(--color-brand-white);
     --color-dark:   var(--color-brand-dark);
@@ -147,6 +149,7 @@ const EMAIL = 'mail@radiowou.com.ar';
     min-height: 720px;
     max-height: 960px;
     font-family: var(--font-franklin, 'Libre Franklin', sans-serif);
+    transition: background 0.9s var(--ease-expand);
   }
 
   /* ───────────────────────────────────────────────────────────────────
@@ -168,7 +171,7 @@ const EMAIL = 'mail@radiowou.com.ar';
 
   .FooterWOU__tagline {
     margin: 0;
-    color: var(--color-teal);
+    color: var(--color-navy);
     font-weight: 700;
     font-size: clamp(0.95rem, 1.15vw, 1.15rem);
     line-height: 1.2;
@@ -177,7 +180,7 @@ const EMAIL = 'mail@radiowou.com.ar';
 
   .FooterWOU__location {
     margin: clamp(0.75rem, 1.8vw, 1.25rem) 0 0;
-    color: var(--color-teal-55);
+    color: var(--color-ink-55);
     font-weight: 400;
     font-size: 0.85rem;
     letter-spacing: 0.01em;
@@ -197,7 +200,7 @@ const EMAIL = 'mail@radiowou.com.ar';
   }
 
   .FooterWOU__top-right a {
-    color: var(--color-teal);
+    color: var(--color-navy);
     font-weight: 700;
     font-size: clamp(0.95rem, 1.15vw, 1.15rem);
     text-decoration: none;
@@ -222,12 +225,12 @@ const EMAIL = 'mail@radiowou.com.ar';
 
   .FooterWOU__bottom-left {
     left: var(--pad-x);
-    color: var(--color-white-35);
+    color: var(--color-ink-35);
   }
 
   .FooterWOU__bottom-right {
     right: var(--pad-x);
-    color: var(--color-white-35);
+    color: var(--color-ink-35);
   }
 
   /* ───────────────────────────────────────────────────────────────────
@@ -250,7 +253,7 @@ const EMAIL = 'mail@radiowou.com.ar';
   }
 
   .FooterWOU__cta:focus-visible {
-    outline: 2px solid var(--color-teal);
+    outline: 2px solid var(--color-navy);
     outline-offset: 1.5rem;
     border-radius: 9999px;
   }
@@ -276,7 +279,7 @@ const EMAIL = 'mail@radiowou.com.ar';
     margin: calc(var(--circle-size) * var(--scale-hover) / -2) 0 0
             calc(var(--circle-size) * var(--scale-hover) / -2);
     border-radius: 50%;
-    border: 1px solid var(--color-teal);
+    border: 1px solid var(--color-navy);
     opacity: 0;
     transform: scale(0.6);
     transform-origin: center;
@@ -289,13 +292,13 @@ const EMAIL = 'mail@radiowou.com.ar';
 
   @media (hover: hover) {
     .FooterWOU__cta:hover .FooterWOU__ring {
-      opacity: 0.15;
+      opacity: 0.35;
       transform: scale(calc(1 + var(--i) * 0.13));
     }
   }
   .FooterWOU__cta[data-touch-hover] .FooterWOU__ring,
   .FooterWOU__cta:focus-visible .FooterWOU__ring {
-    opacity: 0.15;
+    opacity: 0.35;
     transform: scale(calc(1 + var(--i) * 0.13));
   }
 
@@ -403,12 +406,12 @@ const EMAIL = 'mail@radiowou.com.ar';
   }
 
   .FooterWOU__logo-letter {
-    fill: var(--color-dark);
+    fill: var(--color-navy);
     transition: fill 0.4s ease;
   }
 
   .FooterWOU__logo-dot {
-    fill: var(--color-dark);
+    fill: var(--color-navy);
     transition: opacity 0.3s ease;
   }
 
@@ -488,6 +491,19 @@ const EMAIL = 'mail@radiowou.com.ar';
     opacity: 1;
     transform: translate(-50%, 0);
     transition-delay: 0.9s;
+  }
+
+  /* ───────────────────────────────────────────────────────────────────
+     Hover de footer — fondo gris → teal cuando el CTA está activo
+     ─────────────────────────────────────────────────────────────────── */
+  @media (hover: hover) {
+    .FooterWOU:has(.FooterWOU__cta:hover) {
+      background: var(--color-brand-teal);
+    }
+  }
+  .FooterWOU:has(.FooterWOU__cta[data-touch-hover]),
+  .FooterWOU:has(.FooterWOU__cta:focus-visible) {
+    background: var(--color-brand-teal);
   }
 
   /* ───────────────────────────────────────────────────────────────────
