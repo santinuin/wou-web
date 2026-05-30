@@ -13,11 +13,11 @@ const { items } = Astro.props;
 const loopedItems = [...items, ...items, ...items];
 ---
 
-<div class="flex items-stretch overflow-hidden h-7 lg:h-9">
+<div class="flex items-stretch overflow-hidden h-6 lg:h-8">
 
   <!-- Badge fijo "ESTÁ PASANDO" -->
-  <div class="flex items-center justify-center px-3 lg:px-5 bg-brand-red shrink-0">
-    <span class="font-boldonse text-[11px] lg:text-sm text-brand-white uppercase leading-none whitespace-nowrap">
+  <div class="flex items-center justify-center px-2 lg:px-3 bg-brand-red shrink-0">
+    <span class="font-boldonse text-[10px] lg:text-xs text-brand-white uppercase leading-none whitespace-nowrap">
       ESTÁ PASANDO
     </span>
   </div>

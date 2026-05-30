@@ -55,11 +55,11 @@ const SECTIONS = [
         </svg>
         <!-- EN VIVO + estación -->
         <div class="flex items-center gap-2 leading-none">
-          <span class="font-bowlby text-brand-red uppercase tracking-tight whitespace-nowrap text-[0.7rem]">
+          <span class="font-franklin font-black text-brand-red uppercase tracking-tight whitespace-nowrap text-[0.7rem]">
             ⦿ EN VIVO
           </span>
           <!-- Estación: oculta en mobile (no aparece en el diseño) -->
-          <span class="hidden lg:inline font-bowlby text-brand-white uppercase tracking-tight whitespace-nowrap text-[0.7rem]">
+          <span class="hidden lg:inline font-franklin font-black text-brand-white uppercase tracking-tight whitespace-nowrap text-[0.7rem]">
             WOU 95.1
           </span>
         </div>
@@ -74,7 +74,7 @@ const SECTIONS = [
           class="w-[calc(2.75rem*var(--header-scale,1))] h-[calc(2.75rem*var(--header-scale,1))] transition-[width,height] duration-300 object-contain"
         />
         <span
-          class="font-bowlby text-brand-white tracking-wide text-[calc(1.1rem*var(--header-scale,1))] transition-[font-size] duration-300 whitespace-nowrap"
+          class="font-franklin font-black text-brand-white tracking-wide text-[calc(1.1rem*var(--header-scale,1))] transition-[font-size] duration-300 whitespace-nowrap"
         >
           <span class="header-normal">Viento |</span><span class="wind-value"><WindWidget client:load /></span>
         </span>
@@ -106,7 +106,7 @@ const SECTIONS = [
     <!-- TODO: reemplazar por <SectionMenu client:load /> cuando el dropdown esté definido -->
     <button
       type="button"
-      class="flex items-center gap-1 lg:gap-1.5 font-bowlby text-brand-white uppercase tracking-wide cursor-pointer justify-self-end text-sm lg:text-[calc(1.1rem*var(--header-scale,1))] transition-[font-size] duration-300"
+      class="flex items-center gap-1 lg:gap-1.5 font-franklin font-black text-brand-white uppercase tracking-wide cursor-pointer justify-self-end text-sm lg:text-[calc(1.1rem*var(--header-scale,1))] transition-[font-size] duration-300"
       aria-haspopup="true"
       aria-expanded="false"
       aria-label="Ver todas las secciones"

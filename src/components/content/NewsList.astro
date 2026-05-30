@@ -37,16 +37,16 @@ const {
 // completas durante el scan estático.
 const previewWrapClasses = expandedPreview
   ? 'group-hover:max-w-[30%] group-[.is-pressed]:max-w-[60%]'
-  : 'group-hover:max-w-70 group-[.is-pressed]:max-w-[55%]';
+  : 'group-hover:max-w-[26rem] group-[.is-pressed]:max-w-[50%]';
 const previewImageClasses = expandedPreview
   ? 'w-14 h-14 lg:w-20 lg:h-20'
-  : 'w-12 h-12 lg:w-14 lg:h-14';
+  : 'w-20 h-12 lg:w-24 lg:h-14';
 // En modo expandido la descripción usa ancho FIJO (no flex-1) para que
 // el texto no re-fluya durante la animación de hover. El wrap clipea
 // con overflow:hidden hasta llegar al final del barrido.
 const previewExcerptClasses = expandedPreview
   ? 'w-[12rem] lg:w-[20rem] shrink-0 font-bold'
-  : 'w-32 lg:w-40 shrink-0';
+  : 'w-44 lg:w-60 shrink-0';
 const titleClasses = expandedPreview
   ? 'text-lg sm:text-xl md:text-2xl lg:text-4xl'
   : 'text-sm sm:text-base md:text-lg lg:text-2xl';
@@ -92,7 +92,7 @@ const timeClasses = expandedPreview
       >
         <a
           href={article.href ?? `/articulo/${article.slug}`}
-          class="relative flex flex-1 items-center px-4 lg:px-5 overflow-hidden"
+          class="relative flex flex-1 items-center px-4 lg:px-5 py-3 lg:py-4 overflow-hidden"
         >
           {/*
             Sweep background — barrido vertical del color de hover.
@@ -122,14 +122,14 @@ const timeClasses = expandedPreview
                   height={160}
                   class:list={[
                     previewImageClasses,
-                    'object-cover rounded shrink-0',
+                    'object-cover shrink-0',
                   ]}
                   loading="lazy"
                 />
               )}
               {article.excerpt && (
                 <span class:list={[
-                  'font-franklin text-brand-dark text-xs lg:text-sm font-bold leading-none lg:leading-snug line-clamp-3',
+                  'font-franklin text-brand-dark text-xs lg:text-sm leading-tight line-clamp-3',
                   previewExcerptClasses,
                 ]}>
                   {article.excerpt}
@@ -146,7 +146,7 @@ const timeClasses = expandedPreview
           </span>
 
           <span class:list={[
-            'relative ml-auto font-sans text-brand-dark/40 shrink-0 pl-4 group-hover:text-brand-dark/70 transition-colors',
+            'relative ml-auto font-sans text-brand-dark shrink-0 pl-4 transition-colors',
             timeClasses,
           ]}>
             {timeAgo(article.publishedAt)}
