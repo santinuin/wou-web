@@ -74,7 +74,7 @@ const SECTIONS = [
           class="w-[calc(2.75rem*var(--header-scale,1))] h-[calc(2.75rem*var(--header-scale,1))] transition-[width,height] duration-300 object-contain"
         />
         <span
-          class="font-bowlby text-brand-white tracking-wide text-[calc(1rem*var(--header-scale,1))] transition-[font-size] duration-300 whitespace-nowrap"
+          class="font-bowlby text-brand-white tracking-wide text-[calc(1.1rem*var(--header-scale,1))] transition-[font-size] duration-300 whitespace-nowrap"
         >
           <span class="header-normal">Viento |</span><span class="wind-value"><WindWidget client:load /></span>
         </span>
@@ -106,7 +106,7 @@ const SECTIONS = [
     <!-- TODO: reemplazar por <SectionMenu client:load /> cuando el dropdown esté definido -->
     <button
       type="button"
-      class="flex items-center gap-1 lg:gap-1.5 font-bowlby text-brand-white uppercase tracking-wide cursor-pointer justify-self-end text-sm lg:text-[calc(1.125rem*var(--header-scale,1))] transition-[font-size] duration-300"
+      class="flex items-center gap-1 lg:gap-1.5 font-bowlby text-brand-white uppercase tracking-wide cursor-pointer justify-self-end text-sm lg:text-[calc(1.1rem*var(--header-scale,1))] transition-[font-size] duration-300"
       aria-haspopup="true"
       aria-expanded="false"
       aria-label="Ver todas las secciones"
@@ -115,13 +115,13 @@ const SECTIONS = [
       <!-- flecha ↓ con tallo -->
       <svg
         aria-hidden="true"
-        class="w-1.75 h-2.5 lg:w-[calc(8px*var(--header-scale,1))] lg:h-[calc(12px*var(--header-scale,1))] transition-[width,height] duration-300"
-        viewBox="0 0 8 12"
+        class="w-[0.43em] h-[0.78em] shrink-0" style="transform: translateY(-1px)"
+        viewBox="0 0 8 14"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <line x1="4" y1="0" x2="4" y2="8" stroke="var(--color-brand-white)" stroke-width="2" stroke-linecap="round"/>
-        <path d="M1 6L4 11L7 6" stroke="var(--color-brand-white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="4" y1="0" x2="4" y2="9" stroke="var(--color-brand-white)" stroke-width="2" stroke-linecap="round"/>
+        <path d="M1 7L4 13L7 7" stroke="var(--color-brand-white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
   </div>
