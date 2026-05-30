@@ -147,11 +147,6 @@ export default defineConfig({
 
             // ── Secciones del portal ─────────────────────────────────────
             S.listItem()
-              .title('✍️ Editoriales')
-              .schemaType('editorial')
-              .child(S.documentTypeList('editorial').title('Editoriales')),
-
-            S.listItem()
               .title('📢 Publicidad')
               .schemaType('advertisement')
               .child(S.documentTypeList('advertisement').title('Publicidades')),

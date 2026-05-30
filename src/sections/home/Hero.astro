@@ -15,13 +15,18 @@ import YoutubeStream from '@/components/ui/YoutubeStream.svelte';
 import NewsTicker from '@/components/content/NewsTicker.astro';
 import NewsList from '@/components/content/NewsList.astro';
 import EditorialCard from '@/components/content/EditorialCard.astro';
-import editorialImageMock from '@/assets/editorial-image-mock.png';
 import youtubePlaceholder from '@/assets/placeholders/youtube.png';
 
 const now = new Date();
 
-// Artículos recientes excluyendo "Círculo Rojo" — ya están en el collection (build-time)
+// Artículos recientes excluyendo "Círculo Rojo" y "Editorial Semanal" — ya están en el collection (build-time)
 const rawArticles = await getCollection('articles');
+
+const editorialArticle = rawArticles
+  .filter((a) => a.data.categories?.some((c) => c.slug?.current === 'editorial-semanal'))
+  .sort((a, b) => (b.data.publishedAt ?? '').localeCompare(a.data.publishedAt ?? ''))
+  .at(0) ?? null;
+
 const newsItems = rawArticles
   .filter((a) => !a.data.categories?.some((c) => c.title === 'Circulo Rojo' || c.title === 'Círculo Rojo'))
   .sort((a, b) => (b.data.publishedAt ?? '').localeCompare(a.data.publishedAt ?? ''))
@@ -36,14 +41,6 @@ const newsItems = rawArticles
   }));
 
 const tickerItems = newsItems.map((a) => a.title);
-
-const MOCK_EDITORIAL = {
-  title: 'Sueldos de pobreza',
-  highlightWord: 'pobreza',
-  imageUrl: editorialImageMock.src,
-  imageAlt: 'Foto editorial semanal',
-  slug: 'sueldos-de-pobreza',
-};
 
 ---
 
@@ -114,14 +111,16 @@ const MOCK_EDITORIAL = {
       <NewsTicker items={tickerItems} />
     </div>
 
-    <!-- Editorial -->
-    <EditorialCard
-      title={MOCK_EDITORIAL.title}
-      highlightWord={MOCK_EDITORIAL.highlightWord}
-      imageUrl={MOCK_EDITORIAL.imageUrl}
-      imageAlt={MOCK_EDITORIAL.imageAlt}
-      slug={MOCK_EDITORIAL.slug}
-    />
+    <!-- Editorial: último artículo de la categoría "editorial-semanal" -->
+    {editorialArticle && (
+      <EditorialCard
+        title={editorialArticle.data.title}
+        highlightWord={editorialArticle.data.highlightWord ?? null}
+        imageUrl={editorialArticle.data.mainImage?.url ?? null}
+        imageAlt={editorialArticle.data.mainImage?.alt ?? 'Imagen editorial'}
+        slug={editorialArticle.data.slug.current}
+      />
+    )}
 
   </div>
 

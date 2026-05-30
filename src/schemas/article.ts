@@ -118,21 +118,6 @@ export const articleType = defineType({
       validation: (Rule) => Rule.max(300),
     }),
     defineField({
-      name: 'format',
-      title: 'Formato editorial',
-      type: 'string',
-      options: {
-        list: [
-          { title: 'Noticia', value: 'news' },
-          { title: 'Opinión', value: 'opinion' },
-          { title: 'Análisis', value: 'analysis' },
-          { title: 'Reportaje', value: 'feature' },
-          { title: 'Entrevista', value: 'interview' },
-        ],
-        layout: 'radio',
-      },
-    }),
-    defineField({
       name: 'featured',
       title: '¿Destacado en portada?',
       type: 'boolean',

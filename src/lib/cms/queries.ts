@@ -20,7 +20,6 @@ const ARTICLE_CARD_FIELDS = groq`
   wpId,
   excerpt,
   featured,
-  format,
   highlightWord,
   mainImage,
   "author": author->name,
@@ -68,7 +67,6 @@ export const ARTICLE_BY_SLUG_QUERY = groq`
     wpId,
     excerpt,
     featured,
-    format,
     mainImage,
     body,
     "author": author-> {
@@ -147,17 +145,6 @@ export const LATEST_NEWS_QUERY = groq`
   *[_type == "article" && defined(slug.current)] | order(publishedAt desc) [0...4] {
     _id,
     title,
-    slug,
-    publishedAt
-  }
-`;
-
-export const LATEST_EDITORIAL_QUERY = groq`
-  *[_type == "editorial" && defined(slug.current)] | order(publishedAt desc) [0] {
-    _id,
-    title,
-    question,
-    image,
     slug,
     publishedAt
   }

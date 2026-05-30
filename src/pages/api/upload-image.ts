@@ -1,8 +1,8 @@
 /**
- * POST /api/upload-image
+ * /api/upload-image
  *
- * Endpoint de Cloudflare Worker que recibe un archivo de imagen desde
- * Sanity Studio (componente R2UrlInput) y lo escribe en el bucket R2.
+ * Recibe un archivo de imagen desde Sanity Studio (R2UrlInput) y lo escribe
+ * en el bucket R2.
  *
  * Auth: header  Authorization: Bearer <UPLOAD_SECRET>
  * Body: multipart/form-data con campo "file" (File)
@@ -12,21 +12,15 @@
  * Response 400: { error: "No file provided" }
  * Response 500: { error: "Upload failed: ..." }
  *
- * Variables de entorno requeridas (Cloudflare Workers dashboard):
- *   UPLOAD_SECRET   — string secreto compartido con Sanity Studio
- *   R2_PUBLIC_BASE  — ej: https://media.wou.com.ar
- *
- * Binding R2 requerido (wrangler.toml):
- *   [[r2_buckets]]
- *   binding     = "WOU_MEDIA"
- *   bucket_name = "wou-media"
+ * Nota CORS: el adapter de Cloudflare no enruta `export const OPTIONS` a los
+ * handlers de Astro (responde 405 sin CORS headers, bloqueando el preflight).
+ * Se usa `export const ALL` para capturar OPTIONS y POST en el mismo handler.
  */
 import type { APIRoute } from 'astro';
 
 const ALLOWED_ORIGINS = [
   'https://wou.sanity.studio',
   'https://wou-test.sanity.studio',
-  // Desarrollo local del Studio
   'http://localhost:3333',
 ];
 
@@ -40,12 +34,10 @@ function corsHeaders(origin: string | null): HeadersInit {
   };
 }
 
-/** Genera una clave de objeto con estructura de fecha para R2. */
 function buildKey(filename: string): string {
   const now = new Date();
   const yyyy = now.getUTCFullYear();
   const mm   = String(now.getUTCMonth() + 1).padStart(2, '0');
-  // Sanitizar nombre: lowercase, sin espacios, sin caracteres especiales.
   const safe = filename
     .toLowerCase()
     .replace(/\s+/g, '-')
@@ -54,19 +46,21 @@ function buildKey(filename: string): string {
   return `uploads/${yyyy}/${mm}/${uuid}-${safe}`;
 }
 
-// ── OPTIONS (preflight CORS) ──────────────────────────────────────────────────
-export const OPTIONS: APIRoute = ({ request }) => {
-  const origin = request.headers.get('Origin');
-  return new Response(null, { status: 204, headers: corsHeaders(origin) });
-};
-
-// ── POST ─────────────────────────────────────────────────────────────────────
-export const POST: APIRoute = async (context) => {
+export const ALL: APIRoute = async (context) => {
   const { request } = context;
-  const origin = request.headers.get('Origin');
+  const origin  = request.headers.get('Origin');
   const headers = { ...corsHeaders(origin), 'Content-Type': 'application/json' };
 
-  // ── 1. Autenticación ───────────────────────────────────────────────────────
+  // ── OPTIONS: preflight CORS ────────────────────────────────────────────────
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: corsHeaders(origin) });
+  }
+
+  if (request.method !== 'POST') {
+    return new Response(null, { status: 405 });
+  }
+
+  // ── 1. Runtime env (solo disponible en Workers) ────────────────────────────
   const runtime = (context.locals as any).runtime as { env: CloudflareEnv } | undefined;
   const env = runtime?.env;
 
@@ -77,6 +71,7 @@ export const POST: APIRoute = async (context) => {
     );
   }
 
+  // ── 2. Autenticación ───────────────────────────────────────────────────────
   const authHeader = request.headers.get('Authorization') ?? '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
 
@@ -84,7 +79,7 @@ export const POST: APIRoute = async (context) => {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers });
   }
 
-  // ── 2. Extraer archivo del multipart ───────────────────────────────────────
+  // ── 3. Extraer archivo del multipart ───────────────────────────────────────
   let formData: FormData;
   try {
     formData = await request.formData();
@@ -97,7 +92,7 @@ export const POST: APIRoute = async (context) => {
     return new Response(JSON.stringify({ error: 'No file provided (expected field "file")' }), { status: 400, headers });
   }
 
-  // ── 3. Validar tipo MIME ───────────────────────────────────────────────────
+  // ── 4. Validar tipo MIME ───────────────────────────────────────────────────
   const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif', 'image/svg+xml'];
   if (!ALLOWED_TYPES.includes(file.type)) {
     return new Response(
@@ -106,15 +101,14 @@ export const POST: APIRoute = async (context) => {
     );
   }
 
-  // ── 4. Subir a R2 ─────────────────────────────────────────────────────────
-  const key = buildKey(file.name);
+  // ── 5. Subir a R2 ─────────────────────────────────────────────────────────
+  const key    = buildKey(file.name);
   const buffer = await file.arrayBuffer();
 
   try {
     await env.WOU_MEDIA.put(key, buffer, {
       httpMetadata: {
         contentType: file.type,
-        // Las imágenes no cambian: cache agresivo en CDN
         cacheControl: 'public, max-age=31536000, immutable',
       },
     });
@@ -125,7 +119,7 @@ export const POST: APIRoute = async (context) => {
     );
   }
 
-  // ── 5. Retornar URL pública ────────────────────────────────────────────────
+  // ── 6. Retornar URL pública ────────────────────────────────────────────────
   const base = (env.R2_PUBLIC_BASE ?? 'https://media.wou.com.ar').replace(/\/$/, '');
   const url  = `${base}/${key}`;
 

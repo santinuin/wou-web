@@ -57,7 +57,6 @@ interface RawArticleCard {
   wpId?: number | null;
   excerpt?: string | null;
   featured?: boolean | null;
-  format?: string | null;
   highlightWord?: string | null;
   mainImage?: SanityMainImage | null;
   author?: string | null;             // string en queries de lista
@@ -114,7 +113,6 @@ function normalizeArticle(raw: RawArticleCard | RawArticleFull) {
       tags: raw.tags ?? [],
       author: authorName,
       featured: raw.featured ?? null,
-      format: raw.format ?? null,
       highlightWord: raw.highlightWord ?? null,
       originalUrl: raw.originalUrl ?? null,
       seo: (raw as RawArticleFull).seo ?? null,

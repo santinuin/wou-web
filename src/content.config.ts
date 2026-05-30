@@ -73,7 +73,6 @@ const articles = defineCollection({
     tags: z.array(z.string()).nullish(),
     author: z.string().nullish(),
     featured: z.boolean().nullish(),
-    format: z.string().nullish(),
     highlightWord: z.string().nullish(),
     originalUrl: z.string().nullish(),
     seo: z.any().nullish(),

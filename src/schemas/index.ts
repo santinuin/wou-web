@@ -3,7 +3,6 @@ import { articleType } from './article';
 import { authorType } from './author';
 import { blockContentType } from './blockContent';
 import { categoryType } from './category';
-import { editorialType } from './editorial';
 import { programType } from './program';
 import { r2ImageType } from './r2Image';
 import { radioShowType } from './radioShow';
@@ -19,7 +18,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     authorType,
     blockContentType,
     categoryType,
-    editorialType,
     programType,
     radioShowType,
     radioStreamType,
