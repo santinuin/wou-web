@@ -37,7 +37,12 @@ const EMAIL = 'mail@radiowou.com.ar';
     <p class="FooterWOU__tagline">
       Periodismo<br />narrativo y stream.
     </p>
-    <p class="FooterWOU__location">Santa Cruz, Argentina</p>
+    <p class="FooterWOU__location">
+      <svg class="FooterWOU__pin" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
+      </svg>
+      Santa Cruz, Argentina
+    </p>
   </div>
 
   <!-- ── Esquina superior derecha: redes sociales ─────────────────────── -->
@@ -115,7 +120,7 @@ const EMAIL = 'mail@radiowou.com.ar';
   </p>
 
   <!-- ── Esquina inferior derecha ─────────────────────────────────────── -->
-  <p class="FooterWOU__bottom-right">Desarrollado por Estudio Jogging</p>
+  <p class="FooterWOU__bottom-right">Desarrollado por <strong>Estudio Jogging</strong></p>
 </footer>
 
 <style>
@@ -179,11 +184,20 @@ const EMAIL = 'mail@radiowou.com.ar';
   }
 
   .FooterWOU__location {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
     margin: clamp(0.75rem, 1.8vw, 1.25rem) 0 0;
-    color: var(--color-ink-55);
+    color: var(--color-navy);
     font-weight: 400;
     font-size: 0.85rem;
     letter-spacing: 0.01em;
+  }
+
+  .FooterWOU__pin {
+    width: 0.9em;
+    height: 0.9em;
+    flex-shrink: 0;
   }
 
   .FooterWOU__top-right {
@@ -225,12 +239,12 @@ const EMAIL = 'mail@radiowou.com.ar';
 
   .FooterWOU__bottom-left {
     left: var(--pad-x);
-    color: var(--color-ink-35);
+    color: var(--color-navy);
   }
 
   .FooterWOU__bottom-right {
     right: var(--pad-x);
-    color: var(--color-ink-35);
+    color: var(--color-navy);
   }
 
   /* ───────────────────────────────────────────────────────────────────

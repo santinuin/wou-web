@@ -12,15 +12,17 @@
  * Response 400: { error: "No file provided" }
  * Response 500: { error: "Upload failed: ..." }
  *
- * Nota CORS: el adapter de Cloudflare no enruta `export const OPTIONS` a los
- * handlers de Astro (responde 405 sin CORS headers, bloqueando el preflight).
- * Se usa `export const ALL` para capturar OPTIONS y POST en el mismo handler.
+ * Notas Astro v6 / Cloudflare:
+ *  · `prerender = false` → la ruta corre como Worker on-demand (sin esto se
+ *    prerenderiza estática y devuelve 405).
+ *  · El binding R2 y los secrets se leen via `import { env } from 'cloudflare:workers'`.
+ *    `Astro.locals.runtime.env` fue REMOVIDO en Astro v6.
+ *  · CORS: se usa `export const ALL` (no `OPTIONS`+`POST` separados) porque el
+ *    adapter no enruta `export const OPTIONS` al handler de Astro.
  */
 import type { APIRoute } from 'astro';
+import { env } from 'cloudflare:workers';
 
-// Corre como Cloudflare Worker (on-demand). Sin esto, con output:'static'
-// la ruta se prerenderiza como endpoint estático y devuelve 405 a
-// OPTIONS/POST → el preflight CORS del Studio falla con "Failed to fetch".
 export const prerender = false;
 
 const ALLOWED_ORIGINS = [
@@ -51,8 +53,7 @@ function buildKey(filename: string): string {
   return `uploads/${yyyy}/${mm}/${uuid}-${safe}`;
 }
 
-export const ALL: APIRoute = async (context) => {
-  const { request } = context;
+export const ALL: APIRoute = async ({ request }) => {
   const origin  = request.headers.get('Origin');
   const headers = { ...corsHeaders(origin), 'Content-Type': 'application/json' };
 
@@ -65,26 +66,18 @@ export const ALL: APIRoute = async (context) => {
     return new Response(null, { status: 405 });
   }
 
-  // ── 1. Runtime env (solo disponible en Workers) ────────────────────────────
-  const runtime = (context.locals as any).runtime as { env: CloudflareEnv } | undefined;
-  const env = runtime?.env;
+  // env (binding R2 + secrets) — Astro v6: desde 'cloudflare:workers'
+  const cfEnv = env as unknown as CloudflareEnv;
 
-  if (!env) {
-    return new Response(
-      JSON.stringify({ error: 'Runtime env not available. Is this a Workers deployment?' }),
-      { status: 500, headers },
-    );
-  }
-
-  // ── 2. Autenticación ───────────────────────────────────────────────────────
+  // ── 1. Autenticación ───────────────────────────────────────────────────────
   const authHeader = request.headers.get('Authorization') ?? '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
 
-  if (!env.UPLOAD_SECRET || token !== env.UPLOAD_SECRET) {
+  if (!cfEnv.UPLOAD_SECRET || token !== cfEnv.UPLOAD_SECRET) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers });
   }
 
-  // ── 3. Extraer archivo del multipart ───────────────────────────────────────
+  // ── 2. Extraer archivo del multipart ───────────────────────────────────────
   let formData: FormData;
   try {
     formData = await request.formData();
@@ -97,7 +90,7 @@ export const ALL: APIRoute = async (context) => {
     return new Response(JSON.stringify({ error: 'No file provided (expected field "file")' }), { status: 400, headers });
   }
 
-  // ── 4. Validar tipo MIME ───────────────────────────────────────────────────
+  // ── 3. Validar tipo MIME ───────────────────────────────────────────────────
   const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif', 'image/svg+xml'];
   if (!ALLOWED_TYPES.includes(file.type)) {
     return new Response(
@@ -106,12 +99,12 @@ export const ALL: APIRoute = async (context) => {
     );
   }
 
-  // ── 5. Subir a R2 ─────────────────────────────────────────────────────────
+  // ── 4. Subir a R2 ─────────────────────────────────────────────────────────
   const key    = buildKey(file.name);
   const buffer = await file.arrayBuffer();
 
   try {
-    await env.WOU_MEDIA.put(key, buffer, {
+    await cfEnv.WOU_MEDIA.put(key, buffer, {
       httpMetadata: {
         contentType: file.type,
         cacheControl: 'public, max-age=31536000, immutable',
@@ -124,8 +117,8 @@ export const ALL: APIRoute = async (context) => {
     );
   }
 
-  // ── 6. Retornar URL pública ────────────────────────────────────────────────
-  const base = (env.R2_PUBLIC_BASE ?? 'https://media.wou.com.ar').replace(/\/$/, '');
+  // ── 5. Retornar URL pública ────────────────────────────────────────────────
+  const base = (cfEnv.R2_PUBLIC_BASE ?? 'https://media.wou.com.ar').replace(/\/$/, '');
   const url  = `${base}/${key}`;
 
   return new Response(JSON.stringify({ url }), { status: 200, headers });

@@ -138,7 +138,7 @@ const initialOffset = articles.length;
 <style>
   .CategoryPage {
     position: relative;
-    background: var(--color-brand-dark);
+    background: var(--color-brand-white);
     overflow: hidden;
   }
 
@@ -158,8 +158,8 @@ const initialOffset = articles.length;
     font-weight: 700;
     font-size: clamp(6rem, 13vw, 15rem);
     text-transform: uppercase;
-    color: var(--color-brand-blue);
-    opacity: 0.35;
+    color: var(--color-brand-dark);
+    opacity: 0.12;
     writing-mode: vertical-rl;
     text-orientation: mixed;
     line-height: 0.59;
@@ -178,7 +178,7 @@ const initialOffset = articles.length;
     align-items: center;
     justify-content: center;
     min-height: 40vh;
-    color: var(--color-brand-white);
+    color: var(--color-brand-dark);
     font-family: var(--font-alumni);
     font-size: 2rem;
     opacity: 0.5;
@@ -193,6 +193,6 @@ const initialOffset = articles.length;
   }
   @media (max-width: 640px) {
     .CategoryPage__container { padding: 0.75rem 1rem; }
-    .CategoryPage__watermark { display: none; }
+    .CategoryPage__watermark { font-size: 5rem; }
   }
 </style>
