@@ -18,6 +18,11 @@
  */
 import type { APIRoute } from 'astro';
 
+// Corre como Cloudflare Worker (on-demand). Sin esto, con output:'static'
+// la ruta se prerenderiza como endpoint estático y devuelve 405 a
+// OPTIONS/POST → el preflight CORS del Studio falla con "Failed to fetch".
+export const prerender = false;
+
 const ALLOWED_ORIGINS = [
   'https://wou.sanity.studio',
   'https://wou-test.sanity.studio',
