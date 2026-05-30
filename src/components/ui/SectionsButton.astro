@@ -1,14 +1,13 @@
 ---
-import PillButton from './PillButton.astro';
+import { getCollection } from 'astro:content';
+import SectionsButtonMenu from './SectionsButtonMenu.svelte';
 
-interface Props {
-  href?: string;
-  label?: string;
-}
-
-const { href = '/secciones', label = '+ SECCIONES' } = Astro.props;
+const rawCats = await getCollection('categories');
+const categories = rawCats
+  .filter((c) => c.data.slug?.current)
+  .map((c) => ({ title: c.data.title, slug: c.data.slug!.current }));
 ---
 
-<div class="flex justify-center items-center pt-10 pb-0 md:pt-20 lg:pt-40 bg-brand-gray">
-  <PillButton href={href} label={label} variant="primary" ariaLabel="Ver todas las secciones" />
+<div class="flex justify-center items-start pt-10 pb-16 md:pt-20 md:pb-20 lg:pt-40 lg:pb-24 bg-brand-gray">
+  <SectionsButtonMenu {categories} client:idle />
 </div>
