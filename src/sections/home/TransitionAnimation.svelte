@@ -19,7 +19,7 @@
   const DOT_R_PCT = 8.09 / 109;
 
   // Fracción del viewport con que el texto asoma por la derecha al inicio.
-  const PEEK = 0.1;
+  const PEEK = -0.05;
 
   onMount(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -79,7 +79,7 @@
     Object.assign(overlay.style, {
       position:      'absolute',
       inset:         '0',
-      background:    'var(--color-brand-blue)',
+      background:    'var(--color-brand-white)',
       pointerEvents: 'none',
       zIndex:        '20',
     });
@@ -131,9 +131,9 @@
         tl.to(overlay, { opacity: 1, ease: 'none', duration: 0.05 }, 1);
         tl.to(overlay, {
           clipPath: `circle(${coverR}px at ${dotX}px ${dotY}px)`,
-          ease: 'power2.in', duration: 0.55,
+          ease: 'power2.in', duration: 0.42,
         }, 1);
-        if (label) tl.to(label, { opacity: 0, ease: 'power1.in', duration: 0.35 }, 1);
+        if (label) tl.to(label, { opacity: 0, ease: 'power1.in', duration: 0.30 }, 1);
 
         // SVG: se inclina gradualmente y crece en sincronía con el overlay
         tl.to(svg!, {
@@ -141,20 +141,20 @@
           scale: 14,
           transformOrigin: `${(DOT_X_PCT * 100).toFixed(1)}% ${(DOT_Y_PCT * 100).toFixed(1)}%`,
           ease: 'power2.in',
-          duration: 0.55,
+          duration: 0.42,
         }, 1);
 
-        if (bg) tl.to(bg, { opacity: 0, ease: 'none', duration: 0.20 }, 1.55);
-        tl.to(group!, { opacity: 0, ease: 'none', duration: 0.15 }, 1.60);
+        if (bg) tl.to(bg, { opacity: 0, ease: 'none', duration: 0.18 }, 1.42);
+        tl.to(group!, { opacity: 0, ease: 'none', duration: 0.13 }, 1.46);
 
-        tl.to(overlay, { opacity: 0, ease: 'power1.out', duration: 0.25 }, 1.75);
+        tl.to(overlay, { opacity: 0, ease: 'none', duration: 0.35 }, 1.65);
         if (stallWrap) {
-          tl.to(stallWrap, { opacity: 1, ease: 'power1.out', duration: 0.25 }, 1.75);
+          tl.to(stallWrap, { opacity: 1, ease: 'none', duration: 0.35 }, 1.65);
         }
 
         ScrollTrigger.create({
           trigger:   wrapper,
-          start:     'top top',
+          start:     'top 40%',
           end:       '+=300%',
           scrub:     0.3,
           animation: tl,
