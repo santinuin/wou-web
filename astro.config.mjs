@@ -23,6 +23,13 @@ export default defineConfig({
     platformProxy: { enabled: false },
   }),
 
+  // CSRF origin-check de Astro desactivado: protege auth basada en cookies
+  // de POSTs cross-origin, pero bloquea el upload legítimo del Sanity Studio
+  // (multipart/form-data desde sanity.studio → Worker). El endpoint /api/upload-image
+  // se autentica por Bearer token (no cookies), así que el check no aporta
+  // seguridad; las demás rutas on-demand son GET de solo lectura.
+  security: { checkOrigin: false },
+
   integrations: [
     sanity({
       projectId: PUBLIC_SANITY_PROJECT_ID || 'unconfigured',
